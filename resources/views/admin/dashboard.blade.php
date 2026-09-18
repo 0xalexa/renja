@@ -417,6 +417,96 @@
       padding: 9px 10px !important;
       vertical-align: middle !important;
     }
+
+    /* BUKTI PENDUKUNG TABLE CELL & BUTTONS */
+    .btn-isi-bukti {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f766e;
+      background: #f0fdfa;
+      border: 1px dashed #5eead4;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .btn-isi-bukti:hover {
+      background: #ccfbf1;
+      border-color: #0f766e;
+      color: #115e59;
+      transform: translateY(-1px);
+    }
+    .bukti-cell-container {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+      max-width: 170px;
+    }
+    .bukti-badge-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .bukti-badge-link, .bukti-badge-file {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .bukti-badge-link {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+    }
+    .bukti-badge-link:hover {
+      background: #dbeafe;
+      border-color: #3b82f6;
+    }
+    .bukti-badge-file {
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .bukti-badge-file:hover {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    .bukti-btn-edit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #64748b;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.15s ease;
+    }
+    .bukti-btn-edit:hover {
+      background: #f1f5f9;
+      color: #0f766e;
+      border-color: #0f766e;
+    }
   </style>
   <script>
     window.appUrl = "{{ url('/') }}";
@@ -1601,6 +1691,7 @@
                   <th colspan="4" style="white-space:nowrap;">Target Kinerja</th>
                   <th colspan="3" style="white-space:nowrap;">Capaian Kinerja</th>
                   <th colspan="2" style="white-space:nowrap;">Capaian Keuangan</th>
+                  <th rowspan="3" style="text-align:center;white-space:nowrap;min-width:140px;">Bukti Pendukung</th>
                   <th rowspan="3" style="text-align:center;white-space:nowrap;width:1%;">Aksi</th>
                 </tr>
 
@@ -2100,21 +2191,44 @@
           </div>
         </div>
 
-        <!-- Bukti Pendukung / Tautan Link Biasa (Opsional) -->
-        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:10px;">
+        <!-- Bukti Pendukung (Tautan Link & File Upload) -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;margin-bottom:12px;">
+          <label style="font-size:11.5px;font-weight:700;color:#0f766e;text-transform:uppercase;letter-spacing:0.03em;display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+            <span>📎 Bukti Pendukung (Bisa Diisi Link / Berkas)</span>
+          </label>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="font-size:11.5px;font-weight:600;color:#334155;">Tautan / Link Bukti (Drive / Web)</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="crudCapaianBuktiLink" 
+                placeholder="https://drive.google.com/... atau tautan berkas" 
+                style="width:100%;font-size:12px;background:#ffffff;"
+              >
+            </div>
+            <div class="form-group" style="margin-bottom:8px;">
+              <label style="font-size:11.5px;font-weight:600;color:#334155;">Unggah File Bukti (PDF / Doc / Gambar)</label>
+              <input 
+                type="file" 
+                class="form-control" 
+                id="crudCapaianBuktiFile" 
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" 
+                style="width:100%;font-size:11.5px;background:#ffffff;padding:4px 8px;"
+              >
+            </div>
+          </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label style="font-size:12px;font-weight:700;color:#334155;">Tautan / Link Berkas Pendukung (Opsional)</label>
+            <label style="font-size:11.5px;font-weight:600;color:#334155;">Keterangan Singkat Bukti (Opsional)</label>
             <input 
               type="text" 
               class="form-control" 
-              id="crudCapaianBuktiLink" 
-              placeholder="Contoh: link dokumen atau URL pendukung (jika ada)" 
-              style="width:100%;font-size:12.5px;background:#ffffff;"
+              id="crudCapaianBuktiKeterangan" 
+              placeholder="Contoh: Laporan Monev TW I, SK, Notulen, Dokumentasi" 
+              style="width:100%;font-size:12px;background:#ffffff;"
             >
-            <div style="font-size:11px;color:#64748b;margin-top:4px;">*Data langsung tersimpan di database MySQL lokal Anda tanpa proses upload drive.</div>
           </div>
-          <input type="hidden" id="crudCapaianBuktiKeterangan" value="">
-          <div id="crudCapaianExistingFile" style="display:none;"></div>
+          <div id="crudCapaianExistingFile" style="display:none;margin-top:8px;font-size:11.5px;color:#0f766e;font-weight:600;background:#f0fdfa;padding:6px 10px;border-radius:6px;border:1px solid #ccfbf1;"></div>
         </div>
 
       </div>

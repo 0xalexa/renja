@@ -211,6 +211,7 @@
         <th colspan="4">Target Kinerja</th>
         <th colspan="3">Capaian Kinerja</th>
         <th colspan="2">Capaian Keuangan</th>
+        <th rowspan="3" style="width: 110px;">Bukti Pendukung</th>
       </tr>
 
       <!-- Baris 2: Kolom Rincian -->
@@ -270,10 +271,21 @@
           </td>
           <td class="text-right" style="font-weight: 700;">Rp {{ number_format($row->realisasi_keuangan, 0, ',', '.') }}</td>
           <td class="text-right" style="font-weight: 700; color: #b91c1c;">{{ number_format($row->capaian_keuangan_persen, 2, ',', '.') }}%</td>
+          <td class="text-center" style="font-size: 10.5px;">
+            @if($row->bukti_link)
+              <a href="{{ $row->bukti_link }}" target="_blank" style="color: #0284c7; text-decoration: underline;">Link</a>
+            @endif
+            @if($row->bukti_file_name)
+              <div>{{ $row->bukti_file_name }}</div>
+            @endif
+            @if(!$row->bukti_link && !$row->bukti_file_name)
+              <span style="color: #94a3b8;">-</span>
+            @endif
+          </td>
         </tr>
       @empty
         <tr>
-          <td colspan="15" class="text-center" style="padding: 24px; color: #64748b;">
+          <td colspan="16" class="text-center" style="padding: 24px; color: #64748b;">
             Belum ada data capaian kinerja pada periode {{ $triwulan }} Tahun {{ $tahun }}.
           </td>
         </tr>
@@ -289,6 +301,7 @@
           <td colspan="8"></td>
           <td class="text-right">Rp {{ number_format($totalRealisasiKeu, 0, ',', '.') }}</td>
           <td class="text-right" style="color: #b91c1c;">{{ number_format($persenTotalKeu, 2, ',', '.') }}%</td>
+          <td></td>
         </tr>
       @endif
     </tbody>

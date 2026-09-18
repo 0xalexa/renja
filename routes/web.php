@@ -46,6 +46,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/capaian-kinerja', [CapaianKinerjaController::class, 'index'])->name('capaian.index');
     Route::post('/capaian-kinerja', [CapaianKinerjaController::class, 'store'])->name('capaian.store');
     Route::post('/capaian-kinerja/{id}/update', [CapaianKinerjaController::class, 'update'])->name('capaian.update');
+    Route::post('/capaian-kinerja/{id}/bukti', [CapaianKinerjaController::class, 'updateBukti'])->name('capaian.bukti');
+    Route::get('/capaian-kinerja/download-bukti/{id}', [CapaianKinerjaController::class, 'downloadBukti'])->name('capaian.download-bukti');
     Route::delete('/capaian-kinerja/{id}', [CapaianKinerjaController::class, 'destroy'])->name('capaian.destroy');
     Route::get('/capaian-kinerja/export-excel', [CapaianKinerjaController::class, 'exportExcel'])->name('capaian.export');
     Route::get('/capaian-kinerja/cetak', [CapaianKinerjaController::class, 'cetak'])->name('capaian.cetak');

@@ -3136,6 +3136,55 @@ function onCapaianSearch(query) {
 }
 window.onCapaianSearch = onCapaianSearch;
 
+// Helper: Render Kolom Bukti Pendukung
+function renderBuktiCell(row) {
+  const hasLink = Boolean(row.bukti_link);
+  const hasFile = Boolean(row.bukti_file_name || row.bukti_file_path);
+  const hasKet = Boolean(row.bukti_keterangan);
+
+  if (!hasLink && !hasFile && !hasKet) {
+    return `
+      <button type="button" class="btn-isi-bukti" onclick="openQuickBuktiModal(${row.id})" title="Klik untuk mengisi bukti pendukung (link / file)">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>+ Isi Bukti</span>
+      </button>
+    `;
+  }
+
+  let badges = '';
+  if (hasLink) {
+    badges += `
+      <a href="${row.bukti_link}" target="_blank" rel="noopener noreferrer" class="bukti-badge-link" title="Buka tautan: ${row.bukti_link}">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>Link</span>
+      </a>
+    `;
+  }
+  if (hasFile) {
+    const fileName = row.bukti_file_name || 'Berkas';
+    const downloadUrl = `/admin/capaian-kinerja/download-bukti/${row.id}`;
+    badges += `
+      <a href="${downloadUrl}" target="_blank" class="bukti-badge-file" title="Unduh berkas: ${fileName}">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span>${fileName}</span>
+      </a>
+    `;
+  }
+
+  return `
+    <div class="bukti-cell-container">
+      <div class="bukti-badge-group">
+        ${badges}
+        <button type="button" class="bukti-btn-edit" onclick="openQuickBuktiModal(${row.id})" title="Kelola / Ganti Bukti Pendukung">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+      </div>
+      ${hasKet ? `<span style="font-size:10px;color:#64748b;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${row.bukti_keterangan}">"${row.bukti_keterangan}"</span>` : ''}
+    </div>
+  `;
+}
+window.renderBuktiCell = renderBuktiCell;
+
 // Render Tabel Capaian Kinerja (e-SAKIP Format Sesuai Foto)
 function renderCapaianTable() {
   const tbody = document.getElementById('tbodyCapaianKinerja');
@@ -3175,7 +3224,7 @@ function renderCapaianTable() {
   if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="16" style="text-align:center;padding:48px 24px;background:#ffffff;">
+        <td colspan="17" style="text-align:center;padding:48px 24px;background:#ffffff;">
           <div style="font-size:36px;margin-bottom:12px;">📊</div>
           <div style="font-weight:700;font-size:15px;color:#1e293b;">Belum Ada Data Capaian Kinerja (${activeCapaianTriwulan} Tahun ${activeCapaianTahun})</div>
           <div style="font-size:13px;color:#64748b;margin-top:6px;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.5;">
@@ -3234,7 +3283,12 @@ function renderCapaianTable() {
           ${(parseFloat(row.pagu_anggaran) > 0 && parseFloat(row.realisasi_keuangan) > 0) ? formatDesimalCapaian(row.capaian_keuangan_persen) + '%' : '-'}
         </td>
 
-        <!-- 16. AKSI CRUD -->
+        <!-- 16. BUKTI PENDUKUNG (DI SEBELAH KIRI AKSI) -->
+        <td style="text-align:center;white-space:nowrap;padding:6px 8px;" onclick="event.stopPropagation()">
+          ${renderBuktiCell(row)}
+        </td>
+
+        <!-- 17. AKSI CRUD -->
         <td style="text-align:center;white-space:nowrap;" onclick="event.stopPropagation()">
           <div style="display:inline-flex;gap:4px;align-items:center;">
             <button type="button" class="agenda-btn edit" onclick="openModalCapaian('edit', ${row.id})" title="Sunting / Isi Isian Capaian Kinerja">
@@ -3364,6 +3418,11 @@ function openModalCapaian(mode, id) {
     setSafe('crudCapaianRealisasiKinerja', '');
     setSafe('crudCapaianRealisasiKeuangan', '');
     setSafe('crudCapaianBuktiLink', '');
+    setSafe('crudCapaianBuktiKeterangan', '');
+    const fileInp = document.getElementById('crudCapaianBuktiFile');
+    if (fileInp) fileInp.value = '';
+    const existFile = document.getElementById('crudCapaianExistingFile');
+    if (existFile) existFile.style.display = 'none';
     setSafe('crudCapaianPersenKinerja', '0.00');
     setSafe('crudCapaianPersenKeuangan', '0.00');
 
@@ -3390,6 +3449,18 @@ function openModalCapaian(mode, id) {
     setSafe('crudCapaianRealisasiKinerja', item.realisasi_kinerja || '');
     setSafe('crudCapaianRealisasiKeuangan', (item.realisasi_keuangan && parseFloat(item.realisasi_keuangan) > 0) ? (Math.floor(item.realisasi_keuangan) === parseFloat(item.realisasi_keuangan) ? parseFloat(item.realisasi_keuangan).toLocaleString('id-ID') : item.realisasi_keuangan) : '');
     setSafe('crudCapaianBuktiLink', item.bukti_link);
+    setSafe('crudCapaianBuktiKeterangan', item.bukti_keterangan);
+    const fileInp = document.getElementById('crudCapaianBuktiFile');
+    if (fileInp) fileInp.value = '';
+    const existFile = document.getElementById('crudCapaianExistingFile');
+    if (existFile) {
+      if (item.bukti_file_name) {
+        existFile.style.display = 'block';
+        existFile.innerHTML = `📁 File tersimpan: <a href="/admin/capaian-kinerja/download-bukti/${item.id}" target="_blank" style="color:#0f766e;text-decoration:underline;font-weight:700;">${item.bukti_file_name}</a> ${item.bukti_file_size ? '(' + item.bukti_file_size + ')' : ''}`;
+      } else {
+        existFile.style.display = 'none';
+      }
+    }
     setSafe('crudCapaianPersenKinerja', item.capaian_kinerja_persen);
     setSafe('crudCapaianPersenKeuangan', item.capaian_keuangan_persen);
 
@@ -3433,6 +3504,8 @@ async function handleCapaianSubmit(event) {
   const realisasiKeuangan = parseRupiahInput(document.getElementById('crudCapaianRealisasiKeuangan')?.value);
 
   const buktiLink = document.getElementById('crudCapaianBuktiLink')?.value || '';
+  const buktiKeterangan = document.getElementById('crudCapaianBuktiKeterangan')?.value || '';
+  const buktiFileInput = document.getElementById('crudCapaianBuktiFile');
 
   // Hitung formula default
   let targetAktif = tw1;
@@ -3492,6 +3565,10 @@ async function handleCapaianSubmit(event) {
     formData.append('predikat_kinerja', predikat);
     formData.append('capaian_keuangan_persen', persenKeuangan);
     formData.append('bukti_link', buktiLink);
+    formData.append('bukti_keterangan', buktiKeterangan);
+    if (buktiFileInput && buktiFileInput.files && buktiFileInput.files[0]) {
+      formData.append('bukti_file', buktiFileInput.files[0]);
+    }
 
     try {
       const url = mode === 'create' ? '/admin/capaian-kinerja' : `/admin/capaian-kinerja/${id}/update`;
@@ -3532,7 +3609,12 @@ async function handleCapaianSubmit(event) {
       predikat_kinerja: predikat,
       realisasi_keuangan: realisasiKeuangan,
       capaian_keuangan_persen: persenKeuangan,
-      bukti_link: buktiLink
+      bukti_link: buktiLink,
+      bukti_keterangan: buktiKeterangan,
+      bukti_file_name: buktiFileInput?.files?.[0]?.name || null,
+      bukti_file_path: null,
+      bukti_file_size: null,
+      status_bukti: 'Belum Ada'
     };
 
     const existingIdx = capaianDb.findIndex(x => x.id == newItem.id);
@@ -3564,7 +3646,11 @@ async function handleCapaianSubmit(event) {
         predikat_kinerja: predikat,
         realisasi_keuangan: realisasiKeuangan,
         capaian_keuangan_persen: persenKeuangan,
-        bukti_link: buktiLink
+        bukti_link: buktiLink,
+        bukti_keterangan: buktiKeterangan,
+        bukti_file_name: buktiFileInput?.files?.[0]?.name || capaianDb[idx]?.bukti_file_name,
+        bukti_file_path: capaianDb[idx]?.bukti_file_path,
+        bukti_file_size: capaianDb[idx]?.bukti_file_size
       };
       capaianDb[idx] = updatedItem;
       customCapaianYears.add(tahun);

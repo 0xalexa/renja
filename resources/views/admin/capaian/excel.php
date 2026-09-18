@@ -59,6 +59,7 @@
       <th colspan="4">Target Kinerja</th>
       <th colspan="3">Capaian Kinerja</th>
       <th colspan="2">Capaian Keuangan</th>
+      <th rowspan="3" style="width: 180px;">Bukti Pendukung</th>
     </tr>
 
     <!-- BARIS 2: Rincian Sub-Grup -->
@@ -123,12 +124,13 @@
         <td class="<?= $predClass ?>"><?= htmlspecialchars($row->predikat_kinerja ?? '-') ?></td>
         <td class="num-right">Rp <?= number_format($row->realisasi_keuangan, 0, ',', '.') ?></td>
         <td class="num-right"><?= number_format($row->capaian_keuangan_persen, 2, ',', '.') ?>%</td>
+        <td class="text-left"><?= htmlspecialchars($row->bukti_link ? ($row->bukti_link . ($row->bukti_file_name ? ' (' . $row->bukti_file_name . ')' : '')) : ($row->bukti_file_name ?: '-')) ?></td>
       </tr>
     <?php endforeach; ?>
 
     <?php if($count === 0): ?>
       <tr>
-        <td colspan="15" class="num-center" style="padding: 20px; color: #64748b;">
+        <td colspan="16" class="num-center" style="padding: 20px; color: #64748b;">
           Tidak ada data capaian kinerja untuk periode ini.
         </td>
       </tr>
@@ -142,6 +144,7 @@
         <td colspan="8"></td>
         <td class="num-right">Rp <?= number_format($totalRealisasiKeuangan, 0, ',', '.') ?></td>
         <td class="num-right"><?= number_format($totalPersenKeu, 2, ',', '.') ?>%</td>
+        <td></td>
       </tr>
     <?php endif; ?>
   </tbody>

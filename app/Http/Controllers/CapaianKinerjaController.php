@@ -338,6 +338,78 @@ class CapaianKinerjaController extends Controller
     }
 
     /**
+     * Simpan / Perbarui Bukti Pendukung Kinerja (Link, File, Keterangan)
+     */
+    public function updateBukti(Request $request, $id)
+    {
+        $record = CapaianKinerja::findOrFail($id);
+
+        $validated = $request->validate([
+            'bukti_link' => 'nullable|string|max:1000',
+            'bukti_keterangan' => 'nullable|string|max:1000',
+            'bukti_file' => 'nullable|file|max:30720', // max 30MB
+        ]);
+
+        if ($request->hasFile('bukti_file')) {
+            // Hapus berkas lama jika ada
+            if (!empty($record->bukti_file_path) && File::exists(public_path($record->bukti_file_path))) {
+                File::delete(public_path($record->bukti_file_path));
+            }
+
+            $file = $request->file('bukti_file');
+            $originalName = $file->getClientOriginalName();
+            $record->bukti_file_name = $originalName;
+            $fileSize = round($file->getSize() / 1024, 1) . ' KB';
+            if ($file->getSize() >= 1048576) {
+                $fileSize = round($file->getSize() / 1048576, 2) . ' MB';
+            }
+            $record->bukti_file_size = $fileSize;
+
+            $folderDest = 'uploads/capaian/' . $record->tahun . '/' . str_replace(' ', '', $record->triwulan);
+            $targetDir = public_path($folderDest);
+            if (!file_exists($targetDir)) {
+                mkdir($targetDir, 0755, true);
+            }
+            $storedName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $originalName);
+            $file->move($targetDir, $storedName);
+            $record->bukti_file_path = $folderDest . '/' . $storedName;
+        }
+
+        if ($request->has('bukti_link')) {
+            $record->bukti_link = $validated['bukti_link'] ?? null;
+        }
+        if ($request->has('bukti_keterangan')) {
+            $record->bukti_keterangan = $validated['bukti_keterangan'] ?? null;
+        }
+
+        $link = $record->bukti_link;
+        $fileName = $record->bukti_file_name;
+        $record->status_bukti = ($fileName && $link) ? 'Lengkap' : ($fileName ? 'Ada Berkas' : ($link ? 'Ada Link' : (!empty($record->bukti_keterangan) ? 'Catatan' : 'Belum Ada')));
+
+        $record->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bukti pendukung berhasil disimpan.',
+            'data' => $record,
+        ]);
+    }
+
+    /**
+     * Unduh Berkas Bukti Pendukung
+     */
+    public function downloadBukti($id)
+    {
+        $record = CapaianKinerja::findOrFail($id);
+
+        if (empty($record->bukti_file_path) || !File::exists(public_path($record->bukti_file_path))) {
+            abort(404, 'Berkas bukti pendukung tidak ditemukan di server.');
+        }
+
+        return response()->download(public_path($record->bukti_file_path), $record->bukti_file_name ?: 'Bukti_Pendukung');
+    }
+
+    /**
      * Export ke Excel (.xls) dengan format multi-level header persis sesuai foto
      */
     public function exportExcel(Request $request)
