@@ -1993,20 +1993,19 @@
         <!-- Baris 1: Tahun, Triwulan, Satuan -->
         <div class="form-row">
           <div class="form-group">
-            <label>Tahun Anggaran <span class="req">*</span></label>
+            <label>Tahun Anggaran</label>
             <input 
               type="number" 
               class="form-control" 
               id="crudCapaianTahun" 
               placeholder="Contoh: 2026" 
               value="2026"
-              required
               style="width:100%;font-weight:700;color:var(--primary);"
             >
           </div>
           <div class="form-group">
-            <label>Periode Triwulan <span class="req">*</span></label>
-            <select class="form-control" id="crudCapaianTriwulan" onchange="recalculateCapaianForm()" style="width:100%;font-weight:600;" required>
+            <label>Periode Triwulan</label>
+            <select class="form-control" id="crudCapaianTriwulan" onchange="recalculateCapaianForm()" style="width:100%;font-weight:600;">
               <option value="TW I">Triwulan I (TW I)</option>
               <option value="TW II">Triwulan II (TW II)</option>
               <option value="TW III">Triwulan III (TW III)</option>
@@ -2014,14 +2013,13 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Satuan Indikator <span class="req">*</span></label>
+            <label>Satuan Indikator</label>
             <input 
               type="text" 
               class="form-control" 
               id="crudCapaianSatuan" 
               placeholder="Contoh: %, Orang, Dokumen, Ruang Kelas" 
               value="Persentase" 
-              required 
               style="width:100%;"
             >
           </div>
@@ -2029,26 +2027,24 @@
 
         <!-- Sasaran / Program / Kegiatan -->
         <div class="form-group">
-          <label>Tujuan / Sasaran / Program / Kegiatan / Sub Kegiatan <span class="req">*</span></label>
+          <label>Tujuan / Sasaran / Program / Kegiatan / Sub Kegiatan</label>
           <textarea 
             class="form-control" 
             id="crudCapaianSasaran" 
             rows="2" 
-            placeholder="Ketik uraian tujuan / sasaran strategis / program / kegiatan..." 
-            required 
+            placeholder="Ketik uraian tujuan / sasaran strategis / program / kegiatan (opsional)..." 
             style="width:100%;resize:vertical;"
           ></textarea>
         </div>
 
         <!-- Indikator Kinerja -->
         <div class="form-group">
-          <label>Indikator Kinerja <span class="req">*</span></label>
+          <label>Indikator Kinerja</label>
           <textarea 
             class="form-control" 
             id="crudCapaianIndikator" 
             rows="2" 
-            placeholder="Ketik tolok ukur atau rumusan indikator kinerja..." 
-            required 
+            placeholder="Ketik tolok ukur atau rumusan indikator kinerja (opsional)..." 
             style="width:100%;resize:vertical;font-weight:600;"
           ></textarea>
         </div>
@@ -2056,13 +2052,12 @@
         <!-- Pagu Anggaran & Target Tahunan -->
         <div class="form-row">
           <div class="form-group">
-            <label>Target Kinerja Tahunan (Data 2026) <span class="req">*</span></label>
+            <label>Target Kinerja Tahunan (Data 2026)</label>
             <input 
               type="text" 
               class="form-control" 
               id="crudCapaianTargetTahunan" 
-              placeholder="Contoh: 85.50" 
-              required 
+              placeholder="Contoh: 85.50 (opsional)" 
               style="width:100%;font-weight:600;"
             >
           </div>
@@ -2117,14 +2112,13 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label style="color:#9a3412;">Realisasi Kinerja Fisik (Triwulan Terpilih) <span class="req">*</span></label>
+              <label style="color:#9a3412;">Realisasi Kinerja Fisik (Triwulan Terpilih)</label>
               <input 
                 type="text" 
                 class="form-control" 
                 id="crudCapaianRealisasiKinerja" 
-                placeholder="Contoh: 21.30" 
+                placeholder="Contoh: 21.30 (opsional)" 
                 oninput="recalculateCapaianForm()"
-                required 
                 style="width:100%;font-weight:700;background:#ffffff;border-color:#fb923c;"
               >
             </div>

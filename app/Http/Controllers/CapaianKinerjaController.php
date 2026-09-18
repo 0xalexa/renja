@@ -52,11 +52,11 @@ class CapaianKinerjaController extends Controller
         }
 
         $validated = $request->validate([
-            'tahun' => 'required|integer',
-            'triwulan' => 'required|string',
-            'sasaran' => 'required|string',
-            'indikator' => 'required|string',
-            'satuan' => 'required|string',
+            'tahun' => 'nullable|integer',
+            'triwulan' => 'nullable|string',
+            'sasaran' => 'nullable|string',
+            'indikator' => 'nullable|string',
+            'satuan' => 'nullable|string',
             'target_tahunan' => 'nullable|numeric',
             'pagu_anggaran' => 'nullable|numeric',
             'target_tw1' => 'nullable|numeric',
@@ -67,11 +67,14 @@ class CapaianKinerjaController extends Controller
             'realisasi_keuangan' => 'nullable|numeric',
             'bukti_link' => 'nullable|string',
             'bukti_keterangan' => 'nullable|string',
-            'bukti_file' => 'nullable|file|max:20480', // max 20MB
+            'bukti_file' => 'nullable|file|max:30720', // max 30MB
         ]);
 
-        $tahun = (int) $validated['tahun'];
-        $triwulan = $validated['triwulan'];
+        $tahun = (int) ($validated['tahun'] ?? date('Y'));
+        $triwulan = !empty($validated['triwulan']) ? $validated['triwulan'] : 'TW I';
+        $sasaran = !empty(trim($validated['sasaran'] ?? '')) ? $validated['sasaran'] : '-';
+        $indikator = !empty(trim($validated['indikator'] ?? '')) ? $validated['indikator'] : '-';
+        $satuan = !empty(trim($validated['satuan'] ?? '')) ? $validated['satuan'] : '-';
         $targetTahunan = (float) ($validated['target_tahunan'] ?? 0);
         $paguAnggaran = (float) ($validated['pagu_anggaran'] ?? 0);
         $tw1 = (float) ($validated['target_tw1'] ?? 0);
@@ -198,11 +201,11 @@ class CapaianKinerjaController extends Controller
         }
 
         $validated = $request->validate([
-            'tahun' => 'required|integer',
-            'triwulan' => 'required|string',
-            'sasaran' => 'required|string',
-            'indikator' => 'required|string',
-            'satuan' => 'required|string',
+            'tahun' => 'nullable|integer',
+            'triwulan' => 'nullable|string',
+            'sasaran' => 'nullable|string',
+            'indikator' => 'nullable|string',
+            'satuan' => 'nullable|string',
             'target_tahunan' => 'nullable|numeric',
             'pagu_anggaran' => 'nullable|numeric',
             'target_tw1' => 'nullable|numeric',
@@ -213,11 +216,14 @@ class CapaianKinerjaController extends Controller
             'realisasi_keuangan' => 'nullable|numeric',
             'bukti_link' => 'nullable|string',
             'bukti_keterangan' => 'nullable|string',
-            'bukti_file' => 'nullable|file|max:20480',
+            'bukti_file' => 'nullable|file|max:30720',
         ]);
 
-        $tahun = (int) $validated['tahun'];
-        $triwulan = $validated['triwulan'];
+        $tahun = (int) ($validated['tahun'] ?? $record->tahun ?? date('Y'));
+        $triwulan = !empty($validated['triwulan']) ? $validated['triwulan'] : ($record->triwulan ?? 'TW I');
+        $sasaran = !empty(trim($validated['sasaran'] ?? '')) ? $validated['sasaran'] : ($record->sasaran ?? '-');
+        $indikator = !empty(trim($validated['indikator'] ?? '')) ? $validated['indikator'] : ($record->indikator ?? '-');
+        $satuan = !empty(trim($validated['satuan'] ?? '')) ? $validated['satuan'] : ($record->satuan ?? '-');
         $targetTahunan = (float) ($validated['target_tahunan'] ?? 0);
         $paguAnggaran = (float) ($validated['pagu_anggaran'] ?? 0);
         $tw1 = (float) ($validated['target_tw1'] ?? 0);
