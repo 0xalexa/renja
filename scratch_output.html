@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Workspace — Manajemen Dokumen & CRUD PEP</title>
+  <meta name="csrf-token" content="MvIOsyuTc2LMY3eMY8EhYRq3pU40ScyTkUWu3CUE">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="http://localhost/assets/css/style.css?v=1789440126">
+  <script>
+    window.appUrl = "http://localhost";
+    window.serverAdminDb = {"renja-murni":[{"id":14,"tahun":2011,"judul":"Alexa Kusuma Wardana CV (1)","keterangan":"-","file":"Alexa_Kusuma_Wardana_CV (1).pdf","size":"259.5 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2011\/1789397595_Alexa_Kusuma_Wardana_CV__1_.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2011\/1789397595_Alexa_Kusuma_Wardana_CV__1_.pdf"},{"id":13,"tahun":2017,"judul":"Alexa Kusuma Wardana CV (2)","keterangan":"-","file":"Alexa_Kusuma_Wardana_CV (2).pdf","size":"259.5 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2017\/1789397582_Alexa_Kusuma_Wardana_CV__2_.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2017\/1789397582_Alexa_Kusuma_Wardana_CV__2_.pdf"},{"id":12,"tahun":2018,"judul":"solo is solo","keterangan":"-","file":"solo is solo.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2018\/1789397574_solo_is_solo.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2018\/1789397574_solo_is_solo.pdf"},{"id":11,"tahun":2019,"judul":"CV (1)","keterangan":"-","file":"CV (1).pdf","size":"74.3 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2019\/1789397542_CV__1_.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2019\/1789397542_CV__1_.pdf"},{"id":10,"tahun":2023,"judul":"Slip Tagihan Retribusi 723020126090001","keterangan":"-","file":"Slip Tagihan Retribusi 723020126090001.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2023\/1789397529_Slip_Tagihan_Retribusi_723020126090001.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2023\/1789397529_Slip_Tagihan_Retribusi_723020126090001.pdf"},{"id":9,"tahun":2024,"judul":"solo is solo","keterangan":"-","file":"solo is solo.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2024\/1789397517_solo_is_solo.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2024\/1789397517_solo_is_solo.pdf"},{"id":8,"tahun":2025,"judul":"solo is solo","keterangan":"-","file":"solo is solo.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2025\/1789397502_solo_is_solo.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2025\/1789397502_solo_is_solo.pdf"},{"id":7,"tahun":1999,"judul":"CV (1)","keterangan":"-","file":"CV (1).pdf","size":"74.3 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/1999\/1789397490_CV__1_.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/1999\/1789397490_CV__1_.pdf"},{"id":6,"tahun":2011,"judul":"Slip Tagihan Retribusi 723020126090001","keterangan":"-","file":"Slip Tagihan Retribusi 723020126090001.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2011\/1789397463_Slip_Tagihan_Retribusi_723020126090001.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2011\/1789397463_Slip_Tagihan_Retribusi_723020126090001.pdf"},{"id":5,"tahun":2019,"judul":"Slip Tagihan Retribusi 723020126090001","keterangan":"-","file":"Slip Tagihan Retribusi 723020126090001.pdf","size":"130.7 KB","date":"2026-09-14","status":"Lengkap","link_drive":null,"file_path":"uploads\/dokumen\/renja\/murni\/2019\/1789396690_Slip_Tagihan_Retribusi_723020126090001.pdf","download_url":"http:\/\/localhost\/uploads\/dokumen\/renja\/murni\/2019\/1789396690_Slip_Tagihan_Retribusi_723020126090001.pdf"}],"renja-perubahan":[],"pk-murni":[],"pk-perubahan":[],"dpa-murni":[],"dpa-perubahan":[],"surat-masuk":[],"surat-keluar":[]};
+    window.googleDriveDefaultFolder = "https://drive.google.com/drive/folders/18XtuS2NgJyn8FBHwF_cw09qM4JuhPy7P?usp=sharing";
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="http://localhost/assets/js/admin.js?v=1789440126" defer></script>
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- ==================== SIDEBAR KIRI (HOPE UI STYLE) ==================== -->
+  <aside class="admin-sidebar" id="adminSidebar">
+
+    <!-- Brand Header di atas Sidebar (Hope UI Style) -->
+    <div class="sidebar-brand-header" onclick="toggleAdminSidebar()" style="cursor:pointer;" title="Klik untuk Tutup / Buka Menu Navigasi">
+      <div class="sidebar-brand-left">
+        <div class="sidebar-brand-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <div class="sidebar-brand-text">
+          <span class="brand-title-text">SIM-PEP</span>
+          <span class="brand-sub-badge">DISDIK</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu (Sesuai Navbar dengan Icon) -->
+    <nav class="admin-nav">
+      
+      <div class="admin-nav-title">Utama</div>
+      <a href="#" class="admin-nav-item active" data-page="dashboard" data-tooltip="Dashboard Utama" title="Dashboard Utama" onclick="navigateAdmin('dashboard'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-text">Dashboard</span>
+        </div>
+        <span class="nav-arrow">&rarr;</span>
+      </a>
+
+      <div class="admin-nav-title">Rencana Kerja</div>
+      <a href="#" class="admin-nav-item" data-page="renja-murni" data-tooltip="Renja Murni" title="Renja Murni" onclick="navigateAdmin('renja-murni'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          <span class="nav-text">Renja Murni</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-renja-murni">10</span>
+      </a>
+      <a href="#" class="admin-nav-item" data-page="renja-perubahan" data-tooltip="Renja Perubahan" title="Renja Perubahan" onclick="navigateAdmin('renja-perubahan'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          <span class="nav-text">Renja Perubahan</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-renja-perubahan">0</span>
+      </a>
+
+      <div class="admin-nav-title">Perjanjian Kinerja</div>
+      <a href="#" class="admin-nav-item" data-page="pk-murni" data-tooltip="PK Murni" title="PK Murni" onclick="navigateAdmin('pk-murni'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+          <span class="nav-text">PK Murni</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-pk-murni">0</span>
+      </a>
+      <a href="#" class="admin-nav-item" data-page="pk-perubahan" data-tooltip="PK Perubahan" title="PK Perubahan" onclick="navigateAdmin('pk-perubahan'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span class="nav-text">PK Perubahan</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-pk-perubahan">0</span>
+      </a>
+
+      <div class="admin-nav-title">Pelaksanaan Anggaran</div>
+      <a href="#" class="admin-nav-item" data-page="dpa-murni" data-tooltip="DPA Murni" title="DPA Murni" onclick="navigateAdmin('dpa-murni'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          <span class="nav-text">DPA Murni</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-dpa-murni">0</span>
+      </a>
+      <a href="#" class="admin-nav-item" data-page="dpa-perubahan" data-tooltip="DPA Perubahan" title="DPA Perubahan" onclick="navigateAdmin('dpa-perubahan'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+          <span class="nav-text">DPA Perubahan</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-dpa-perubahan">0</span>
+      </a>
+
+      <div class="admin-nav-title">Arsip Persuratan</div>
+      <a href="#" class="admin-nav-item" data-page="surat-masuk" data-tooltip="Surat Masuk" title="Surat Masuk" onclick="navigateAdmin('surat-masuk'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+          <span class="nav-text">Surat Masuk</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-surat-masuk">0</span>
+      </a>
+      <a href="#" class="admin-nav-item" data-page="surat-keluar" data-tooltip="Surat Keluar" title="Surat Keluar" onclick="navigateAdmin('surat-keluar'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          <span class="nav-text">Surat Keluar</span>
+        </div>
+        <span class="badge badge-gray" id="badge-count-surat-keluar">0</span>
+      </a>
+
+      <div class="admin-nav-title">Pelaporan</div>
+      <a href="#" class="admin-nav-item" data-page="laporan" data-tooltip="Laporan Simdapangda" title="Laporan Simdapangda" onclick="navigateAdmin('laporan'); return false;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span class="nav-text">Laporan Simdapangda</span>
+        </div>
+        <span class="badge badge-gray">Rekap</span>
+      </a>
+
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="admin-sidebar-footer">
+      <div class="sidebar-footer-info" style="font-size:11px;color:#94a3b8;line-height:1.4;">
+        <div style="font-weight:700;color:#64748b;">SIM-PEP DISDIK</div>
+        <div>T.A. 2026 &bull; Subbag PEP</div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ==================== AREA UTAMA ADMIN ==================== -->
+  <div class="admin-main">
+
+    <!-- ==================== TOPBAR PUTIH BERSIH (HOPE UI STYLE) ==================== -->
+    <header class="hope-topbar">
+      <div class="topbar-left">
+        <button class="topbar-mobile-btn" id="btnAdminSidebarToggle" onclick="toggleAdminSidebar();" aria-label="Toggle Menu" title="Tutup / Buka Sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <!-- Search Bar Rounded (Hope UI Style) -->
+        <div class="appbar-search-container">
+          <div class="appbar-search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              id="appbarSearchInput" 
+              class="appbar-search-input" 
+              placeholder="Cari dokumen, renja, surat... (Ctrl+K)" 
+              autocomplete="off"
+              oninput="handleAppbarSearch(this.value)"
+              onfocus="handleAppbarSearchFocus()"
+            >
+            <kbd class="search-kbd">Ctrl K</kbd>
+            <button type="button" class="search-clear-btn" id="appbarSearchClear" onclick="clearAppbarSearch()" style="display:none;" title="Hapus pencarian">&times;</button>
+          </div>
+
+          <!-- Dropdown Popover Hasil Pencarian -->
+          <div class="appbar-search-results" id="appbarSearchResults"></div>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Tombol Notifikasi & Dropdown -->
+        <div class="appbar-notif-container">
+          <button class="appbar-icon-btn" id="btnNotifToggle" onclick="toggleAppbarNotif();" aria-label="Notifikasi" title="Notifikasi Sistem & Dokumen">
+            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="notif-badge">0</span>
+          </button>
+
+          <!-- Dropdown Notifikasi -->
+          <div class="appbar-notif-dropdown" id="appbarNotifDropdown">
+            <div class="notif-dropdown-header">
+              <div class="notif-dropdown-title">
+                <span>Notifikasi & Aktivitas</span>
+                <span class="notif-count-pill">PEP System</span>
+              </div>
+              <button class="notif-mark-read" onclick="markAllNotifsRead();">Tutup</button>
+            </div>
+            <div class="notif-dropdown-list">
+              <div class="notif-dropdown-item">
+                <div class="notif-item-icon icon-renja">
+                  <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                </div>
+                <div class="notif-item-content">
+                  <div class="notif-item-title">Sistem SIM-PEP Siap Digunakan</div>
+                  <div class="notif-item-meta">Tahun Anggaran 2026 Aktif &bull; Subbag PEP</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="appbar-divider"></div>
+
+        <!-- Status Sinkronisasi Google Drive Desktop -->
+        <div class="topbar-drive-status" title="Google Drive for Desktop: Terhubung ke G:\My Drive\SIM-PEP">
+          <div class="topbar-drive-icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="#16a34a"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+            <span class="topbar-pulse-dot"></span>
+          </div>
+          <div class="topbar-drive-text">
+            <span class="drive-title">Google Drive Desktop</span>
+            <span class="drive-sub"><span style="color:#16a34a;font-weight:700;">● Terhubung</span> &bull; G:\My Drive\SIM-PEP</span>
+          </div>
+        </div>
+
+        <div class="appbar-divider"></div>
+
+        <!-- Waktu & Tanggal Operasional Sistem Real-time -->
+        <div class="topbar-clock-widget" title="Waktu Operasional Sistem SIM-PEP">
+          <svg viewBox="0 0 24 24" width="15" height="15" stroke="#475569" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <div class="topbar-clock-text">
+            <span id="appbarLiveDate" class="clock-date">-- --- ----</span>
+            <span id="appbarLiveTime" class="clock-time">--:--:-- WIB</span>
+          </div>
+        </div>
+
+        <div class="appbar-divider"></div>
+
+        <!-- Akun Administrator Ringkas -->
+        <div class="topbar-admin-chip" title="Akun Aktif: Administrator Subbag PEP">
+          <div class="admin-chip-avatar">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#ffffff" stroke-width="2.2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="admin-chip-info">
+            <span class="admin-chip-name">Administrator Subbag PEP</span>
+            <span class="admin-chip-role">Administrator</span>
+          </div>
+        </div>
+
+        <!-- Tombol Keluar dengan Form POST -->
+        <form action="http://localhost/logout" method="POST" style="display:inline;margin:0;">
+          <input type="hidden" name="_token" value="MvIOsyuTc2LMY3eMY8EhYRq3pU40ScyTkUWu3CUE" autocomplete="off">          <button type="submit" class="btn-appbar-logout" style="border:none;cursor:pointer;font-family:inherit;" title="Keluar dari sesi admin">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            <span>Keluar</span>
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <!-- Konten Halaman Admin -->
+    <div class="admin-content">
+
+      <!-- ==================== 1. DASHBOARD UTAMA (HOPE UI DASHBOARD STYLE) ==================== -->
+      <div class="admin-page active" id="admin-page-dashboard">
+        
+        <div class="hope-dashboard-wrap">
+
+          <!-- ==================== HERO WELCOME BANNER (HOPE UI CURVED BLUE BANNER) ==================== -->
+          <div class="hope-hero-banner">
+            <div class="hero-banner-content">
+              <div class="hero-badge-tag">
+                <span class="hero-badge-dot"></span>
+                <span>Sistem Informasi Manajemen Dokumen PEP &bull; T.A. 2026</span>
+              </div>
+              <h1 class="hero-banner-title">Selamat Datang di SIM-PEP!</h1>
+              <p class="hero-banner-desc">Pusat Terpadu Perencanaan, Evaluasi, dan Pelaporan Dinas Pendidikan. Kelola Renja, PK, DPA, dan Persuratan secara transparan dan terintegrasi.</p>
+            </div>
+            <div class="hero-banner-actions">
+              <button class="btn-hero-action" onclick="openCrudModal('create', 'renja-murni')" title="Tambah Berkas Dokumen">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <span>Tambah Dokumen</span>
+              </button>
+              <button class="btn-hero-action outline" onclick="showAdminToast('Agenda Terdekat: Evaluasi Capaian Renja Triwulan III', 'info')">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Pengumuman</span>
+              </button>
+            </div>
+            <!-- Decorative Wave Curve SVG -->
+            <div class="hero-wave-shape">
+              <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="#f5f6fa" opacity="1"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- ==================== 4 FLOATING METRIC CARDS (OVERLAPPING BANNER) ==================== -->
+          <div class="hope-metric-grid">
+            
+            <!-- Card 1: Renja Murni -->
+            <div class="hope-metric-card" onclick="navigateAdmin('renja-murni')" title="Buka Modul Renja Murni">
+              <div class="metric-circle-indicator blue">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+              </div>
+              <div class="metric-body">
+                <div class="metric-label">Renja Murni</div>
+                <div class="metric-value"><span id="metricRenjaVal">10</span> <span class="metric-unit">Berkas</span></div>
+                <div class="metric-sub">Pagu Sesuai Dokumen</div>
+              </div>
+            </div>
+
+            <!-- Card 2: PK Kinerja -->
+            <div class="hope-metric-card" onclick="navigateAdmin('pk-murni')" title="Buka Modul Perjanjian Kinerja">
+              <div class="metric-circle-indicator teal">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="metric-body">
+                <div class="metric-label">PK Kinerja</div>
+                <div class="metric-value"><span id="metricPkVal">0</span> <span class="metric-unit">Dokumen</span></div>
+                <div class="metric-sub">Sesuai Indikator</div>
+              </div>
+            </div>
+
+            <!-- Card 3: DPA Belanja -->
+            <div class="hope-metric-card" onclick="navigateAdmin('dpa-murni')" title="Buka Modul Pelaksanaan Anggaran">
+              <div class="metric-circle-indicator amber">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>
+              </div>
+              <div class="metric-body">
+                <div class="metric-label">DPA Belanja</div>
+                <div class="metric-value"><span id="metricDpaVal">0</span> <span class="metric-unit">Berkas</span></div>
+                <div class="metric-sub">Pagu Sesuai DPA</div>
+              </div>
+            </div>
+
+            <!-- Card 4: Arsip Surat -->
+            <div class="hope-metric-card" onclick="navigateAdmin('surat-masuk')" title="Buka Agenda Persuratan">
+              <div class="metric-circle-indicator green">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+              </div>
+              <div class="metric-body">
+                <div class="metric-label">Arsip Surat</div>
+                <div class="metric-value"><span id="metricSuratVal">0</span> <span class="metric-unit">Agenda</span></div>
+                <div class="metric-sub">0 Masuk &bull; 0 Keluar</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== TWO-COLUMN MAIN CONTENT GRID (HOPE UI STYLE) ==================== -->
+          <div class="hope-content-grid">
+            
+            <!-- ==================== KOLOM KIRI (WIDE ~66%) ==================== -->
+            <div class="hope-col-left">
+
+              <!-- 1. Hope UI Spline Activity Chart Card -->
+              <div class="hope-card">
+                <div class="hope-card-header">
+                  <div>
+                    <div class="hope-stat-main">
+                      <span class="stat-number" id="hopeStatTotal">10</span>
+                      <span class="stat-suffix">Total Dokumen Terdata</span>
+                    </div>
+                    <div class="hope-card-subtitle">Tren Aktivitas Dokumen Masuk vs Terverifikasi (T.A. 2026)</div>
+                  </div>
+                  <div class="hope-chart-legend-wrap">
+                    <div class="chart-legend-pill">
+                      <span class="legend-dot-blue"></span>
+                      <span>Dokumen Masuk</span>
+                    </div>
+                    <div class="chart-legend-pill">
+                      <span class="legend-dot-teal"></span>
+                      <span>Terverifikasi</span>
+                    </div>
+                    <select class="hope-select-filter" onchange="showAdminToast('Menampilkan data periode: ' + this.value, 'info')">
+                      <option value="T.A. 2026">T.A. 2026</option>
+                      <option value="Semester I">Semester I</option>
+                      <option value="Semester II">Semester II</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="hope-chart-canvas-wrap">
+                  <canvas id="chartHopeActivity"></canvas>
+                </div>
+              </div>
+
+              <!-- 2. Tabel Dokumen Terakhir yang Ditambahkan / Diperbarui -->
+              <div class="hope-card">
+                <div class="hope-card-header">
+                  <div>
+                    <h3 class="hope-card-title">Dokumen Terakhir yang Ditambahkan / Diperbarui</h3>
+                    <div class="hope-card-subtitle">Rekap dokumen terkini dari seluruh kelompok modul perencanaan</div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" onclick="openCrudModal('create', 'renja-murni')">
+                    <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Tambah Dokumen Baru
+                  </button>
+                </div>
+                <div class="table-responsive">
+                  <table class="gov-table">
+                    <thead>
+                      <tr>
+                        <th style="width:45px;text-align:center;">No</th>
+                        <th style="width:75px;text-align:center;">Tahun</th>
+                        <th>Nama Dokumen / Perihal</th>
+                        <th style="width:160px;">Kelompok Modul</th>
+                        <th style="width:240px;">Berkas Lampiran PDF</th>
+                        <th style="width:105px;text-align:center;">Status</th>
+                        <th style="width:220px;text-align:center;">Aksi CRUD</th>
+                      </tr>
+                    </thead>
+                    <tbody id="adminRecentTable">
+                      <!-- Rendered by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ==================== KOLOM KANAN (~34%) ==================== -->
+            <div class="hope-col-right">
+
+              <!-- 1. Digital Identity / VIP Card Subbag PEP (Hope UI Card Style) -->
+              <div class="hope-digital-card">
+                <div class="digital-card-bg-glow"></div>
+                <div class="digital-card-top">
+                  <div class="digital-card-brand">
+                    <span class="digital-brand-title">SIM-PEP DISDIK</span>
+                    <span class="digital-brand-badge">VERIFIED</span>
+                  </div>
+                  <div class="digital-card-chip">
+                    <svg viewBox="0 0 24 24" width="28" height="28" fill="#facc15"><rect x="3" y="5" width="18" height="14" rx="3" stroke="#eab308" stroke-width="1.5" fill="#fde047" /><line x1="3" y1="10" x2="21" y2="10" stroke="#ca8a04" stroke-width="1.2" /><line x1="3" y1="14" x2="21" y2="14" stroke="#ca8a04" stroke-width="1.2" /><line x1="10" y1="5" x2="10" y2="19" stroke="#ca8a04" stroke-width="1.2" /><line x1="14" y1="5" x2="14" y2="19" stroke="#ca8a04" stroke-width="1.2" /></svg>
+                  </div>
+                </div>
+                <div class="digital-card-code">
+                  <span>DISDIK</span> &bull;&bull;&bull;&bull; <span>PEP</span> &bull;&bull;&bull;&bull; <span>2026</span>
+                </div>
+                <div class="digital-card-bottom">
+                  <div class="digital-owner">
+                    <div class="digital-owner-label">UNIT KERJA</div>
+                    <div class="digital-owner-name">SUBBAG PEP</div>
+                  </div>
+                  <div class="digital-valid">
+                    <div class="digital-valid-label">TAHUN ANGGARAN</div>
+                    <div class="digital-valid-date">T.A. 2026</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Status Dokumen (Donut Chart) -->
+              <div class="hope-card">
+                <div class="hope-card-header">
+                  <h3 class="hope-card-title">Status Dokumen</h3>
+                  <button class="hope-btn-icon-link" onclick="navigateAdmin('laporan')" title="Lihat Rekap">
+                    &rarr;
+                  </button>
+                </div>
+                <div class="donut-chart-container">
+                  <canvas id="chartDonutStatus"></canvas>
+                  <div class="donut-center-text">
+                    <div class="donut-center-num" id="donutCenterTotal">10</div>
+                    <div class="donut-center-label">Dokumen</div>
+                  </div>
+                </div>
+                <div class="donut-legend">
+                  <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span><span id="donutLegendLengkap">Lengkap (10)</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span><span id="donutLegendDiproses">Diproses (0)</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span><span id="donutLegendPerluUpdate">Perlu Update (0)</span></div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#8b5cf6;"></span><span id="donutLegendTerkirim">Terkirim (0)</span></div>
+                </div>
+              </div>
+
+              <!-- 3. Tasks & Agenda PEP -->
+              <div class="hope-card">
+                <div class="hope-card-header">
+                  <h3 class="hope-card-title">Tasks &amp; Agenda PEP</h3>
+                  <div class="tasks-tabs">
+                    <span class="tasks-tab-item active" onclick="switchTaskTab(this, 'today')">Hari ini</span>
+                    <span class="tasks-tab-item" onclick="switchTaskTab(this, 'week')">Minggu</span>
+                    <span class="tasks-tab-item" onclick="switchTaskTab(this, 'month')">Bulan</span>
+                  </div>
+                </div>
+                <div class="task-list" id="taskListContainer">
+                  <div class="empty-state-card" style="padding: 24px 16px; text-align: center; color: #8a92a6;">
+                    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" style="margin: 0 auto 8px; opacity: 0.5; display: block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-dark);">Belum Ada Agenda / Tugas</div>
+                    <div style="font-size: 0.75rem; margin-top: 4px; color: var(--text-muted);">Agenda kegiatan akan tercatat secara otomatis saat ada jadwal baru.</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Kalender Kegiatan -->
+              <div class="hope-card">
+                <div class="cal-header">
+                  <button class="cal-nav-btn" onclick="showAdminToast('Bulan sebelumnya', 'info')">&lsaquo;</button>
+                  <span>September 2026</span>
+                  <button class="cal-nav-btn" onclick="showAdminToast('Bulan berikutnya', 'info')">&rsaquo;</button>
+                </div>
+                <div class="cal-weekdays">
+                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                </div>
+                <div class="cal-days-grid" id="calDaysGrid">
+                  <span class="cal-day empty"></span>
+                  <span class="cal-day empty"></span>
+                  <span class="cal-day" onclick="selectCalDay(this, 1)">1</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 2)">2</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 3)">3</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 4)">4</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 5)">5</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 6)">6</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 7)">7</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 8)">8</span>
+                  <span class="cal-day " onclick="selectCalDay(this, 9)">9</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 10)">10</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 11)">11</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 12)">12</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 13)">13</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 14)">14</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 15)">15</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 16)">16</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 17)">17</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 18)">18</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 19)">19</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 20)">20</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 21)">21</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 22)">22</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 23)">23</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 24)">24</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 25)">25</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 26)">26</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 27)">27</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 28)">28</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 29)">29</span>
+                  <span class="cal-day" onclick="selectCalDay(this, 30)">30</span>
+                </div>
+                <div style="margin-top:10px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border-subtle);">
+                  <span>Hari ini: <strong>15 Sep 2026</strong></span>
+                  <span class="badge badge-blue">Aktif</span>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==================== 2. RENJA MURNI ==================== -->
+      <div class="admin-page" id="admin-page-renja-murni">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — Renja Murni</h1>
+            <p>Pengelolaan dokumen Rencana Kerja penetapan APBD murni tahunan.</p>
+          </div>
+          <div class="page-header-meta">Rencana Kerja</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari dokumen Renja...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'renja-murni')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Dokumen Renja
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-renja-murni">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Nama Dokumen & Program</th>
+                <th>Uraian / Keterangan</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 3. RENJA PERUBAHAN ==================== -->
+      <div class="admin-page" id="admin-page-renja-perubahan">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — Renja Perubahan</h1>
+            <p>Pengelolaan dokumen penyesuaian program dan kegiatan perubahan APBD.</p>
+          </div>
+          <div class="page-header-meta">Rencana Kerja</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari Renja Perubahan...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'renja-perubahan')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Renja Perubahan
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-renja-perubahan">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Nama Dokumen & Program</th>
+                <th>Uraian Perubahan</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 4. PK MURNI ==================== -->
+      <div class="admin-page" id="admin-page-pk-murni">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — PK Murni</h1>
+            <p>Pengelolaan berkas penetapan Perjanjian Kinerja awal tahun pejabat dinas.</p>
+          </div>
+          <div class="page-header-meta">Perjanjian Kinerja</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari berkas PK...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'pk-murni')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Dokumen PK
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-pk-murni">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Dokumen Perjanjian Kinerja</th>
+                <th>Sasaran Strategis & Uraian</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 5. PK PERUBAHAN ==================== -->
+      <div class="admin-page" id="admin-page-pk-perubahan">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — PK Perubahan</h1>
+            <p>Pengelolaan adendum target perjanjian kinerja pejabat struktural dinas.</p>
+          </div>
+          <div class="page-header-meta">Perjanjian Kinerja</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari berkas PK Perubahan...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'pk-perubahan')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah PK Perubahan
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-pk-perubahan">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Dokumen Perjanjian Kinerja</th>
+                <th>Sasaran Perubahan & Uraian</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 6. DPA MURNI ==================== -->
+      <div class="admin-page" id="admin-page-dpa-murni">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — DPA Murni</h1>
+            <p>Pengelolaan berkas Dokumen Pelaksanaan Anggaran (DPA) SKPD penetapan murni.</p>
+          </div>
+          <div class="page-header-meta">Pelaksanaan Anggaran</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari dokumen DPA...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'dpa-murni')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Dokumen DPA
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-dpa-murni">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Nama Dokumen DPA</th>
+                <th>Pagu Anggaran / Uraian Belanja</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 7. DPA PERUBAHAN ==================== -->
+      <div class="admin-page" id="admin-page-dpa-perubahan">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — DPA Perubahan</h1>
+            <p>Pengelolaan berkas Dokumen Pelaksanaan Perubahan Anggaran (DPPA SKPD).</p>
+          </div>
+          <div class="page-header-meta">Pelaksanaan Anggaran</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari dokumen DPPA...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'dpa-perubahan')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Tambah Dokumen DPPA
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-dpa-perubahan">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:70px;text-align:center;">Tahun</th>
+                <th>Nama Dokumen DPPA</th>
+                <th>Pergeseran Anggaran / Uraian</th>
+                <th style="width:220px;">Berkas PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 8. SURAT MASUK ==================== -->
+      <div class="admin-page" id="admin-page-surat-masuk">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — Agenda Surat Masuk</h1>
+            <p>Pencatatan agenda surat dinas masuk, disposisi pimpinan, dan berkas scan PDF.</p>
+          </div>
+          <div class="page-header-meta">Arsip Persuratan</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari nomor surat / perihal...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'surat-masuk')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Catat Surat Masuk
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-surat-masuk">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:90px;text-align:center;">Tanggal</th>
+                <th style="width:220px;">Nomor Surat & Pengirim</th>
+                <th>Perihal & Disposisi</th>
+                <th style="width:200px;">Berkas Scan PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 9. SURAT KELUAR ==================== -->
+      <div class="admin-page" id="admin-page-surat-keluar">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Kelola Data — Agenda Surat Keluar</h1>
+            <p>Pencatatan nomor surat keluar dinas, instansi tujuan, dan scan arsip tertandatangan.</p>
+          </div>
+          <div class="page-header-meta">Arsip Persuratan</div>
+        </div>
+
+        <div class="table-toolbar">
+          <div class="toolbar-group">
+            <input type="text" class="form-control search-box" placeholder="Cari surat keluar...">
+            <select class="form-control filter-year">
+              <option value="">Semua Tahun</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
+          <div class="toolbar-group">
+            <button class="btn btn-primary" onclick="openCrudModal('create', 'surat-keluar')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Catat Surat Keluar
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="gov-table" id="admin-table-surat-keluar">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:90px;text-align:center;">Tanggal</th>
+                <th style="width:220px;">Nomor Surat & Tujuan</th>
+                <th>Perihal & Penandatangan</th>
+                <th style="width:200px;">Berkas Scan PDF</th>
+                <th style="width:95px;text-align:center;">Status</th>
+                <th style="width:190px;text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ==================== 10. LAPORAN SIMDAPANGDA ==================== -->
+      <div class="admin-page" id="admin-page-laporan">
+        <div class="page-header">
+          <div class="page-header-title">
+            <h1>Laporan Rekapitulasi Simdapangda</h1>
+            <p>Monitoring kepatuhan pelaporan seluruh dokumen dinas serta opsi ekspor PDF.</p>
+          </div>
+          <div class="page-header-meta">Ekspor & Monitoring</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Tabel Rekapitulasi Realisasi Berkas SIM-PEP (T.A. 2026)</span>
+            <button class="btn btn-primary btn-sm" onclick="exportPdf('Laporan_Rekapitulasi_Simdapangda_2026.pdf')">
+              <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Export PDF Laporan Lengkap
+            </button>
+          </div>
+          <div class="panel-body">
+            <p style="font-size:13px;color:var(--text-body);margin-bottom:12px;">
+              Dokumen rekapitulasi merangkum seluruh berkas yang berhasil dikelola ke sistem SIM-PEP selama Tahun Anggaran berjalan.
+            </p>
+            <table class="gov-table">
+              <thead>
+                <tr>
+                  <th style="width:45px;text-align:center;">No</th>
+                  <th>Kelompok Modul Dokumen</th>
+                  <th style="width:130px;text-align:center;">Target Dokumen</th>
+                  <th style="width:160px;text-align:center;">Dokumen Terdata (PDF)</th>
+                  <th style="width:130px;text-align:center;">Kepatuhan</th>
+                  <th style="width:140px;text-align:center;">Aksi Rekap</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="text-align:center;">1</td>
+                  <td><strong>Rencana Kerja (Renja Murni & Perubahan)</strong></td>
+                  <td style="text-align:center;">—</td>
+                  <td style="text-align:center;"><strong style="color:var(--primary);">10 Berkas</strong></td>
+                  <td style="text-align:center;"><span class="badge badge-green">Tersedia</span></td>
+                  <td style="text-align:center;">
+                    <button class="btn btn-outline btn-sm" onclick="exportPdf('Rekap_Renja_2026.pdf')">Unduh Rekap</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;">2</td>
+                  <td><strong>Perjanjian Kinerja (PK Murni & Perubahan)</strong></td>
+                  <td style="text-align:center;">—</td>
+                  <td style="text-align:center;"><strong style="color:var(--primary);">0 Berkas</strong></td>
+                  <td style="text-align:center;"><span class="badge badge-gray">Kosong</span></td>
+                  <td style="text-align:center;">
+                    <button class="btn btn-outline btn-sm" onclick="exportPdf('Rekap_PK_2026.pdf')">Unduh Rekap</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;">3</td>
+                  <td><strong>Pelaksanaan Anggaran (DPA Murni & Perubahan)</strong></td>
+                  <td style="text-align:center;">—</td>
+                  <td style="text-align:center;"><strong style="color:var(--primary);">0 Berkas</strong></td>
+                  <td style="text-align:center;"><span class="badge badge-gray">Kosong</span></td>
+                  <td style="text-align:center;">
+                    <button class="btn btn-outline btn-sm" onclick="exportPdf('Rekap_DPA_2026.pdf')">Unduh Rekap</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;">4</td>
+                  <td><strong>Arsip Persuratan (Surat Masuk & Keluar)</strong></td>
+                  <td style="text-align:center;">—</td>
+                  <td style="text-align:center;"><strong style="color:var(--primary);">0 Berkas</strong></td>
+                  <td style="text-align:center;"><span class="badge badge-gray">Kosong</span></td>
+                  <td style="text-align:center;">
+                    <button class="btn btn-outline btn-sm" onclick="exportPdf('Rekap_Agenda_Surat_2026.pdf')">Unduh Rekap</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL FORM TAMBAH / EDIT DATA (CRUD) ==================== -->
+<div class="modal-overlay" id="modalCrud">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-header">
+      <h3 id="modalCrudTitle">TAMBAH DATA DOKUMEN</h3>
+      <button class="modal-close-btn" onclick="closeAdminModal('modalCrud')">&times;</button>
+    </div>
+    <form id="formCrud" onsubmit="handleCrudSubmit(event)">
+      <div class="modal-body">
+        
+        <input type="hidden" id="crudMode" value="create">
+        <input type="hidden" id="crudModuleKey" value="renja-murni">
+        <input type="hidden" id="crudEditId" value="">
+
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Tahun Anggaran <span class="req">*</span></label>
+            <input 
+              type="number" 
+              class="form-control" 
+              id="crudTahun" 
+              name="tahun_anggaran"
+              min="1990" 
+              max="2100" 
+              step="1"
+              placeholder="Contoh: 2026" 
+              value="2026"
+              required
+              style="width:100%;height:38px;font-weight:700;font-size:13px;color:var(--primary);box-sizing:border-box;"
+            >
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label id="crudModuleLabel">Jenis Dokumen <span class="req">*</span></label>
+            <!-- Saat di dalam fitur: Terkunci otomatis sesuai modul halaman aktif -->
+            <input 
+              type="text" 
+              class="form-control" 
+              id="crudModuleFixedDisplay" 
+              readonly 
+              style="width:100%;height:38px;font-weight:700;background:#f8fafc;color:var(--primary);border:1px solid #cbd5e1;cursor:not-allowed;box-sizing:border-box;"
+            >
+            <!-- Hanya muncul jika modal dibuka dari Dashboard Utama -->
+            <select class="form-control" id="crudModuleSelect" onchange="onCrudModuleChange(this.value)" style="width:100%;height:38px;font-weight:700;color:var(--primary);display:none;box-sizing:border-box;">
+              <optgroup label="Rencana Kerja (Renja)">
+                <option value="renja-murni">Renja Murni</option>
+                <option value="renja-perubahan">Renja Perubahan</option>
+              </optgroup>
+              <optgroup label="Perjanjian Kinerja (PK)">
+                <option value="pk-murni">PK Murni</option>
+                <option value="pk-perubahan">PK Perubahan</option>
+              </optgroup>
+              <optgroup label="Pelaksanaan Anggaran (DPA)">
+                <option value="dpa-murni">DPA Murni</option>
+                <option value="dpa-perubahan">DPA Perubahan</option>
+              </optgroup>
+              <optgroup label="Arsip Persuratan">
+                <option value="surat-masuk">Surat Masuk</option>
+                <option value="surat-keluar">Surat Keluar</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kolom Upload PDF Khusus dengan Auto-Name & Icon -->
+        <div class="form-group">
+          <label id="crudFileLabel">Unggah Berkas PDF Lampiran <span class="req">*</span></label>
+          <div class="pdf-upload-box" id="crudPdfDropzone" onclick="document.getElementById('crudPdfFile').click()">
+            <svg style="width:30px;height:30px;stroke:var(--primary);stroke-width:1.8;fill:none;margin-bottom:6px;" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <div style="font-weight:700;color:var(--primary);margin-bottom:2px;">
+              Klik atau tarik file PDF ke area ini
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);">
+              Khusus file dokumen format <strong>.PDF</strong> (Maksimal 20 MB)
+            </div>
+            <div class="pdf-file-info" id="crudPdfPreview"></div>
+          </div>
+          <input type="file" id="crudPdfFile" accept=".pdf" style="display:none">
+        </div>
+
+        <!-- Judul / Nama Dokumen (Otomatis dari PDF jika dipilih) -->
+        <div class="form-group">
+          <label id="crudTitleLabel">Nama Dokumen / Perihal <span class="req">*</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            id="crudJudul" 
+            placeholder="Otomatis terisi dari nama file PDF yang dipilih..." 
+            required 
+            style="width:100%;font-weight:600;"
+          >
+          <div style="font-size:11px;color:var(--success);font-weight:700;margin-top:4px;">
+            ✓ Nama dokumen otomatis mengambil nama file PDF (tetap dapat disunting jika diperlukan)
+          </div>
+        </div>
+
+        <!-- Indikator Auto-Sync Google Drive Desktop -->
+        <div style="padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <svg style="width:20px;height:20px;fill:#16a34a;flex-shrink:0;" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+          <div style="font-size:12px;color:#166534;font-weight:600;">
+            Berkas PDF otomatis tersimpan ke server & disinkronkan ke Google Drive (<span style="font-family:monospace;font-size:11px;">G:\My Drive\SIM-PEP</span>)
+          </div>
+        </div>
+
+        <!-- Bidang Khusus Surat (Hanya Tampil Saat Modul Surat Masuk/Keluar) -->
+        <div id="groupSuratFields" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nomor Surat <span class="req">*</span></label>
+              <input type="text" class="form-control" id="crudNomorSurat" placeholder="Contoh: 005/PEP-DISDIK/IX/2026" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label>Tanggal Surat <span class="req">*</span></label>
+              <input type="date" class="form-control" id="crudTanggalSurat" value="2026-09-15" style="width:100%;">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label id="crudInstansiLabel">Instansi Pengirim / Tujuan <span class="req">*</span></label>
+            <input type="text" class="form-control" id="crudInstansi" placeholder="Contoh: Bappeda Litbang / Kepala Dinas" style="width:100%;">
+          </div>
+        </div>
+
+        <!-- Status Dokumen -->
+        <div class="form-group">
+          <label>Status Verifikasi Administrasi <span class="req">*</span></label>
+          <select class="form-control" id="crudStatus" style="width:100%;" required>
+            <option value="Lengkap">Lengkap (Terverifikasi)</option>
+            <option value="Diproses">Diproses / Dalam Penelaahan</option>
+            <option value="Perlu Update">Perlu Update / Revisi</option>
+            <option value="Terkirim">Terkirim / Selesai</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeAdminModal('modalCrud')">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btnCrudSubmit">Simpan Dokumen</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL DETAIL DOKUMEN ==================== -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 id="detailModalTitle">DETAIL DOKUMEN</h3>
+      <button class="modal-close-btn" onclick="closeAdminModal('modalDetail')">&times;</button>
+    </div>
+    <div class="modal-body" id="detailModalBody">
+      <!-- Diisi oleh JS -->
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeAdminModal('modalDetail')">Tutup</button>
+      <button type="button" class="btn btn-primary" id="btnDetailDownload">
+        <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Unduh Berkas PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL KONFIRMASI HAPUS (DELETE) ==================== -->
+<div class="modal-overlay" id="modalDelete">
+  <div class="modal-dialog" style="max-width:440px;">
+    <div class="modal-header">
+      <h3>KONFIRMASI HAPUS DATA</h3>
+      <button class="modal-close-btn" onclick="closeAdminModal('modalDelete')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="deleteModalMessage" style="color:var(--text-dark);line-height:1.5;">Apakah Anda yakin ingin menghapus data dokumen ini?</p>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:6px;">Data yang dihapus akan langsung hilang dari tabel dan Portal Pengguna.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-outline" onclick="closeAdminModal('modalDelete')">Batal</button>
+      <button type="button" class="btn btn-danger" onclick="confirmDeleteDoc()">Hapus Permanen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="adminToastContainer"></div>
+
+</body>
+</html>

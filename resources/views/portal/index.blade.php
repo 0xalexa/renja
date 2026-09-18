@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Dokumen PEP — Sistem Informasi Manajemen Dokumen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v={{ time() }}">
+  <script>
+    window.appUrl = "{{ url('/') }}";
+    window.serverDb = @json($allDocsGrouped);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="{{ asset('assets/js/app.js') }}?v={{ time() }}" defer></script>
+</head>
+
+<body>
+
+  <!-- ==================== TOP BAR PEMERINTAHAN ==================== -->
+  <div class="gov-topbar">
+    <div class="gov-topbar-inner">
+      <div class="gov-topbar-left">
+        <span>PEMERINTAH DAERAH &bull; DINAS PENDIDIKAN</span>
+        <span style="opacity:0.4;">|</span>
+        <span>SUBBAGIAN PERENCANAAN, EVALUASI & PELAPORAN (PEP)</span>
+      </div>
+      <div class="gov-topbar-right">
+        <span id="topbarDate">Rabu, 9 September 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== NAVBAR HORIZONTAL UTAMA ==================== -->
+  <header class="main-navbar">
+    <div class="navbar-inner">
+
+      <!-- Brand -->
+      <a href="#" class="nav-brand" onclick="navigate('dashboard'); return false;">
+        <span class="brand-badge">PEP</span>
+        <span class="brand-title">SIM-PEP PORTAL</span>
+      </a>
+
+      <button class="nav-mobile-toggle" id="mobileNavToggle" aria-label="Menu Navigasi">☰</button>
+
+      <!-- Menu Horizontal -->
+      <ul class="nav-menu" id="navMenu">
+
+        <!-- Beranda -->
+        <li class="nav-item active" data-nav="dashboard">
+          <a href="#" class="nav-link" onclick="navigate('dashboard'); return false;">
+            Beranda
+          </a>
+        </li>
+
+        <!-- Dropdown Rencana Kerja -->
+        <li class="nav-item" data-nav="renja">
+          <a href="#" class="nav-link" onclick="event.preventDefault(); toggleDropdown(this);">
+            Rencana Kerja <span class="nav-caret">▼</span>
+          </a>
+          <ul class="nav-dropdown">
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('renja-murni'); return false;">Renja Murni</a>
+            </li>
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('renja-perubahan'); return false;">Renja
+                Perubahan</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Dropdown Perjanjian Kinerja -->
+        <li class="nav-item" data-nav="pk">
+          <a href="#" class="nav-link" onclick="event.preventDefault(); toggleDropdown(this);">
+            Perjanjian Kinerja <span class="nav-caret">▼</span>
+          </a>
+          <ul class="nav-dropdown">
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('pk-murni'); return false;">PK Murni</a>
+            </li>
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('pk-perubahan'); return false;">PK Perubahan</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Dropdown Anggaran -->
+        <li class="nav-item" data-nav="dpa">
+          <a href="#" class="nav-link" onclick="event.preventDefault(); toggleDropdown(this);">
+            Pelaksanaan Anggaran <span class="nav-caret">▼</span>
+          </a>
+          <ul class="nav-dropdown">
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('dpa-murni'); return false;">DPA Murni</a>
+            </li>
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('dpa-perubahan'); return false;">DPA Perubahan</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Dropdown Arsip Surat -->
+        <li class="nav-item" data-nav="surat">
+          <a href="#" class="nav-link" onclick="event.preventDefault(); toggleDropdown(this);">
+            Arsip Surat <span class="nav-caret">▼</span>
+          </a>
+          <ul class="nav-dropdown">
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('surat-masuk'); return false;">Surat Masuk</a>
+            </li>
+            <li class="nav-dropdown-item">
+              <a href="#" class="nav-dropdown-link" onclick="navigate('surat-keluar'); return false;">Surat Keluar</a>
+            </li>
+          </ul>
+        </li>
+
+        <!-- Laporan Simdapangda -->
+        <li class="nav-item" data-nav="laporan">
+          <a href="#" class="nav-link" onclick="navigate('laporan'); return false;">
+            Laporan Simdapangda
+          </a>
+        </li>
+
+      </ul>
+
+      <!-- User / Profile Section (Read-Only User) -->
+      <div class="nav-right">
+        @auth
+          <span class="nav-user-text">
+            <strong>{{ Auth::user()->name }}</strong> &bull; {{ (Auth::user()->role ?? 'user') === 'admin' ? 'Administrator' : 'Pegawai' }}
+          </span>
+          <form action="{{ route('logout') }}" method="POST" style="display:inline;margin:0;">
+            @csrf
+            <button type="submit" class="btn-nav-logout" style="background:none;border:none;cursor:pointer;font-family:inherit;" title="Keluar dari sesi portal">
+              Keluar
+            </button>
+          </form>
+        @else
+          <a href="{{ route('login') }}" class="btn btn-outline btn-sm" style="font-size:11px;font-weight:700;color:var(--primary);padding:4px 8px;">
+            Masuk / Login &rarr;
+          </a>
+        @endauth
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ==================== MAIN PAGE CONTAINER ==================== -->
+  <main class="page-container">
+
+    <!-- ==================== 1. BERANDA (DASHBOARD PENGGUNA) ==================== -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Portal Penelusuran Dokumen & Arsip PEP</h1>
+          <p>Layanan akses informasi dan unduh berkas resmi perencanaan, kinerja, anggaran, dan persuratan dinas.</p>
+        </div>
+        <div class="page-header-meta">
+          T.A. 2026 &bull; Mode Pengguna (Read-Only)
+        </div>
+      </div>
+
+      <!-- 4 Stats Boxes -->
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Dokumen Renja Tersedia</div>
+          <div class="stat-value" id="kpiRenja">{{ $renjaMurni->count() + $renjaPerubahan->count() }}</div>
+          <div class="stat-desc">Rencana Kerja Murni & Perubahan</div>
+        </div>
+        <div class="stat-box border-emerald">
+          <div class="stat-label">Dokumen PK & DPA</div>
+          <div class="stat-value" id="kpiPkDpa">{{ $pkMurni->count() + $pkPerubahan->count() + $dpaMurni->count() + $dpaPerubahan->count() }}</div>
+          <div class="stat-desc">Perjanjian Kinerja & Dokumen DPA</div>
+        </div>
+        <div class="stat-box border-amber">
+          <div class="stat-label">Agenda Surat Masuk</div>
+          <div class="stat-value" id="kpiSuratMasuk">{{ $suratMasuk->count() }}</div>
+          <div class="stat-desc">{{ date('F Y') }} &bull; Tercatat Resmi</div>
+        </div>
+        <div class="stat-box border-red">
+          <div class="stat-label">Agenda Surat Keluar</div>
+          <div class="stat-value" id="kpiSuratKeluar">{{ $suratKeluar->count() }}</div>
+          <div class="stat-desc">{{ date('F Y') }} &bull; Terarsip</div>
+        </div>
+      </div>
+
+      <!-- Chart & Quick Links -->
+      <div class="dash-columns">
+
+        <!-- Chart Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Statistik Ketersediaan Dokumen per Modul (T.A. 2026)</span>
+            <span class="badge badge-blue">Tahun Berjalan</span>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap">
+              <canvas id="chartAnggaran"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Links Panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <span class="panel-title">Pintasan Kategori Berkas</span>
+          </div>
+          <div class="panel-body">
+            <div class="quick-menu-list">
+              <a href="#" class="quick-menu-item" onclick="navigate('renja-murni'); return false;">
+                <span>Rencana Kerja (Renja Murni)</span>
+                <span>&rarr;</span>
+              </a>
+              <a href="#" class="quick-menu-item" onclick="navigate('pk-murni'); return false;">
+                <span>Perjanjian Kinerja (PK Murni)</span>
+                <span>&rarr;</span>
+              </a>
+              <a href="#" class="quick-menu-item" onclick="navigate('dpa-murni'); return false;">
+                <span>Pelaksanaan Anggaran (DPA)</span>
+                <span>&rarr;</span>
+              </a>
+              <a href="#" class="quick-menu-item" onclick="navigate('surat-masuk'); return false;">
+                <span>Buku Agenda Surat Masuk</span>
+                <span>&rarr;</span>
+              </a>
+              <a href="#" class="quick-menu-item" onclick="navigate('surat-keluar'); return false;">
+                <span>Buku Agenda Surat Keluar</span>
+                <span>&rarr;</span>
+              </a>
+              <a href="#" class="quick-menu-item" onclick="navigate('laporan'); return false;">
+                <span>Laporan Rekapitulasi Simdapangda</span>
+                <span>&rarr;</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recent Documents Table -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Daftar Dokumen dan Arsip Terkini</span>
+          <button class="btn btn-outline btn-sm" onclick="navigate('renja-murni')">Lihat Semua Berkas Renja</button>
+        </div>
+        <div class="table-responsive">
+          <table class="gov-table">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th style="width:75px;text-align:center;">Tahun</th>
+                <th>Nama Dokumen / Subjek Surat</th>
+                <th style="width:160px;">Kelompok Modul</th>
+                <th style="width:230px;">Berkas Terlampir</th>
+                <th style="width:115px;text-align:center;">Tanggal</th>
+                <th style="width:105px;text-align:center;">Status</th>
+                <th style="width:130px;text-align:center;">Aksi Pengguna</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardRecentTable">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== 2. RENJA MURNI ==================== -->
+    <div class="page" id="page-renja-murni">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Dokumen Rencana Kerja — Renja Murni</h1>
+          <p>Penelusuran dan unduh berkas dokumen rencana kerja tahunan penetapan awal.</p>
+        </div>
+        <div class="page-header-meta">Modul Rencana Kerja</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box" placeholder="Cari nama dokumen atau program kegiatan...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Klik <strong>Unduh</strong> untuk mengunduh dokumen
+            resmi</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-renja-murni">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Nama Dokumen / Program Kegiatan</th>
+              <th>Keterangan</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen Renja Murni</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 3. RENJA PERUBAHAN ==================== -->
+    <div class="page" id="page-renja-perubahan">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Dokumen Rencana Kerja — Renja Perubahan</h1>
+          <p>Penelusuran dan unduh berkas perubahan rencana kerja tahun berjalan.</p>
+        </div>
+        <div class="page-header-meta">Modul Rencana Kerja</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box" placeholder="Cari dokumen perubahan...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Dokumen resmi hasil revisi APBD</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-renja-perubahan">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Nama Dokumen / Revisi Program</th>
+              <th>Keterangan Perubahan</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen Renja Perubahan</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 4. PK MURNI ==================== -->
+    <div class="page" id="page-pk-murni">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Perjanjian Kinerja (PK Murni)</h1>
+          <p>Penetapan sasaran dan perjanjian kinerja awal tahun pejabat/satuan kerja dinas.</p>
+        </div>
+        <div class="page-header-meta">Modul Kinerja</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box"
+            placeholder="Cari perihal atau jabatan perjanjian kinerja...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Format dokumen PDF telah ditandatangani</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-pk-murni">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Jabatan / Nama Perjanjian Kinerja</th>
+              <th>Uraian Target</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen PK Murni</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 5. PK PERUBAHAN ==================== -->
+    <div class="page" id="page-pk-perubahan">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Perjanjian Kinerja (PK Perubahan)</h1>
+          <p>Dokumen adendum dan penyesuaian target kinerja tahun berjalan.</p>
+        </div>
+        <div class="page-header-meta">Modul Kinerja</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box" placeholder="Cari dokumen PK perubahan...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Adendum target kinerja disahkan</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-pk-perubahan">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Jabatan / Nama Perjanjian Kinerja</th>
+              <th>Keterangan Revisi Target</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen PK Perubahan</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 6. DPA MURNI ==================== -->
+    <div class="page" id="page-dpa-murni">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Pelaksanaan Anggaran — DPA Murni</h1>
+          <p>Dokumen Pelaksanaan Anggaran (DPA) SKPD Dinas Pendidikan versi murni.</p>
+        </div>
+        <div class="page-header-meta">Modul Anggaran</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box" placeholder="Cari sub-kegiatan atau dokumen anggaran...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Pagu alokasi anggaran belanja dinas</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-dpa-murni">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Nama Sub-Kegiatan / Dokumen DPA</th>
+              <th>Pagu Anggaran & Uraian</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen DPA Murni</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 7. DPA PERUBAHAN ==================== -->
+    <div class="page" id="page-dpa-perubahan">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Pelaksanaan Anggaran — DPA Perubahan</h1>
+          <p>Dokumen Pelaksanaan Perubahan Anggaran (DPPA) SKPD tahun anggaran berjalan.</p>
+        </div>
+        <div class="page-header-meta">Modul Anggaran</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box" placeholder="Cari dokumen DPPA perubahan...">
+          <select class="form-control filter-year">
+            <option value="">Semua Tahun</option>
+            <option value="2026">2026</option>
+            <option value="2025">2025</option>
+          </select>
+        </div>
+        <div class="toolbar-group">
+          <span style="font-size:12px;color:var(--text-muted);">Penyesuaian pergeseran belanja program</span>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-dpa-perubahan">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:75px;text-align:center;">Tahun</th>
+              <th>Nama Sub-Kegiatan / Dokumen DPPA</th>
+              <th>Keterangan Perubahan Pagu</th>
+              <th style="width:240px;">Berkas Lampiran</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan data dokumen DPA Perubahan</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 8. SURAT MASUK ==================== -->
+    <div class="page" id="page-surat-masuk">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Buku Agenda Surat Masuk</h1>
+          <p>Penelusuran arsip surat dinas yang diterima dari instansi dan lembaga mitra.</p>
+        </div>
+        <div class="page-header-meta">Arsip Persuratan</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box"
+            placeholder="Cari nomor surat, instansi pengirim, atau perihal...">
+          <input type="date" class="form-control filter-date-from" title="Dari tanggal">
+          <input type="date" class="form-control filter-date-to" title="Sampai tanggal">
+        </div>
+        <div class="toolbar-group">
+          <button class="btn btn-outline" onclick="showToast('Mencetak rekapitulasi agenda surat masuk...', 'info')">
+            Cetak Rekapitulasi
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-surat-masuk">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:160px;">No. Surat</th>
+              <th style="width:105px;text-align:center;">Tanggal Surat</th>
+              <th>Perihal Surat</th>
+              <th>Asal Instansi</th>
+              <th style="width:180px;">Scan Berkas</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan arsip agenda surat masuk</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 9. SURAT KELUAR ==================== -->
+    <div class="page" id="page-surat-keluar">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Buku Agenda Surat Keluar</h1>
+          <p>Penelusuran arsip surat dinas yang diterbitkan oleh Dinas Pendidikan / Subbag PEP.</p>
+        </div>
+        <div class="page-header-meta">Arsip Persuratan</div>
+      </div>
+
+      <div class="table-toolbar">
+        <div class="toolbar-group">
+          <input type="text" class="form-control search-box"
+            placeholder="Cari nomor surat, tujuan instansi, atau perihal...">
+          <input type="date" class="form-control filter-date-from" title="Dari tanggal">
+          <input type="date" class="form-control filter-date-to" title="Sampai tanggal">
+        </div>
+        <div class="toolbar-group">
+          <button class="btn btn-outline" onclick="showToast('Mencetak rekapitulasi agenda surat keluar...', 'info')">
+            Cetak Rekapitulasi
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="gov-table" id="table-surat-keluar">
+          <thead>
+            <tr>
+              <th style="width:45px;text-align:center;">No</th>
+              <th style="width:160px;">No. Surat</th>
+              <th style="width:105px;text-align:center;">Tanggal Surat</th>
+              <th>Perihal Surat</th>
+              <th>Tujuan Instansi</th>
+              <th style="width:180px;">Scan Berkas</th>
+              <th style="width:110px;text-align:center;">Status</th>
+              <th style="width:130px;text-align:center;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pagination-bar">
+        <span>Menampilkan arsip agenda surat keluar</span>
+        <span>Halaman 1 dari 1</span>
+      </div>
+    </div>
+
+    <!-- ==================== 10. LAPORAN SIMDAPANGDA ==================== -->
+    <div class="page" id="page-laporan">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Pelaporan Terpadu Simdapangda</h1>
+          <p>Matriks evaluasi kepatuhan dokumen perencanaan, kinerja, anggaran, dan persuratan dinas.</p>
+        </div>
+        <div class="page-header-meta">Pelaporan Terpadu</div>
+      </div>
+
+      <!-- Filter Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Filter Matriks Rekapitulasi</span>
+        </div>
+        <div class="panel-body">
+          <div
+            style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;align-items:flex-end;">
+            <div class="form-group" style="margin:0;">
+              <label>Tahun Anggaran</label>
+              <select class="form-control" id="repYear" style="width:100%;">
+                <option value="2026">2026 (Tahun Berjalan)</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>Periode Rekapitulasi</label>
+              <select class="form-control" id="repPeriod" style="width:100%;">
+                <option>Tahunan (Januari – Desember)</option>
+                <option>Triwulan I (Jan – Mar)</option>
+                <option>Triwulan II (Apr – Jun)</option>
+                <option>Triwulan III (Jul – Sep)</option>
+                <option>Triwulan IV (Okt – Des)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label>Lingkup Dokumen</label>
+              <select class="form-control" id="repScope" style="width:100%;">
+                <option>Semua Modul Terpadu</option>
+                <option>Rencana Kerja (Renja)</option>
+                <option>Perjanjian Kinerja (PK)</option>
+                <option>Pelaksanaan Anggaran (DPA)</option>
+                <option>Arsip Persuratan</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn btn-primary" style="width:100%;height:33px;"
+                onclick="showToast('Memuat matriks rekapitulasi data...', 'success')">
+                Tampilkan Data
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Table Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Matriks Kepatuhan Administrasi PEP — T.A. 2026</span>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-outline btn-sm" onclick="showToast('Menyiapkan dokumen format PDF...', 'info')">
+              Export PDF
+            </button>
+            <button class="btn btn-success btn-sm" onclick="showToast('Menyiapkan berkas Excel (.xlsx)...', 'success')">
+              Export Excel (.xlsx)
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="gov-table">
+            <thead>
+              <tr>
+                <th style="width:45px;text-align:center;">No</th>
+                <th>Kelompok Administrasi</th>
+                <th>Kategori / Versi</th>
+                <th style="width:130px;text-align:center;">Target Berkas</th>
+                <th style="width:140px;text-align:center;">Realisasi Berkas</th>
+                <th style="width:120px;text-align:center;">Kepatuhan (%)</th>
+                <th style="width:130px;text-align:center;">Pembaruan</th>
+                <th style="width:110px;text-align:center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="text-align:center;">1</td>
+                <td><strong>Rencana Kerja</strong></td>
+                <td>Renja Murni</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $renjaMurni->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $renjaMurni->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $renjaMurni->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $renjaMurni->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $renjaMurni->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">2</td>
+                <td><strong>Rencana Kerja</strong></td>
+                <td>Renja Perubahan</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $renjaPerubahan->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $renjaPerubahan->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $renjaPerubahan->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $renjaPerubahan->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $renjaPerubahan->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">3</td>
+                <td><strong>Perjanjian Kinerja</strong></td>
+                <td>PK Murni</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $pkMurni->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $pkMurni->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $pkMurni->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $pkMurni->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $pkMurni->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">4</td>
+                <td><strong>Perjanjian Kinerja</strong></td>
+                <td>PK Perubahan</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $pkPerubahan->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $pkPerubahan->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $pkPerubahan->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $pkPerubahan->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $pkPerubahan->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">5</td>
+                <td><strong>Pelaksanaan Anggaran</strong></td>
+                <td>DPA Murni</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $dpaMurni->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $dpaMurni->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $dpaMurni->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $dpaMurni->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $dpaMurni->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">6</td>
+                <td><strong>Pelaksanaan Anggaran</strong></td>
+                <td>DPA Perubahan</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $dpaPerubahan->count() }} Dokumen</td>
+                <td style="text-align:center;"><strong>{{ $dpaPerubahan->count() > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $dpaPerubahan->first()?->created_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $dpaPerubahan->count() > 0 ? 'badge-green' : 'badge-gray' }}">{{ $dpaPerubahan->count() > 0 ? 'Lengkap' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">7</td>
+                <td><strong>Arsip Persuratan</strong></td>
+                <td>Surat Masuk</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $suratMasuk->count() }} Berkas</td>
+                <td style="text-align:center;"><strong>{{ $suratMasuk->count() > 0 ? 'Aktif' : '-' }}</strong></td>
+                <td style="text-align:center;">{{ $suratMasuk->first()?->tanggal_surat ? date('d/m/Y', strtotime($suratMasuk->first()->tanggal_surat)) : '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $suratMasuk->count() > 0 ? 'badge-blue' : 'badge-gray' }}">{{ $suratMasuk->count() > 0 ? 'Tercatat' : 'Kosong' }}</span></td>
+              </tr>
+              <tr>
+                <td style="text-align:center;">8</td>
+                <td><strong>Arsip Persuratan</strong></td>
+                <td>Surat Keluar</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $suratKeluar->count() }} Berkas</td>
+                <td style="text-align:center;"><strong>{{ $suratKeluar->count() > 0 ? 'Aktif' : '-' }}</strong></td>
+                <td style="text-align:center;">{{ $suratKeluar->first()?->tanggal_surat ? date('d/m/Y', strtotime($suratKeluar->first()->tanggal_surat)) : '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $suratKeluar->count() > 0 ? 'badge-blue' : 'badge-gray' }}">{{ $suratKeluar->count() > 0 ? 'Tercatat' : 'Kosong' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ==================== MODAL: DETAIL PREVIEW ==================== -->
+  <div class="modal-overlay" id="modalDetail">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="detailModalTitle">DETAIL INFORMASI BERKAS</h3>
+        <button class="modal-close-btn" onclick="closeModal('modalDetail')">&times;</button>
+      </div>
+      <div class="modal-body" id="detailListContent" style="font-size:13px;line-height:1.8;">
+        <!-- Dynamic detail content -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalDetail')">Tutup</button>
+        <button type="button" class="btn btn-primary" id="btnDetailDownload">Unduh Berkas Resmi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFIKASI ==================== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</body>
+
+</html>

@@ -1,0 +1,476 @@
+/* ==========================================================================
+   SIM-PEP — Windows 11 Settings / Fluent Design (Light Mode)
+   Overrides Hope UI while keeping existing JS class hooks.
+   ========================================================================== */
+
+:root {
+  --fluent-bg: #f3f3f3;
+  --fluent-card: #ffffff;
+  --fluent-text: #1a1a1a;
+  --fluent-muted: #5d5d5d;
+  --fluent-subtle: #8a8a8a;
+  --fluent-accent: #0067c0;
+  --fluent-hover: #eaeaea;
+  --fluent-active: #e5e5e5;
+  --fluent-radius: 12px;
+  --hope-bg: #f3f3f3;
+  --hope-border: transparent;
+}
+
+html,
+body {
+  font-family: "Segoe UI", Inter, system-ui, -apple-system, sans-serif !important;
+  background: var(--fluent-bg) !important;
+  color: var(--fluent-text);
+  letter-spacing: -0.01em;
+}
+
+.admin-layout,
+.admin-main,
+.admin-content,
+.hope-dashboard-wrap {
+  background: var(--fluent-bg) !important;
+}
+
+/* ---------- Sidebar: blends into app chrome ---------- */
+.admin-sidebar {
+  background: var(--fluent-bg) !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+
+.sidebar-brand-header {
+  height: auto !important;
+  min-height: 76px;
+  padding: 16px 14px 12px !important;
+  border-bottom: none !important;
+  background: transparent !important;
+}
+
+.sidebar-brand-header:hover {
+  background: transparent !important;
+}
+
+.sidebar-brand-icon,
+.fluent-avatar {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(145deg, #0078d4, #005a9e) !important;
+  box-shadow: 0 2px 8px rgba(0, 103, 192, 0.25) !important;
+}
+
+.brand-title-text,
+.fluent-user-name {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+}
+
+.brand-sub-badge,
+.fluent-user-role {
+  background: transparent !important;
+  color: var(--fluent-muted) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 0 !important;
+  letter-spacing: 0 !important;
+}
+
+.admin-nav {
+  padding: 4px 8px 16px !important;
+}
+
+.admin-nav-title {
+  padding: 16px 14px 6px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  color: #9a9a9a !important;
+  height: auto !important;
+}
+
+.admin-nav-item {
+  height: 36px !important;
+  margin: 1px 4px !important;
+  padding: 0 12px 0 16px !important;
+  border-radius: 6px !important;
+  color: #1a1a1a !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.admin-nav-item:hover {
+  background: var(--fluent-hover) !important;
+  color: #1a1a1a !important;
+}
+
+.admin-nav-item:hover .nav-icon {
+  stroke: #1a1a1a !important;
+  opacity: 1 !important;
+}
+
+.admin-nav-item.active {
+  background: var(--fluent-active) !important;
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+.admin-nav-item.active .nav-icon {
+  stroke: #1a1a1a !important;
+  opacity: 1 !important;
+}
+
+.admin-nav-item.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 16px;
+  background: var(--fluent-accent);
+  border-radius: 999px;
+}
+
+.admin-nav-item.active .badge {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  border: none !important;
+}
+
+.admin-nav-item .nav-arrow {
+  display: none !important;
+}
+
+.sidebar-toggle-circle {
+  display: none !important;
+}
+
+.nav-icon {
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  opacity: 0.85 !important;
+}
+
+.admin-sidebar-footer {
+  background: transparent !important;
+  border-top: none !important;
+  padding: 12px 16px 20px !important;
+}
+
+.admin-sidebar.collapsed .admin-nav-item.active::before {
+  height: 12px;
+}
+
+/* ---------- Top chrome: no blocky navbar ---------- */
+.hope-topbar,
+.fluent-chrome {
+  height: auto !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  padding: 18px 32px 8px !important;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.fluent-chrome {
+  display: grid !important;
+  grid-template-columns: 1fr minmax(280px, 560px) 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-left,
+.topbar-right {
+  background: transparent !important;
+}
+
+.fluent-chrome .topbar-left {
+  justify-content: flex-start;
+}
+
+.fluent-chrome .topbar-right {
+  justify-content: flex-end;
+}
+
+.hope-topbar .appbar-search-container,
+.fluent-chrome .appbar-search-container {
+  max-width: 560px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+.hope-topbar .appbar-search-box,
+.fluent-search {
+  height: 40px !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e5e5 !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  padding: 0 16px !important;
+}
+
+.hope-topbar .appbar-search-box:hover,
+.fluent-search:hover {
+  background: #ffffff !important;
+  border-color: #d4d4d4 !important;
+}
+
+.hope-topbar .appbar-search-box:focus-within,
+.fluent-search:focus-within {
+  background: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 2px 0 0 var(--fluent-accent) !important;
+}
+
+.appbar-divider,
+.topbar-drive-status,
+.topbar-clock-widget,
+.topbar-admin-chip,
+.btn-topbar-portal,
+.appbar-status-badge,
+.appbar-user {
+  display: none !important;
+}
+
+.appbar-icon-btn,
+.btn-appbar-logout {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #3b3b3b !important;
+  box-shadow: none !important;
+  width: 36px;
+  height: 36px;
+}
+
+.appbar-icon-btn:hover,
+.btn-appbar-logout:hover {
+  background: var(--fluent-hover) !important;
+  color: #1a1a1a !important;
+}
+
+.btn-appbar-logout span {
+  display: none;
+}
+
+/* ---------- Greeting card (replaces blue hero) ---------- */
+.hope-hero-banner {
+  background: #ffffff !important;
+  color: var(--fluent-text) !important;
+  margin: 8px 32px 0 !important;
+  padding: 22px 24px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid #f0f0f0 !important;
+  overflow: visible !important;
+}
+
+body.sidebar-collapsed .hope-hero-banner {
+  padding: 22px 24px !important;
+}
+
+.hero-wave-shape {
+  display: none !important;
+}
+
+.hero-badge-tag {
+  background: #f3f3f3 !important;
+  border: none !important;
+  color: var(--fluent-muted) !important;
+}
+
+.hero-banner-title {
+  color: #1a1a1a !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+}
+
+.hero-banner-desc {
+  color: var(--fluent-muted) !important;
+  font-size: 13.5px !important;
+}
+
+.btn-hero-action {
+  background: #f3f3f3 !important;
+  color: #1a1a1a !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  padding: 8px 14px !important;
+}
+
+.btn-hero-action:hover {
+  background: #eaeaea !important;
+  transform: none !important;
+}
+
+.btn-hero-action.outline {
+  background: transparent !important;
+  border: 1px solid #e5e5e5 !important;
+  color: #1a1a1a !important;
+}
+
+/* ---------- Metric cards ---------- */
+.hope-metric-grid {
+  margin-top: 16px !important;
+  padding: 0 32px !important;
+  gap: 16px !important;
+}
+
+body.sidebar-collapsed .hope-metric-grid {
+  margin-top: 16px !important;
+  padding: 0 32px !important;
+}
+
+.hope-metric-card {
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  padding: 16px !important;
+}
+
+.hope-metric-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
+
+.metric-label {
+  color: var(--fluent-muted) !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+}
+
+.metric-value {
+  color: #1a1a1a !important;
+}
+
+/* ---------- Content cards ---------- */
+.hope-content-grid {
+  padding: 20px 32px 40px !important;
+}
+
+.hope-card {
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.hope-card-title,
+.stat-number {
+  color: #1a1a1a !important;
+}
+
+.hope-card-subtitle,
+.stat-suffix {
+  color: var(--fluent-muted) !important;
+}
+
+.table-responsive {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.admin-page:not(#admin-page-dashboard) {
+  padding: 12px 32px 40px !important;
+}
+
+.page-header {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: none;
+  margin-bottom: 16px;
+}
+
+.panel,
+.table-toolbar + .table-responsive,
+.admin-page:not(#admin-page-dashboard) .table-responsive {
+  border-radius: 16px !important;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  border: none !important;
+}
+
+/* ---------- ID card: glass / soft gradient ---------- */
+.hope-digital-card {
+  background: linear-gradient(135deg, rgba(0, 103, 192, 0.92) 0%, rgba(0, 77, 148, 0.88) 48%, rgba(91, 155, 213, 0.75) 100%) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 24px rgba(0, 103, 192, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.sidebar-collapsed .hope-digital-card {
+  border-radius: 20px !important;
+}
+
+.digital-card-bg-glow {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.35), transparent 70%) !important;
+}
+
+/* ---------- Calendar / tasks polish ---------- */
+.cal-day.active-today {
+  background: var(--fluent-accent) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+
+.tasks-tab-item.active {
+  background: var(--fluent-active) !important;
+  color: #1a1a1a !important;
+}
+
+@media (max-width: 1100px) {
+  .fluent-chrome {
+    grid-template-columns: auto 1fr auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .hope-hero-banner,
+  .hope-metric-grid,
+  .hope-content-grid,
+  .admin-page:not(#admin-page-dashboard) {
+    margin-left: 16px !important;
+    margin-right: 16px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .hope-hero-banner {
+    margin: 8px 16px 0 !important;
+    padding: 18px !important;
+  }
+
+  .hope-metric-grid {
+    padding: 0 16px !important;
+  }
+
+  .hope-content-grid {
+    padding: 16px 16px 32px !important;
+  }
+
+  .fluent-chrome {
+    padding: 12px 16px !important;
+  }
+
+  .topbar-drive-status,
+  .topbar-clock-widget {
+    display: none !important;
+  }
+}
