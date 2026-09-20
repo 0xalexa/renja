@@ -147,6 +147,82 @@ body {
   display: none !important;
 }
 
+.nav-dropdown {
+  position: relative;
+  margin: 1px 4px !important;
+}
+.nav-dropdown-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px !important;
+  padding: 0 12px 0 16px !important;
+  border-radius: 6px !important;
+  color: #1a1a1a !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+  font-family: inherit;
+}
+.nav-dropdown-toggle:hover,
+.nav-dropdown:hover > .nav-dropdown-toggle,
+.nav-dropdown.open > .nav-dropdown-toggle {
+  background: var(--fluent-hover) !important;
+  color: #1a1a1a !important;
+}
+.nav-dropdown.has-active-child > .nav-dropdown-toggle {
+  color: #005fb8 !important;
+  font-weight: 600 !important;
+}
+.nav-dropdown.has-active-child > .nav-dropdown-toggle .nav-icon {
+  stroke: #005fb8 !important;
+  opacity: 1 !important;
+}
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+  color: #707070;
+  flex-shrink: 0;
+}
+.nav-dropdown:hover .dropdown-arrow,
+.nav-dropdown.open .dropdown-arrow {
+  transform: rotate(180deg);
+  color: #005fb8;
+}
+.nav-dropdown-menu {
+  display: none;
+  flex-direction: column;
+  padding: 2px 0 4px 10px;
+  margin: 2px 0 2px 14px;
+  border-left: 1.5px solid #e0e0e0;
+}
+.nav-dropdown:hover > .nav-dropdown-menu,
+.nav-dropdown.open > .nav-dropdown-menu {
+  display: flex !important;
+}
+.nav-sub-item {
+  height: 32px !important;
+  padding: 0 10px !important;
+  font-size: 12.5px !important;
+  margin: 1px 0 !important;
+  border-radius: 5px !important;
+}
+.nav-sub-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #a0a0a0;
+  display: inline-block;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.nav-sub-item.active .nav-sub-dot {
+  background-color: #005fb8;
+}
 .sidebar-toggle-circle {
   display: none !important;
 }
@@ -358,7 +434,94 @@ body.sidebar-collapsed .hope-metric-grid {
 
 /* ---------- Content cards ---------- */
 .hope-content-grid {
-  padding: 20px 32px 40px !important;
+  padding: 20px 32px 16px !important;
+}
+
+.hope-recent-wrapper {
+  padding: 0 32px 32px 32px !important;
+}
+
+@media (max-width: 1180px) {
+  .hope-content-grid {
+    padding: 16px 16px 16px 16px !important;
+  }
+  .hope-recent-wrapper {
+    padding: 0 16px 24px 16px !important;
+  }
+}
+
+.hope-indikator-scroll {
+  max-height: 245px !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.hope-indikator-scroll thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5 !important;
+  background: #f8fafc !important;
+  box-shadow: 0 1px 0 #e2e8f0 !important;
+}
+
+#taskListContainer {
+  min-height: 185px;
+}
+
+@media (min-width: 1181px) {
+  .hope-content-grid {
+    align-items: stretch !important;
+  }
+  .hope-col-left {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .hope-col-left > .hope-card {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .hope-col-right {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+  }
+  .hope-card.hope-agenda-card {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 200px !important;
+  }
+  .hope-card.hope-agenda-card .task-list {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .hope-card.hope-agenda-card .empty-state-card {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100% !important;
+  }
+  .hope-card.hope-calendar-card {
+    flex: 0 0 auto !important;
+    margin-top: auto !important;
+  }
 }
 
 .hope-card {
@@ -473,4 +636,177 @@ body.sidebar-collapsed .hope-digital-card {
   .topbar-clock-widget {
     display: none !important;
   }
+}
+
+/* ==========================================================================
+   DYNAMIC RESPONSIVE CHART CAPAIAN KINERJA (e-SAKIP)
+   Horizontal Scrolling, Clean Columns, Un-shrunk 12px Labels
+   ========================================================================== */
+.capaian-chart-scroll-wrap {
+  width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin;
+  scrollbar-color: #94a3b8 #f1f5f9;
+  padding-bottom: 8px;
+  position: relative;
+}
+
+.capaian-chart-scroll-wrap::-webkit-scrollbar {
+  height: 8px;
+}
+
+.capaian-chart-scroll-wrap::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+
+.capaian-chart-scroll-wrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.capaian-chart-scroll-wrap::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.capaian-chart-inner {
+  position: relative;
+  height: 380px;
+  min-height: 380px;
+}
+
+.chart-scroll-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 12px;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.chart-scroll-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.chart-scroll-btn:active {
+  transform: scale(0.95);
+}
+
+.chart-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chart-mode-pill:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.chart-mode-pill.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+/* ==========================================================================
+   4-TRIWULAN MONITORING CARDS (e-SAKIP QUARTERLY CARDS)
+   ========================================================================== */
+.tw-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 1024px) {
+  .tw-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .tw-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tw-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  position: relative;
+  cursor: pointer;
+}
+
+.tw-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  border-color: #94a3b8;
+}
+
+.tw-card.active {
+  border-color: #2563eb !important;
+  background: #f0f7ff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+}
+
+.btn-tw-action {
+  transition: all 0.15s ease;
+}
+
+.btn-tw-action:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.tw-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tw-tab-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.tw-tab-btn.active {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
 }

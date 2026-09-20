@@ -507,6 +507,174 @@
       color: #0f766e;
       border-color: #0f766e;
     }
+    /* HORIZONTAL SCROLLBAR BERSIH & RAPI UNTUK CHART CAPAIAN KINERJA */
+    .capaian-chart-scroll-wrap {
+      width: 100% !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: thin;
+      scrollbar-color: #94a3b8 #f1f5f9;
+      padding-bottom: 8px;
+      position: relative;
+    }
+    .capaian-chart-scroll-wrap::-webkit-scrollbar {
+      height: 8px;
+    }
+    .capaian-chart-scroll-wrap::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 999px;
+    }
+    .capaian-chart-scroll-wrap::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+      transition: background 0.15s ease;
+    }
+    .capaian-chart-scroll-wrap::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .capaian-chart-inner {
+      position: relative;
+      height: 380px;
+      min-height: 380px;
+    }
+    .chart-scroll-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 12px;
+      padding: 0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .chart-scroll-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+    .chart-scroll-btn:active {
+      transform: scale(0.95);
+    }
+    .chart-mode-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chart-mode-pill:hover {
+      background: #f8fafc;
+      color: #0f172a;
+      border-color: #94a3b8;
+    }
+    .chart-mode-pill.active {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+
+    /* SEGMENTED TAB BUTTONS FOR TRIWULAN (Modern SaaS Pill Group) */
+    .tw-tab-group {
+      display: inline-flex;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 9px;
+      border: 1px solid #e2e8f0;
+      gap: 3px;
+    }
+
+    .tw-tab-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 6px 13px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.16s ease;
+      line-height: 1.4;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .tw-tab-btn:hover {
+      color: #0f172a;
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .tw-tab-btn.active {
+      background: #ffffff !important;
+      color: #2563eb !important;
+      font-weight: 700 !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1) !important;
+    }
+
+    /* 4-TRIWULAN MONITORING CARDS GRID */
+    .tw-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 1024px) {
+      .tw-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .tw-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .tw-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1.5px solid #e2e8f0;
+      border-radius: 12px;
+      background: #ffffff;
+      position: relative;
+      cursor: pointer;
+    }
+    .tw-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+      border-color: #94a3b8;
+    }
+    .tw-card.active {
+      border-color: #2563eb !important;
+      background: #f0f7ff !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+    }
+
+    .btn-tw-action {
+      transition: all 0.15s ease;
+    }
+    .btn-tw-action:hover {
+      filter: brightness(0.96);
+      transform: translateY(-1px);
+    }
   </style>
   <script>
     window.appUrl = "{{ url('/') }}";
@@ -514,6 +682,9 @@
     window.googleDriveDefaultFolder = "{{ $googleDriveFolder }}";
     window.serverCapaianDb = @json($capaianKinerjaList);
     window.serverCapaianYears = @json($capaianYears);
+    window.serverCapaianPerTahun = @json($capaianPerTahun);
+    window.serverPeningkatanTahun = @json($peningkatanTahun);
+    window.serverTwSummary = @json($twSummary);
   </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="{{ asset('assets/js/admin.js') }}?v={{ time() }}" defer></script>
@@ -546,21 +717,20 @@
     <nav class="admin-nav">
       
       <div class="admin-nav-title">Menu Utama</div>
-      <!-- FITUR PALING UTAMA DI NAVBAR: CAPAIAN KINERJA (e-SAKIP) -->
-      <a href="#" class="admin-nav-item active" data-page="capaian-kinerja" data-tooltip="Capaian Kinerja (e-SAKIP)" title="Capaian Kinerja (e-SAKIP)" onclick="navigateAdmin('capaian-kinerja'); return false;" style="font-weight:700;">
-        <div class="nav-item-left">
-          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
-          <span class="nav-text">Capaian Kinerja</span>
-        </div>
-        <span class="badge badge-green" id="badge-count-capaian" style="font-weight:800;">{{ $countCapaian }}</span>
-      </a>
-
-      <a href="#" class="admin-nav-item" data-page="dashboard" data-tooltip="Dashboard Utama" title="Dashboard Utama" onclick="navigateAdmin('dashboard'); return false;">
+      <a href="#" class="admin-nav-item active" data-page="dashboard" data-tooltip="Dashboard Utama" title="Dashboard Utama" onclick="navigateAdmin('dashboard'); return false;">
         <div class="nav-item-left">
           <svg class="nav-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span class="nav-text">Dashboard</span>
         </div>
         <span class="nav-arrow" style="font-size:11px;opacity:0.7;">&rarr;</span>
+      </a>
+
+      <a href="#" class="admin-nav-item" data-page="capaian-kinerja" data-tooltip="Capaian Kinerja (e-SAKIP)" title="Capaian Kinerja (e-SAKIP)" onclick="navigateAdmin('capaian-kinerja'); return false;" style="font-weight:700;">
+        <div class="nav-item-left">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+          <span class="nav-text">Capaian Kinerja</span>
+        </div>
+        <span class="badge badge-green" id="badge-count-capaian" style="font-weight:800;">{{ $countCapaian }}</span>
       </a>
 
       <div class="admin-nav-title">Rencana Kerja</div>
@@ -806,8 +976,8 @@
             </div>
           </div>
 
-          <!-- ==================== 4 FLOATING METRIC CARDS (OVERLAPPING BANNER) ==================== -->
-          <div class="hope-metric-grid">
+          <!-- ==================== 5 FLOATING METRIC CARDS (OVERLAPPING BANNER) ==================== -->
+          <div class="hope-metric-grid" style="grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));">
             
             <!-- Card 1: Renja Murni -->
             <div class="hope-metric-card" onclick="navigateAdmin('renja-murni')" title="Buka Modul Renja Murni">
@@ -845,7 +1015,22 @@
               </div>
             </div>
 
-            <!-- Card 4: Arsip Surat -->
+            <!-- Card 4: Capaian Kinerja (e-SAKIP) -->
+            <div class="hope-metric-card" onclick="navigateAdmin('capaian-kinerja')" title="Buka Modul Capaian Kinerja (e-SAKIP)" style="cursor:pointer;">
+              <div class="metric-circle-indicator indigo" style="background:#eef2ff;color:#4f46e5;">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+              </div>
+              <div class="metric-body">
+                <div class="metric-label">Capaian Kinerja</div>
+                <div class="metric-value">
+                  <span id="metricCapaianAvg">{{ $capaianAvgKinerja > 0 ? $capaianAvgKinerja . '%' : '-' }}</span>
+                  <span class="metric-unit" style="font-size:10px;font-weight:700;color:{{ $overallColor }};">({{ $overallPredikat }})</span>
+                </div>
+                <div class="metric-sub">{{ $countCapaian }} Indikator &bull; Serapan {{ $capaianAvgKeuangan }}%</div>
+              </div>
+            </div>
+
+            <!-- Card 5: Arsip Surat -->
             <div class="hope-metric-card" onclick="navigateAdmin('surat-masuk')" title="Buka Agenda Persuratan">
               <div class="metric-circle-indicator green">
                 <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
@@ -865,101 +1050,332 @@
             <!-- ==================== KOLOM KIRI (WIDE ~66%) ==================== -->
             <div class="hope-col-left">
 
-              <!-- 1. Hope UI Spline Activity Chart Card -->
-              <div class="hope-card">
-                <div class="hope-card-header">
+              <!-- ==================== PUSAT INFORMASI & MONITORING 4 TRIWULAN (e-SAKIP) ==================== -->
+              <div class="hope-card" id="cardDiagramCapaianKinerja" style="border:1px solid #e2e8f0;box-shadow:0 4px 16px rgba(15,23,42,0.04);border-radius:14px;overflow:hidden;">
+                
+                <!-- 1. Header Utama Card -->
+                <div class="hope-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 20px;border-bottom:1px solid #edf2f7;background:#ffffff;">
                   <div>
-                    <div class="hope-stat-main">
-                      <span class="stat-number" id="hopeStatTotal">{{ $totalDokumen }}</span>
-                      <span class="stat-suffix">Total Dokumen Terdata</span>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:#eef2ff;color:#4f46e5;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 20V10"></path><path d="M18 20V4"></path><path d="M6 20v-4"></path></svg>
+                      </span>
+                      <div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                          <h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;letter-spacing:-0.3px;">
+                            Monitoring Capaian Kinerja per Triwulan (T.A. {{ $latestYear }})
+                          </h3>
+                          <span class="badge {{ $overallBadgeClass }}" style="font-weight:700;font-size:11px;">
+                            {{ $overallPredikat }}
+                          </span>
+                        </div>
+                        <div class="hope-card-subtitle" style="margin-top:3px;font-size:12px;color:#64748b;">
+                          Pantauan realisasi fisik &amp; penyerapan pagu anggaran 4 Triwulan (TW I s.d TW IV)
+                        </div>
+                      </div>
                     </div>
-                    <div class="hope-card-subtitle">Tren Aktivitas Dokumen Masuk vs Terverifikasi (T.A. 2026)</div>
                   </div>
-                  <div class="hope-chart-legend-wrap">
-                    <div class="chart-legend-pill">
-                      <span class="legend-dot-blue"></span>
-                      <span>Dokumen Masuk</span>
-                    </div>
-                    <div class="chart-legend-pill">
-                      <span class="legend-dot-teal"></span>
-                      <span>Terverifikasi</span>
-                    </div>
-                    <select class="hope-select-filter" onchange="showAdminToast('Menampilkan data periode: ' + this.value, 'info')">
-                      <option value="T.A. 2026">T.A. 2026</option>
-                      <option value="Semester I">Semester I</option>
-                      <option value="Semester II">Semester II</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="hope-chart-canvas-wrap">
-                  <canvas id="chartHopeActivity"></canvas>
-                </div>
-              </div>
 
-              <!-- 2. Tabel Dokumen Terakhir yang Ditambahkan / Diperbarui -->
-              <div class="hope-card hope-recent-card" id="hopeRecentTableCard">
-                <div class="hope-card-header">
-                  <div>
-                    <h3 class="hope-card-title">Dokumen Terakhir yang Ditambahkan / Diperbarui</h3>
-                    <div class="hope-card-subtitle">Rekap dokumen terkini dari seluruh kelompok modul perencanaan</div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="navigateAdmin('capaian-kinerja')" title="Buka modul Capaian Kinerja e-SAKIP" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px;border-radius:8px;padding:6px 14px;cursor:pointer;border:1.5px solid #4f46e5;color:#4f46e5;background:#ffffff;">
+                      <span>Buka Modul Capaian Kinerja</span>
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
                   </div>
-                  <button class="btn btn-outline btn-sm" onclick="openCrudModal('create', 'renja-murni')">
-                    <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Tambah Dokumen Baru
-                  </button>
                 </div>
-                <div class="table-responsive">
-                  <table class="gov-table">
-                    <thead>
-                      <tr>
-                        <th style="width:75px;text-align:center;">Tahun</th>
-                        <th>Nama Dokumen / Perihal</th>
-                        <th style="width:160px;">Kelompok Modul</th>
-                        <th style="width:240px;">Berkas Lampiran PDF</th>
-                        <th style="width:105px;text-align:center;">Status</th>
-                        <th style="width:220px;text-align:center;">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody id="adminRecentTable">
-                      @forelse($recentDocs as $doc)
-                      <tr data-doc-id="{{ $doc->id }}" data-mod-key="{{ $doc->modul ?? 'renja-murni' }}">
-                        <td style="text-align:center;"><span class="badge badge-gray">{{ $doc->tahun_anggaran ?? '2026' }}</span></td>
-                        <td>
-                          <strong>{{ $doc->judul }}</strong>
-                          <div style="font-size:11px;color:var(--text-muted);">{{ $doc->keterangan ?? '-' }}</div>
-                        </td>
-                        <td><span class="badge badge-blue">{{ strtoupper($doc->modul ?? 'RENJA') }}</span></td>
-                        <td>
-                          @if($doc->link_drive)
-                            <span class="badge badge-yellow" style="font-size:10px;margin-right:4px;">Drive</span>
-                          @endif
-                          <span style="font-family:monospace;font-size:11px;color:var(--primary);">{{ $doc->file_name ?? 'Berkas' }}</span>
-                          <span style="font-size:10px;color:var(--text-muted);">({{ $doc->file_size ?? '-' }})</span>
-                        </td>
-                        <td style="text-align:center;">
-                          @if($doc->status === 'Lengkap')
-                            <span class="badge badge-green">LENGKAP</span>
-                          @elseif($doc->status === 'Diproses')
-                            <span class="badge badge-yellow">DIPROSES</span>
-                          @else
-                            <span class="badge badge-red">{{ strtoupper($doc->status ?? 'DRAF') }}</span>
-                          @endif
-                        </td>
-                        <td style="text-align:center;">
-                          <div class="btn-action-group" style="justify-content:center;">
-                            <button class="btn btn-outline btn-sm" onclick="openDetailModal('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Lihat Detail"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="3" r="3"></circle></svg> Detail</button>
-                            <button class="btn btn-warning btn-sm" onclick="openCrudModal('edit', '{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Edit Data"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Edit</button>
-                            <button class="btn btn-primary btn-sm" onclick="handleDownloadDoc('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Unduh Berkas / Buka Drive"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Unduh</button>
-                            <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }}, '{{ addslashes($doc->judul) }}')" title="Hapus Data"><svg class="btn-icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Hapus</button>
+
+                <!-- 2. KARTU MONITORING 4 TRIWULAN (Sangat Informatif, Jelas, & Bisa Diklik Langsung) -->
+                <div style="padding:16px 20px;background:#f8fafc;border-bottom:1px solid #edf2f7;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <span style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.4px;">
+                      Status &amp; Realisasi Setiap Triwulan (Klik kartu untuk memfilter rincian):
+                    </span>
+                    <span style="font-size:11.5px;color:#64748b;font-weight:600;">
+                      Kelengkapan: <strong style="color:#0f172a;">{{ $filledTwCount }} dari 4 Triwulan Terisi</strong>
+                    </span>
+                  </div>
+
+                  <div class="tw-cards-grid">
+                    @foreach($twSummary as $k => $tw)
+                      <div class="tw-card" data-tw="{{ $k }}" onclick="selectDashboardTriwulan('{{ $k }}')" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;">
+                        <div>
+                          <!-- Baris Status & Triwulan -->
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
+                            <span style="font-size:13px;font-weight:800;color:#0f172a;">{{ $tw['title'] }}</span>
+                            @if($tw['filled'])
+                              <span class="badge {{ $tw['badgeClass'] }}" style="font-size:10px;padding:2px 7px;">{{ $tw['predikat'] }}</span>
+                            @else
+                              <span class="badge badge-gray" style="font-size:10px;padding:2px 7px;">Belum Diisi</span>
+                            @endif
                           </div>
-                        </td>
-                      </tr>
-                      @empty
-                      <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);font-weight:500;">Belum ada dokumen yang diunggah. Silakan klik modul pada menu di samping kiri dan klik tombol <strong>"+ Tambah Dokumen"</strong> untuk mulai menambahkan berkas.</td></tr>
-                      @endforelse
-                    </tbody>
-                  </table>
+
+                          <div style="font-size:11px;color:#64748b;margin-bottom:10px;">
+                            {{ $tw['months'] }}
+                          </div>
+
+                          <!-- Angka Capaian Persentase -->
+                          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+                            @if($tw['filled'])
+                              <span style="font-size:24px;font-weight:800;color:{{ $tw['color'] }};letter-spacing:-0.5px;">{{ $tw['avgCapaian'] }}%</span>
+                              <span style="font-size:11px;font-weight:600;color:#059669;">Fisik</span>
+                            @else
+                              <span style="font-size:24px;font-weight:800;color:#94a3b8;letter-spacing:-0.5px;">0%</span>
+                              <span style="font-size:11px;color:#94a3b8;">Kosong</span>
+                            @endif
+                          </div>
+
+                          <!-- Ringkasan Anggaran & Indikator -->
+                          <div style="font-size:11px;color:#64748b;line-height:1.4;">
+                            @if($tw['filled'])
+                              <div><strong>{{ $tw['count'] }}</strong> Indikator terdata</div>
+                              <div style="margin-top:2px;">Realisasi: <strong>Rp {{ number_format($tw['totalRealisasi'], 0, ',', '.') }}</strong></div>
+                              <div style="margin-top:1px;font-size:10.5px;color:#2563eb;font-weight:600;">Serapan Keuangan: {{ $tw['avgKeuangan'] }}%</div>
+                            @else
+                              <div style="color:#94a3b8;">0 Indikator terdata</div>
+                              <div style="margin-top:2px;color:#94a3b8;">Realisasi: Rp 0</div>
+                              <div style="margin-top:1px;font-size:10.5px;color:#94a3b8;">Belum ada input laporan</div>
+                            @endif
+                          </div>
+                        </div>
+
+                        <!-- Action Button di Bawah Kartu -->
+                        <div style="margin-top:12px;">
+                          @if($tw['filled'])
+                            <button type="button" class="btn btn-outline btn-sm btn-tw-action" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;border-color:#cbd5e1;color:#334155;">
+                              <span>Lihat Rincian</span>
+                              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </button>
+                          @else
+                            <button type="button" class="btn btn-primary btn-sm btn-tw-action" onclick="event.stopPropagation(); navigateAdmin('capaian-kinerja');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;background:#2563eb;color:#ffffff;border:none;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 1px 3px rgba(37,99,235,0.2);">
+                              <span>+ Input {{ $k }}</span>
+                            </button>
+                          @endif
+                        </div>
+                      </div>
+                    @endforeach
+                  </div>
                 </div>
+
+                <!-- 3. Sub-Header: Mode Tampilan Grafik & Legend Ramah Pengguna -->
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:12px 20px;border-bottom:1px solid #edf2f7;background:#ffffff;">
+                  
+                  <!-- Switcher Mode Grafik: Kuartal, Indikator, Antar-Tahun -->
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <button type="button" id="btnModeKuartal" class="chart-mode-pill active" onclick="setCapaianChartMode('kuartal')" title="Lihat perbandingan rata-rata capaian 4 Triwulan">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                      <span>Perbandingan 4 Triwulan</span>
+                    </button>
+                    <button type="button" id="btnModeIndikator" class="chart-mode-pill" onclick="setCapaianChartMode('indikator')" title="Lihat rincian grafik per indikator sasaran">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="18" rx="1"></rect><rect x="14" y="9" width="7" height="12" rx="1"></rect></svg>
+                      <span>Rincian Per Indikator</span>
+                    </button>
+                    <button type="button" id="btnModeTren" class="chart-mode-pill" onclick="setCapaianChartMode('tren-tahunan')" title="Bandingkan rata-rata capaian antar-tahun">
+                      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                      <span>Tren Antar-Tahun</span>
+                    </button>
+                  </div>
+
+                  <!-- Legend Kategori Capaian -->
+                  <div class="hope-chart-legend-wrap" style="flex-wrap:wrap;gap:8px;">
+                    <div class="chart-legend-pill" style="cursor:default;" title="Realisasi >= 90%">
+                      <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#10b981;margin-right:4px;"></span>
+                      <span style="font-size:11px;font-weight:600;">&ge;90% Sangat Baik</span>
+                    </div>
+                    <div class="chart-legend-pill" style="cursor:default;" title="Realisasi 80% - 89%">
+                      <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#3b82f6;margin-right:4px;"></span>
+                      <span style="font-size:11px;font-weight:600;">80-89% Baik</span>
+                    </div>
+                    <div class="chart-legend-pill" style="cursor:default;" title="Realisasi 70% - 79%">
+                      <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#f59e0b;margin-right:4px;"></span>
+                      <span style="font-size:11px;font-weight:600;">70-79% Cukup Baik</span>
+                    </div>
+                    <div class="chart-legend-pill" style="cursor:default;" title="Realisasi < 70%">
+                      <span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#ef4444;margin-right:4px;"></span>
+                      <span style="font-size:11px;font-weight:600;">&lt;70% Perlu Ditingkatkan</span>
+                    </div>
+                  </div>
+
+                  <!-- Filter Dropdowns Khusus Mode Indikator (Disembunyikan pada Mode Kuartal) -->
+                  <div id="capaianFilterWrap" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
+                    @if(count($capaianYears) > 1)
+                      <select class="hope-select-filter" id="filterChartCapaianYear" onchange="filterCapaianDashboardYear(this.value)" title="Pilih Tahun Anggaran">
+                        <option value="Semua">Semua Tahun</option>
+                        @foreach($capaianYears as $yr)
+                          <option value="{{ $yr }}" {{ $yr == $latestYear ? 'selected' : '' }}>Tahun {{ $yr }}</option>
+                        @endforeach
+                      </select>
+                    @endif
+
+                    <select class="hope-select-filter" id="filterChartCapaianTw" onchange="filterCapaianDashboardChart(this.value)" title="Pilih Triwulan">
+                      <option value="Semua" selected>Semua Triwulan</option>
+                      <option value="TW I">Triwulan 1 (Jan - Mar)</option>
+                      <option value="TW II">Triwulan 2 (Apr - Jun)</option>
+                      <option value="TW III">Triwulan 3 (Jul - Sep)</option>
+                      <option value="TW IV">Triwulan 4 (Okt - Des)</option>
+                    </select>
+
+                    <div id="capaianNavButtons" style="display:none;align-items:center;gap:4px;">
+                      <button type="button" class="chart-scroll-btn" onclick="scrollCapaianChart(-280)" title="Geser ke kiri">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                      </button>
+                      <button type="button" class="chart-scroll-btn" onclick="scrollCapaianChart(280)" title="Geser ke kanan">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 4. Area Kanvas Grafik Responsif (Zero Dummy Data) -->
+                <div class="capaian-chart-scroll-wrap" id="capaianChartScrollWrap" style="padding:16px 20px 8px;">
+                  <div class="capaian-chart-inner" id="capaianChartInner" style="position:relative;height:350px;min-height:350px;width:100%;">
+                    <canvas id="chartHopeActivity"></canvas>
+                  </div>
+                </div>
+
+                <!-- Petunjuk Geser Horizontal Jika Baris Grafik Panjang -->
+                <div id="capaianChartScrollHint" style="display:none;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px;color:#64748b;padding:8px 20px;background:#f8fafc;border-top:1px solid #edf2f7;">
+                  <div style="display:flex;align-items:center;gap:6px;font-weight:600;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                    <span id="capaianChartScrollHintText">Geser horizontal untuk melihat seluruh indikator lengkap</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <button type="button" class="chart-scroll-btn" onclick="scrollCapaianChart(-260)" title="Geser ke kiri" style="width:24px;height:24px;">&lsaquo;</button>
+                    <button type="button" class="chart-scroll-btn" onclick="scrollCapaianChart(260)" title="Geser ke kanan" style="width:24px;height:24px;">&rsaquo;</button>
+                  </div>
+                </div>
+
+                <!-- 5. TAB & TABEL RINCIAN INDIKATOR PER TRIWULAN (Interaktif & Real-Time Filter) -->
+                <div style="padding:16px 20px;border-top:1px solid #edf2f7;background:#ffffff;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;">
+                    <div>
+                      <div style="font-size:13.5px;font-weight:800;color:#0f172a;">
+                        Rincian Capaian Indikator: <span id="currentTwTitle" style="color:#2563eb;">Semua Triwulan (Gabungan Data)</span>
+                      </div>
+                      <div style="font-size:11.5px;color:#64748b;margin-top:2px;">
+                        Data asli realisasi fisik dan serapan pagu anggaran yang telah dilaporkan ke sistem
+                      </div>
+                    </div>
+
+                    <!-- Tombol Tab Triwulan -->
+                    <div class="tw-tab-group">
+                      <button type="button" class="tw-tab-btn active" data-tw="Semua" onclick="selectDashboardTriwulan('Semua')">Semua Triwulan</button>
+                      <button type="button" class="tw-tab-btn" data-tw="TW I" onclick="selectDashboardTriwulan('TW I')">TW I</button>
+                      <button type="button" class="tw-tab-btn" data-tw="TW II" onclick="selectDashboardTriwulan('TW II')">TW II</button>
+                      <button type="button" class="tw-tab-btn" data-tw="TW III" onclick="selectDashboardTriwulan('TW III')">TW III</button>
+                      <button type="button" class="tw-tab-btn" data-tw="TW IV" onclick="selectDashboardTriwulan('TW IV')">TW IV</button>
+                    </div>
+                  </div>
+
+                  <div class="table-responsive hope-indikator-scroll" style="margin:0;border:1px solid #e2e8f0;border-radius:10px;overflow-x:auto;overflow-y:auto;max-height:245px;width:100%;">
+                    <table class="gov-table" id="tableIndikatorTriwulan" style="margin:0;width:100%;font-size:12px;table-layout:auto;">
+                      <thead>
+                        <tr style="background:#f8fafc;">
+                          <th style="width:36px;text-align:center;padding:9px 4px;">No</th>
+                          <th style="width:68px;text-align:center;padding:9px 4px;">Triwulan</th>
+                          <th style="padding:9px 8px;">Sasaran &amp; Indikator Kinerja</th>
+                          <th style="width:115px;text-align:center;padding:9px 6px;">Realisasi / Target</th>
+                          <th style="width:120px;text-align:left;padding:9px 6px;">% Capaian &amp; Predikat</th>
+                          <th style="width:135px;text-align:right;padding:9px 8px;">Keuangan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @forelse($capaianKinerjaList as $idx => $item)
+                        @php
+                          $persenK = (float)($item->capaian_kinerja_persen ?? 0);
+                          if ($persenK <= 0 && ($item->realisasi_kinerja ?? 0) > 0 && ($item->target_tahunan ?? 0) > 0) {
+                              $persenK = ($item->realisasi_kinerja / $item->target_tahunan) * 100;
+                          }
+                          $persenK = min(100, max(0, $persenK));
+
+                          if ($persenK >= 90) {
+                              $bClass = 'badge-green';
+                              $bColor = '#10b981';
+                              $predLabel = $item->predikat_kinerja ?: 'Sangat Tinggi';
+                          } elseif ($persenK >= 80) {
+                              $bClass = 'badge-blue';
+                              $bColor = '#3b82f6';
+                              $predLabel = $item->predikat_kinerja ?: 'Tinggi';
+                          } elseif ($persenK >= 70) {
+                              $bClass = 'badge-yellow';
+                              $bColor = '#f59e0b';
+                              $predLabel = $item->predikat_kinerja ?: 'Sedang';
+                          } else {
+                              $bClass = 'badge-red';
+                              $bColor = '#ef4444';
+                              $predLabel = $item->predikat_kinerja ?: 'Rendah';
+                          }
+
+                          $pagu = (float)($item->pagu_anggaran ?? 0);
+                          $realisasiKeu = (float)($item->realisasi_keuangan ?? 0);
+                          $keuPersen = $pagu > 0 ? round(($realisasiKeu / $pagu) * 100, 1) : 0;
+                        @endphp
+                        <tr class="row-indikator" data-triwulan="{{ trim($item->triwulan ?? '') }}" style="transition:background 0.15s ease;">
+                          <td style="text-align:center;font-weight:700;color:#64748b;padding:8px 4px;">{{ $idx + 1 }}</td>
+                          <td style="text-align:center;padding:8px 4px;">
+                            <span class="badge {{ trim($item->triwulan ?? '') === 'TW I' ? 'badge-blue' : (trim($item->triwulan ?? '') === 'TW III' ? 'badge-green' : 'badge-gray') }}" style="font-size:10.5px;font-weight:700;padding:2px 7px;">
+                              {{ $item->triwulan ?: '-' }}
+                            </span>
+                          </td>
+                          <td style="padding:8px 8px;">
+                            <strong style="color:#0f172a;display:block;font-size:12px;line-height:1.35;word-break:break-word;">{{ $item->indikator ?: 'Indikator belum diisi' }}</strong>
+                            <div style="font-size:11px;color:#64748b;margin-top:2px;line-height:1.3;word-break:break-word;">{{ $item->sasaran ?: '-' }}</div>
+                          </td>
+                          <td style="text-align:center;padding:8px 6px;">
+                            <div style="font-weight:700;color:#0f172a;font-size:12px;line-height:1.2;">
+                              {{ $item->realisasi_kinerja !== null ? rtrim(rtrim(number_format($item->realisasi_kinerja, 2, ',', '.'), '0'), ',') : '-' }}
+                              <span style="font-size:10px;color:#64748b;font-weight:500;">{{ $item->satuan }}</span>
+                            </div>
+                            <div style="font-size:10.5px;color:#64748b;margin-top:2px;white-space:nowrap;">
+                              Target: {{ $item->target_tahunan !== null ? rtrim(rtrim(number_format($item->target_tahunan, 2, ',', '.'), '0'), ',') : '-' }}
+                            </div>
+                          </td>
+                          <td style="text-align:left;padding:8px 6px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:3px;font-size:11px;font-weight:700;">
+                              <span>{{ $persenK > 0 ? $persenK . '%' : '0%' }}</span>
+                              <span class="badge {{ $bClass }}" style="font-size:9px;padding:2px 5px;white-space:nowrap;">{{ $predLabel }}</span>
+                            </div>
+                            <div style="height:5px;background:#e2e8f0;border-radius:999px;overflow:hidden;">
+                              <div style="width:{{ min(100, max(0, $persenK)) }}%;height:100%;background:{{ $bColor }};border-radius:999px;transition:width 0.4s ease;"></div>
+                            </div>
+                          </td>
+                          <td style="text-align:right;padding:8px 8px;">
+                            <div style="font-weight:700;color:#0f172a;font-size:11.5px;white-space:nowrap;">Rp {{ number_format($realisasiKeu, 0, ',', '.') }}</div>
+                            <div style="font-size:10px;color:#64748b;margin-top:1px;white-space:nowrap;">Pagu: Rp {{ number_format($pagu, 0, ',', '.') }} ({{ $keuPersen }}%)</div>
+                          </td>
+                        </tr>
+                        @empty
+                        <!-- Jika capaianKinerjaList kosong total -->
+                        @endforelse
+
+                        <!-- Baris Pesan Kosong Khusus Filter Triwulan yang Belum Diisi -->
+                        <tr id="rowIndikatorEmpty" style="display:none;">
+                          <td colspan="6" style="text-align:center;padding:36px 20px;background:#f8fafc;">
+                            <div style="width:48px;height:48px;border-radius:50%;background:#e0f2fe;display:inline-flex;align-items:center;justify-content:center;color:#0284c7;margin-bottom:10px;">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            </div>
+                            <h4 id="emptyIndikatorTitle" style="font-size:14px;font-weight:700;color:#1e293b;margin:0 0 4px;">Belum Ada Data Indikator</h4>
+                            <p id="emptyIndikatorSub" style="font-size:12px;color:#64748b;margin:0 0 14px;max-width:440px;margin-left:auto;margin-right:auto;line-height:1.5;">
+                              Laporan capaian kinerja belum diinput untuk periode ini. Sistem tidak menampilkan data tiruan agar analisis data Anda tetap akurat.
+                            </p>
+                            <button type="button" id="btnInputSpecificTw" onclick="navigateAdmin('capaian-kinerja')" class="btn btn-primary btn-sm" style="display:none;align-items:center;gap:6px;font-weight:700;font-size:12px;border-radius:8px;padding:7px 18px;background:#2563eb;color:#ffffff;border:none;margin:0 auto;box-shadow:0 2px 4px rgba(37,99,235,0.2);">
+                              <span>+ Input Data Capaian</span>
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <div style="font-size:11.5px;color:#64748b;">
+                      Menampilkan seluruh indikator terdata di sistem
+                    </div>
+                    <a href="#" onclick="navigateAdmin('capaian-kinerja'); return false;" style="font-size:12px;font-weight:700;color:#2563eb;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                      <span>Kelola &amp; Tambah Indikator Baru di Modul Capaian Kinerja &rarr;</span>
+                    </a>
+                  </div>
+                </div>
+
               </div>
 
             </div>
@@ -1007,7 +1423,7 @@
               </div>
 
               <!-- 3. Tasks & Agenda PEP -->
-              <div class="hope-card">
+              <div class="hope-card hope-agenda-card" id="hopeAgendaCard">
                 <div class="hope-card-header" style="align-items:flex-start;gap:8px;">
                   <div style="flex:1;min-width:0;">
                     <h3 class="hope-card-title">Tasks &amp; Agenda PEP</h3>
@@ -1031,11 +1447,16 @@
                   <span id="taskActiveFilterText"></span>
                   <button type="button" onclick="clearCalendarFilter()" style="background:transparent;border:none;color:#ef4444;font-weight:700;cursor:pointer;font-size:11px;">Reset Filter</button>
                 </div>
-                <div class="task-list" id="taskListContainer">
-                  <div class="empty-state-card" style="padding: 24px 16px; text-align: center; color: #8a92a6;">
-                    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" style="margin: 0 auto 8px; opacity: 0.5; display: block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-dark);">Belum Ada Agenda / Tugas</div>
-                    <div style="font-size: 0.75rem; margin-top: 4px; color: var(--text-muted);">Klik <strong style="color:var(--primary);">+ Tambah</strong> untuk menambah agenda kegiatan.</div>
+                <div class="task-list" id="taskListContainer" style="min-height:185px;">
+                  <div class="empty-state-card" style="padding:30px 18px;text-align:center;color:#8a92a6;background:#f8fafc;border-radius:10px;border:1px dashed #cbd5e1;min-height:185px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" style="margin:0 auto 10px;opacity:0.55;display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    <div style="font-size:0.875rem;font-weight:700;color:var(--text-dark);">Belum Ada Agenda / Tugas Terjadwal</div>
+                    <div style="font-size:0.75rem;margin:6px auto 14px;color:var(--text-muted);line-height:1.55;max-width:310px;">
+                      Jadwalkan koordinasi berkala, telaah berkas Renja, batas waktu pelaporan e-SAKIP, dan batas waktu dokumen perangkat daerah.
+                    </div>
+                    <button type="button" onclick="openAgendaModal()" style="padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(59,130,246,0.25);">
+                      + Tambah Agenda
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1093,6 +1514,79 @@
 
             </div>
 
+          </div>
+
+          <!-- ==================== TABEL DOKUMEN TERAKHIR YANG DITAMBAHKAN / DIPERBARUI (FULL WIDTH DI BAWAH KALENDER & GRID) ==================== -->
+          <div class="hope-recent-wrapper">
+            <div class="hope-card hope-recent-card" id="hopeRecentTableCard" style="border:1px solid #eef2f6;box-shadow:0 1px 3px rgba(0,0,0,0.04);border-radius:16px;background:#ffffff;margin:0;">
+              <div class="hope-card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:16px 20px;border-bottom:1px solid #edf2f7;background:#ffffff;">
+                <div>
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:7px;background:#eff6ff;color:#2563eb;">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </span>
+                    <h3 class="hope-card-title" style="font-size:15px;font-weight:800;color:#0f172a;margin:0;">Dokumen Terakhir yang Ditambahkan / Diperbarui</h3>
+                  </div>
+                  <div class="hope-card-subtitle" style="font-size:12px;color:#64748b;margin-top:3px;">Rekap dokumen terkini dari seluruh kelompok modul perencanaan perangkat daerah</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="openCrudModal('create', 'renja-murni')" style="font-weight:700;font-size:12px;display:inline-flex;align-items:center;gap:6px;border-radius:8px;padding:6px 14px;cursor:pointer;">
+                  <svg class="btn-icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                  Tambah Dokumen Baru
+                </button>
+              </div>
+              <div class="table-responsive" style="margin:0;min-height:auto;">
+                <table class="gov-table" style="margin:0;font-size:12.5px;width:100%;">
+                  <thead>
+                    <tr style="background:#f8fafc;">
+                      <th style="width:75px;text-align:center;">Tahun</th>
+                      <th>Nama Dokumen / Perihal</th>
+                      <th style="width:160px;">Kelompok Modul</th>
+                      <th style="width:240px;">Berkas Lampiran PDF</th>
+                      <th style="width:105px;text-align:center;">Status</th>
+                      <th style="width:220px;text-align:center;">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminRecentTable">
+                    @forelse($recentDocs as $doc)
+                    <tr data-doc-id="{{ $doc->id }}" data-mod-key="{{ $doc->modul ?? 'renja-murni' }}">
+                      <td style="text-align:center;"><span class="badge badge-gray">{{ $doc->tahun_anggaran ?? '2026' }}</span></td>
+                      <td>
+                        <strong>{{ $doc->judul }}</strong>
+                        <div style="font-size:11px;color:var(--text-muted);">{{ $doc->keterangan ?? '-' }}</div>
+                      </td>
+                      <td><span class="badge badge-blue">{{ strtoupper($doc->modul ?? 'RENJA') }}</span></td>
+                      <td>
+                        @if($doc->link_drive)
+                          <span class="badge badge-yellow" style="font-size:10px;margin-right:4px;">Drive</span>
+                        @endif
+                        <span style="font-family:monospace;font-size:11px;color:var(--primary);">{{ $doc->file_name ?? 'Berkas' }}</span>
+                        <span style="font-size:10px;color:var(--text-muted);">({{ $doc->file_size ?? '-' }})</span>
+                      </td>
+                      <td style="text-align:center;">
+                        @if($doc->status === 'Lengkap')
+                          <span class="badge badge-green">LENGKAP</span>
+                        @elseif($doc->status === 'Diproses')
+                          <span class="badge badge-yellow">DIPROSES</span>
+                        @else
+                          <span class="badge badge-red">{{ strtoupper($doc->status ?? 'DRAF') }}</span>
+                        @endif
+                      </td>
+                      <td style="text-align:center;">
+                        <div class="btn-action-group" style="justify-content:center;">
+                          <button class="btn btn-outline btn-sm" onclick="openDetailModal('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Lihat Detail"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="3" r="3"></circle></svg> Detail</button>
+                          <button class="btn btn-warning btn-sm" onclick="openCrudModal('edit', '{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Edit Data"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Edit</button>
+                          <button class="btn btn-primary btn-sm" onclick="handleDownloadDoc('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }})" title="Unduh Berkas / Buka Drive"><svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Unduh</button>
+                          <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{ $doc->modul ?? 'renja-murni' }}', {{ $doc->id }}, '{{ addslashes($doc->judul) }}')" title="Hapus Data"><svg class="btn-icon-svg" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Hapus</button>
+                        </div>
+                      </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);font-weight:500;">Belum ada dokumen yang diunggah. Silakan klik modul pada menu di samping kiri dan klik tombol <strong>"+ Tambah Dokumen"</strong> untuk mulai menambahkan berkas.</td></tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
         </div>

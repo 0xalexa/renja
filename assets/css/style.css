@@ -2124,26 +2124,26 @@ body.sidebar-collapsed .metric-sub {
   display: grid;
   grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
   gap: 16px;
-  padding: 20px 20px 36px 20px;
-  align-items: stretch;
+  padding: 20px 20px 16px 20px;
+  align-items: start;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 1180px) {
   .hope-content-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 16px 16px 32px 16px;
+    gap: 16px;
+    padding: 16px 16px 16px 16px;
   }
 }
 
 body.sidebar-collapsed .hope-content-grid {
-  gap: 24px;
-  padding: 24px 32px 40px 32px;
+  gap: 20px;
+  padding: 24px 32px 16px 32px;
 }
 
 .hope-col-left,
@@ -2154,36 +2154,155 @@ body.sidebar-collapsed .hope-content-grid {
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.sidebar-collapsed .hope-col-left,
 body.sidebar-collapsed .hope-col-right {
-  gap: 24px;
+  gap: 20px;
 }
 
 @media (min-width: 1181px) {
+  .hope-content-grid {
+    align-items: stretch !important;
+  }
+
   .hope-col-left {
     min-height: 0;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hope-col-left > .hope-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hope-col-right {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hope-card.hope-agenda-card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+
+  .hope-card.hope-agenda-card .task-list {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hope-card.hope-agenda-card .empty-state-card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+  }
+
+  .hope-card.hope-calendar-card {
+    flex: 0 0 auto;
+    margin-top: auto;
   }
 
   .hope-card.hope-recent-card {
-    flex: 1 1 0px;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
+    min-height: auto;
     margin-bottom: 0;
   }
 
   .hope-card.hope-recent-card .table-responsive {
-    flex: 1 1 0px;
-    min-height: 200px;
+    min-height: auto;
     max-height: none;
-    overflow-y: auto;
     overflow-x: auto;
   }
+}
+
+/* Wrapper Dokumen Terakhir yang Ditambahkan (Full Width di Bawah Grid) */
+.hope-recent-wrapper {
+  padding: 0 20px 32px 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+body.sidebar-collapsed .hope-recent-wrapper {
+  padding: 0 32px 36px 32px;
+}
+
+@media (max-width: 1180px) {
+  .hope-recent-wrapper {
+    padding: 0 16px 24px 16px;
+  }
+}
+
+/* Compact Styling Khusus Tabel Rincian Indikator Kinerja */
+#tableIndikatorTriwulan {
+  width: 100% !important;
+  table-layout: auto !important;
+  border-collapse: collapse !important;
+}
+
+#tableIndikatorTriwulan th {
+  padding: 8px 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #475569 !important;
+  letter-spacing: 0.03em !important;
+  white-space: nowrap !important;
+}
+
+#tableIndikatorTriwulan td {
+  padding: 8px 6px !important;
+  font-size: 12px !important;
+  vertical-align: middle !important;
+}
+
+/* Scroll Vertikal Khusus Indikator dan Header Menempel (Sticky) */
+.hope-indikator-scroll {
+  max-height: 245px !important;
+  overflow-y: auto !important;
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 999px;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+.hope-indikator-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.hope-indikator-scroll thead th {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 5 !important;
+  background: #f8fafc !important;
+  box-shadow: 0 1px 0 #e2e8f0 !important;
+}
+
+#taskListContainer {
+  min-height: 185px;
 }
 
 .hope-card {
@@ -5310,4 +5429,122 @@ input[type="checkbox"].gov-checkbox:indeterminate::after,
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fecaca;
-}
+}
+
+/* ==========================================================================
+   4-TRIWULAN MONITORING & INTERACTIVE TAB BUTTONS (MODERN SAAS PILL STYLE)
+   ========================================================================== */
+.tw-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+@media (max-width: 1024px) {
+  .tw-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .tw-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tw-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  position: relative;
+  cursor: pointer;
+}
+.tw-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+  border-color: #94a3b8;
+}
+.tw-card.active {
+  border-color: #2563eb !important;
+  background: #f0f7ff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+}
+
+.btn-tw-action {
+  transition: all 0.15s ease;
+}
+.btn-tw-action:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.tw-tab-group {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid #e2e8f0;
+  gap: 3px;
+}
+
+.tw-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  line-height: 1.4;
+  outline: none;
+  white-space: nowrap;
+}
+
+.tw-tab-btn:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.tw-tab-btn.active {
+  background: #ffffff !important;
+  color: #2563eb !important;
+  font-weight: 700 !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1) !important;
+}
+
+.chart-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  outline: none;
+}
+.chart-mode-pill:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+.chart-mode-pill.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25) !important;
+}
+

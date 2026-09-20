@@ -138,6 +138,15 @@ function updateAdminStats() {
   const mCardSurat = document.getElementById('metricSuratVal'); if (mCardSurat) mCardSurat.textContent = suratCount;
   const hopeTotal = document.getElementById('hopeStatTotal'); if (hopeTotal) hopeTotal.textContent = totalDoc;
 
+  if (typeof capaianDb !== 'undefined' && Array.isArray(capaianDb) && capaianDb.length > 0) {
+    const valid = capaianDb.filter(c => parseFloat(c.capaian_kinerja_persen) > 0);
+    if (valid.length > 0) {
+      const avg = Math.round(valid.reduce((acc, c) => acc + (parseFloat(c.capaian_kinerja_persen) || 0), 0) / valid.length * 10) / 10;
+      const mCardCapaian = document.getElementById('metricCapaianAvg');
+      if (mCardCapaian) mCardCapaian.textContent = avg + '%';
+    }
+  }
+
   // Stat Baris Header Dashboard
   const eTotal = document.getElementById('statTotalDoc'); if (eTotal) eTotal.textContent = totalDoc;
   const eRenja = document.getElementById('statRenjaDoc'); if (eRenja) eRenja.textContent = renjaCount;
@@ -1425,18 +1434,18 @@ function renderTaskList(period, customDate) {
       all: 'dalam sistem'
     };
     const emptyMsg = (period === 'custom-date' && customDate)
-      ? `Belum ada agenda pada tanggal ini.`
-      : `Tidak ada agenda ${labels[period] || ''}.`;
+      ? `Belum ada agenda kegiatan pada tanggal ini.`
+      : `Tidak ada agenda kegiatan terjadwal ${labels[period] || ''}.`;
 
     const addBtnHtml = (period === 'custom-date' && customDate)
-      ? `<button type="button" onclick="openAgendaModal('', '${customDate}')" style="margin-top:10px;padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">+ Buat Agenda Tanggal Ini</button>`
-      : `<button type="button" onclick="openAgendaModal()" style="margin-top:10px;padding:6px 14px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">+ Tambah Agenda</button>`;
+      ? `<button type="button" onclick="openAgendaModal('', '${customDate}')" style="margin-top:4px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">+ Buat Agenda Tanggal Ini</button>`
+      : `<button type="button" onclick="openAgendaModal()" style="margin-top:4px;padding:6px 16px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">+ Tambah Agenda</button>`;
 
     container.innerHTML = `
-      <div class="empty-state-card" style="padding:28px 16px;text-align:center;color:#8a92a6;background:#f8fafc;border-radius:10px;border:1px dashed #cbd5e1;">
-        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" style="margin:0 auto 8px;opacity:0.5;display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <div class="empty-state-card" style="padding:30px 18px;text-align:center;color:#8a92a6;background:#f8fafc;border-radius:10px;border:1px dashed #cbd5e1;min-height:185px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <svg viewBox="0 0 24 24" width="36" height="36" stroke="currentColor" stroke-width="1.5" fill="none" style="margin:0 auto 10px;opacity:0.55;display:block;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
         <div style="font-size:0.875rem;font-weight:700;color:var(--text-dark);">${emptyMsg}</div>
-        <div style="font-size:0.75rem;margin-top:4px;color:var(--text-muted);">Jadwalkan koordinasi, telaah berkas, atau batas waktu dokumen PEP.</div>
+        <div style="font-size:0.75rem;margin:6px auto 14px;color:var(--text-muted);line-height:1.55;max-width:310px;">Jadwalkan koordinasi berkala, telaah berkas Renja, batas waktu pelaporan e-SAKIP, dan batas waktu dokumen perangkat daerah.</div>
         ${addBtnHtml}
       </div>`;
     return;
@@ -1831,118 +1840,819 @@ function syncTableHeightWithCalendar() {
 window.syncTableHeightWithCalendar = syncTableHeightWithCalendar;
 
 // ==========================================================================
-// GRAFIK HOPE UI SPLINE ACTIVITY CHART (DOKUMEN MASUK VS TERVERIFIKASI)
+// GRAFIK DIAGRAM CAPAIAN KINERJA (e-SAKIP RESPONSIVE DYNAMIC SIZING)
+// Menggunakan dynamic width & scroll horizontal otomatis agar label rapi
+// ==========================================================================
+// GRAFIK DIAGRAM CAPAIAN KINERJA (e-SAKIP RESPONSIVE DYNAMIC SIZING)
+// Pusat Monitoring 4 Triwulan, Dynamic Width, Zero Dummy Data & Filter Cepat
+// ==========================================================================
+let dashboardChartCapaianTw = 'Semua';
+let dashboardChartCapaianYear = 'Semua';
+let dashboardChartCapaianMode = 'kuartal'; // 'kuartal' (default), 'indikator', atau 'tren-tahunan'
+
+function setCapaianChartMode(mode) {
+  dashboardChartCapaianMode = mode || 'kuartal';
+  const btnKuartal = document.getElementById('btnModeKuartal');
+  const btnIndikator = document.getElementById('btnModeIndikator');
+  const btnTren = document.getElementById('btnModeTren');
+  const filterWrap = document.getElementById('capaianFilterWrap');
+
+  [btnKuartal, btnIndikator, btnTren].forEach(b => b?.classList.remove('active'));
+
+  if (mode === 'kuartal') {
+    btnKuartal?.classList.add('active');
+    if (filterWrap) filterWrap.style.display = 'none';
+  } else if (mode === 'indikator') {
+    btnIndikator?.classList.add('active');
+    if (filterWrap) filterWrap.style.display = 'flex';
+  } else {
+    btnTren?.classList.add('active');
+    if (filterWrap) filterWrap.style.display = 'none';
+  }
+
+  initHopeActivityChart();
+}
+window.setCapaianChartMode = setCapaianChartMode;
+
+function selectDashboardTriwulan(twKey) {
+  dashboardChartCapaianTw = twKey || 'Semua';
+
+  // 1. Update kartu visual 4 triwulan
+  const cards = document.querySelectorAll('.tw-card');
+  cards.forEach(c => {
+    if (c.getAttribute('data-tw') === twKey) {
+      c.classList.add('active');
+    } else {
+      c.classList.remove('active');
+    }
+  });
+
+  // 2. Update tombol tab filter tabel
+  const tabBtns = document.querySelectorAll('.tw-tab-btn');
+  tabBtns.forEach(b => {
+    if (b.getAttribute('data-tw') === twKey) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+
+  // 3. Filter baris tabel indikator
+  const rows = document.querySelectorAll('#tableIndikatorTriwulan tbody tr.row-indikator');
+  const emptyRow = document.getElementById('rowIndikatorEmpty');
+  const emptyTitle = document.getElementById('emptyIndikatorTitle');
+  const emptySub = document.getElementById('emptyIndikatorSub');
+  const btnInputTw = document.getElementById('btnInputSpecificTw');
+  let visibleCount = 0;
+
+  rows.forEach(r => {
+    const rowTw = r.getAttribute('data-triwulan');
+    if (!twKey || twKey === 'Semua' || rowTw === twKey) {
+      r.style.display = '';
+      visibleCount++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+
+  if (emptyRow) {
+    if (visibleCount === 0) {
+      emptyRow.style.display = '';
+      let friendlyName = 'periode ini';
+      if (twKey === 'TW I') friendlyName = 'Triwulan I (Januari – Maret)';
+      else if (twKey === 'TW II') friendlyName = 'Triwulan II (April – Juni)';
+      else if (twKey === 'TW III') friendlyName = 'Triwulan III (Juli – September)';
+      else if (twKey === 'TW IV') friendlyName = 'Triwulan IV (Oktober – Desember)';
+
+      if (emptyTitle) emptyTitle.textContent = `Belum Ada Data Indikator untuk ${friendlyName}`;
+      if (emptySub) emptySub.textContent = `Laporan capaian kinerja belum diinput untuk ${friendlyName}. Anda dapat menambahkannya sekarang.`;
+      if (btnInputTw) {
+        btnInputTw.style.display = 'inline-flex';
+        btnInputTw.innerHTML = `<span>+ Input Data Capaian ${twKey}</span>`;
+      }
+    } else {
+      emptyRow.style.display = 'none';
+    }
+  }
+
+  // 4. Update judul rincian indikator
+  const currentTwTitle = document.getElementById('currentTwTitle');
+  if (currentTwTitle) {
+    let tTitle = 'Semua Triwulan (Gabungan Data)';
+    if (twKey === 'TW I') tTitle = 'Triwulan I (Januari – Maret)';
+    else if (twKey === 'TW II') tTitle = 'Triwulan II (April – Juni)';
+    else if (twKey === 'TW III') tTitle = 'Triwulan III (Juli – September)';
+    else if (twKey === 'TW IV') tTitle = 'Triwulan IV (Oktober – Desember)';
+    currentTwTitle.textContent = tTitle;
+  }
+
+  // Jika sedang di mode 'indikator', re-render chart sesuai filter
+  if (dashboardChartCapaianMode === 'indikator') {
+    initHopeActivityChart();
+  }
+}
+window.selectDashboardTriwulan = selectDashboardTriwulan;
+
+function filterCapaianDashboardChart(tw) {
+  selectDashboardTriwulan(tw);
+}
+window.filterCapaianDashboardChart = filterCapaianDashboardChart;
+
+function filterCapaianDashboardYear(yr) {
+  dashboardChartCapaianYear = yr || 'Semua';
+  initHopeActivityChart();
+}
+window.filterCapaianDashboardYear = filterCapaianDashboardYear;
+
+function scrollCapaianChart(offset) {
+  const wrap = document.getElementById('capaianChartScrollWrap');
+  if (wrap) {
+    wrap.scrollBy({ left: offset, behavior: 'smooth' });
+  }
+}
+window.scrollCapaianChart = scrollCapaianChart;
+
+// Helper: Format nilai angka/teks agar rapi dan tidak merusak tampilan tooltip/label
+function formatChartValue(val) {
+  if (val === null || val === undefined || val === '') return '-';
+  const str = String(val).trim();
+  if (str.length > 20) {
+    return str.substring(0, 18) + '…';
+  }
+  return str;
+}
+
+// Helper: Memecah teks label indikator panjang menjadi 1-3 baris rapi (font 12px tetap nyaman)
+function wrapChartLabel(str, maxCharsPerLine = 15, maxLines = 3) {
+  if (!str || str.trim() === '' || str.trim() === '-') return ['Indikator'];
+  const text = str.trim();
+
+  // Jika kata tunggal sangat panjang tanpa spasi (misal input uji coba 2222222...)
+  if (!text.includes(' ') && text.length > maxCharsPerLine) {
+    const chunks = [];
+    let rem = text;
+    while (rem.length > 0 && chunks.length < maxLines) {
+      if (chunks.length === maxLines - 1 && rem.length > maxCharsPerLine) {
+        chunks.push(rem.substring(0, maxCharsPerLine - 1) + '…');
+        break;
+      }
+      chunks.push(rem.substring(0, maxCharsPerLine));
+      rem = rem.substring(maxCharsPerLine);
+    }
+    return chunks;
+  }
+
+  const words = text.split(/\s+/);
+  const lines = [];
+  let currentLine = '';
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (word.length > maxCharsPerLine) {
+      if (currentLine) { lines.push(currentLine); currentLine = ''; }
+      const cut = word.substring(0, maxCharsPerLine - 1) + '…';
+      lines.push(cut);
+      if (lines.length >= maxLines) break;
+      continue;
+    }
+
+    const testLine = currentLine ? (currentLine + ' ' + word) : word;
+    if (testLine.length <= maxCharsPerLine) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) lines.push(currentLine);
+      currentLine = word;
+      if (lines.length >= maxLines) break;
+    }
+  }
+
+  if (currentLine && lines.length < maxLines) {
+    lines.push(currentLine);
+  }
+
+  return lines.length > 0 ? lines : [text.substring(0, maxCharsPerLine)];
+}
+
+// Plugin: Tampilkan persentase presisi tepat di atas setiap batang chart
+const chartTopPercentPlugin = {
+  id: 'chartTopPercent',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea } = chart;
+    if (!chartArea) return;
+    ctx.save();
+    ctx.font = 'bold 11.5px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+
+    chart.data.datasets.forEach((dataset, datasetIdx) => {
+      const meta = chart.getDatasetMeta(datasetIdx);
+      if (!meta.visible) return;
+
+      meta.data.forEach((bar, index) => {
+        const val = dataset.data[index];
+        if (val !== undefined && val !== null) {
+          let col = '#059669'; // hijau (>=90%)
+          if (val < 70) col = '#dc2626'; // merah (<70%)
+          else if (val < 80) col = '#d97706'; // kuning (70-79%)
+          else if (val < 90) col = '#2563eb'; // biru (80-89%)
+
+          ctx.fillStyle = col;
+          const posY = Math.max(chartArea.top + 14, bar.y - 6);
+          ctx.fillText(val + '%', bar.x, posY);
+        }
+      });
+    });
+    ctx.restore();
+  }
+};
+
+// Plugin: Garis acuan target 100% (Dashed Target Reference Line)
+const chartTarget100LinePlugin = {
+  id: 'chartTarget100Line',
+  afterDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    if (!scales || !scales.y || !chartArea) return;
+
+    const yVal = scales.y.getPixelForValue(100);
+    if (isNaN(yVal) || yVal < chartArea.top || yVal > chartArea.bottom) return;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(chartArea.left, yVal);
+    ctx.lineTo(chartArea.right, yVal);
+    ctx.stroke();
+
+    ctx.fillStyle = '#059669';
+    ctx.font = '600 10.5px "Plus Jakarta Sans", sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Target Ideal 100%', chartArea.right - 8, yVal - 4);
+    ctx.restore();
+  }
+};
+
+// ==========================================================================
+// RENDER GRAFIK 4 TRIWULAN (Sederhana, Bersih, & Sangat Mudah Dilihat)
+// ==========================================================================
+function renderQuarterlyChart(canvas, innerContainer, scrollWrap, scrollHint, navButtons) {
+  if (chartHopeActivityInstance) {
+    chartHopeActivityInstance.destroy();
+    chartHopeActivityInstance = null;
+  }
+  if (scrollHint) scrollHint.style.display = 'none';
+  if (navButtons) navButtons.style.display = 'none';
+
+  innerContainer.style.width = '100%';
+  innerContainer.style.minWidth = '100%';
+
+  const twLabels = ['Triwulan I (Jan - Mar)', 'Triwulan II (Apr - Jun)', 'Triwulan III (Jul - Sep)', 'Triwulan IV (Okt - Des)'];
+  const twKeys = ['TW I', 'TW II', 'TW III', 'TW IV'];
+
+  let twDataMap = window.serverTwSummary || null;
+  if (!twDataMap && typeof capaianDb !== 'undefined') {
+    twDataMap = {
+      'TW I': { avgCapaian: 0, filled: false, count: 0 },
+      'TW II': { avgCapaian: 0, filled: false, count: 0 },
+      'TW III': { avgCapaian: 0, filled: false, count: 0 },
+      'TW IV': { avgCapaian: 0, filled: false, count: 0 }
+    };
+    capaianDb.forEach(item => {
+      const k = (item.triwulan || '').trim();
+      if (twDataMap[k]) {
+        twDataMap[k].filled = true;
+        twDataMap[k].count++;
+        let p = parseFloat(item.capaian_kinerja_persen) || 0;
+        if (p <= 0 && item.target_tahunan > 0) p = (item.realisasi_kinerja / item.target_tahunan) * 100;
+        twDataMap[k].avgCapaian = Math.min(100, Math.max(0, p));
+      }
+    });
+  }
+
+  const values = [];
+  const bgColors = [];
+  const borderColors = [];
+
+  twKeys.forEach(k => {
+    const tw = (twDataMap && twDataMap[k]) ? twDataMap[k] : { avgCapaian: 0, filled: false };
+    if (tw.filled && tw.avgCapaian > 0) {
+      values.push(tw.avgCapaian);
+      if (tw.avgCapaian >= 90) {
+        bgColors.push('rgba(16, 185, 129, 0.85)');
+        borderColors.push('#10b981');
+      } else if (tw.avgCapaian >= 80) {
+        bgColors.push('rgba(59, 130, 246, 0.85)');
+        borderColors.push('#3b82f6');
+      } else if (tw.avgCapaian >= 70) {
+        bgColors.push('rgba(245, 158, 11, 0.85)');
+        borderColors.push('#f59e0b');
+      } else {
+        bgColors.push('rgba(239, 68, 68, 0.85)');
+        borderColors.push('#ef4444');
+      }
+    } else {
+      values.push(0);
+      bgColors.push('rgba(241, 245, 249, 0.6)');
+      borderColors.push('#cbd5e1');
+    }
+  });
+
+  chartHopeActivityInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: twLabels,
+      datasets: [{
+        label: '% Capaian Kinerja',
+        data: values,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: { topLeft: 8, topRight: 8 },
+        barPercentage: 0.45,
+        categoryPercentage: 0.72,
+        maxBarThickness: 68
+      }]
+    },
+    plugins: [{
+      id: 'quarterlyTopLabel',
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+
+        chart.data.datasets.forEach((dataset, datasetIdx) => {
+          const meta = chart.getDatasetMeta(datasetIdx);
+          if (!meta.visible) return;
+
+          meta.data.forEach((bar, index) => {
+            const val = dataset.data[index];
+            const k = twKeys[index];
+            const tw = (twDataMap && twDataMap[k]) ? twDataMap[k] : null;
+
+            if (tw && tw.filled && val > 0) {
+              ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+              let col = '#059669';
+              if (val < 70) col = '#dc2626';
+              else if (val < 80) col = '#d97706';
+              else if (val < 90) col = '#2563eb';
+              ctx.fillStyle = col;
+              const posY = Math.max(chartArea.top + 14, bar.y - 6);
+              ctx.fillText(val + '%', bar.x, posY);
+            } else {
+              ctx.font = '600 11px "Plus Jakarta Sans", sans-serif';
+              ctx.fillStyle = '#94a3b8';
+              ctx.fillText('Belum Diisi', bar.x, chartArea.bottom - 10);
+            }
+          });
+        });
+        ctx.restore();
+      }
+    }, chartTarget100LinePlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 28, bottom: 8, left: 14, right: 18 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12.5, weight: '700' },
+          bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11.5 },
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            label: function(context) {
+              const idx = context.dataIndex;
+              const k = twKeys[idx];
+              const tw = (twDataMap && twDataMap[k]) ? twDataMap[k] : null;
+              if (tw && tw.filled) {
+                return `Rata-rata Capaian: ${tw.avgCapaian}% (${tw.predikat}) • ${tw.count} Indikator`;
+              }
+              return 'Status: Belum ada laporan diinput pada periode ini';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#1e293b',
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '700' },
+            padding: 8
+          }
+        },
+        y: {
+          grid: { color: 'rgba(226, 232, 240, 0.8)', borderDash: [4, 4] },
+          ticks: {
+            color: '#64748b',
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11.5, weight: '600' },
+            callback: function(v) { return v + '%'; },
+            stepSize: 20
+          },
+          beginAtZero: true,
+          suggestedMax: 118
+        }
+      }
+    }
+  });
+}
+
+
+// ==========================================================================
+// RENDER GRAFIK ANALISIS TREN & PERBANDINGAN ANTAR-TAHUN (Bahasa Awam)
+// ==========================================================================
+function renderTrenTahunanChart(innerContainer, scrollWrap, scrollHint, navButtons) {
+  if (chartHopeActivityInstance) {
+    chartHopeActivityInstance.destroy();
+    chartHopeActivityInstance = null;
+  }
+  if (scrollHint) scrollHint.style.display = 'none';
+  if (navButtons) navButtons.style.display = 'none';
+
+  let rawList = (typeof capaianDb !== 'undefined' && Array.isArray(capaianDb)) ? [...capaianDb] : [];
+  if (rawList.length === 0) {
+    if (innerContainer) {
+      innerContainer.style.width = '100%';
+      innerContainer.style.minWidth = '100%';
+      innerContainer.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:340px;text-align:center;padding:24px;background:#f8fafc;border-radius:12px;border:1.5px dashed #cbd5e1;box-sizing:border-box;">
+          <h4 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 6px;">Belum Ada Data Tahunan</h4>
+          <p style="font-size:13px;color:#64748b;max-width:420px;margin:0 0 16px;line-height:1.5;">Silakan input data capaian kinerja pada modul Capaian Kinerja untuk membandingkan kinerja antar-tahun.</p>
+          <button type="button" onclick="navigateAdmin('capaian-kinerja')" class="btn btn-primary btn-sm" style="font-weight:600;font-size:12.5px;border-radius:8px;padding:8px 16px;cursor:pointer;background:#2563eb;color:#ffffff;border:none;">
+            + Input Data Capaian
+          </button>
+        </div>
+      `;
+    }
+    return;
+  }
+
+  // Kelompokkan data murni per tahun
+  const yearGroups = {};
+  rawList.forEach(item => {
+    const yr = item.tahun || 2026;
+    if (!yearGroups[yr]) yearGroups[yr] = [];
+    let rawP = parseFloat(item.capaian_kinerja_persen) || 0;
+    if (rawP <= 0) {
+      const target = parseFloat(item.target_tahunan) || 0;
+      const real = parseFloat(item.realisasi_kinerja) || 0;
+      if (target > 0) rawP = (real / target) * 100;
+    }
+    const persen = Math.min(100, Math.max(0, rawP));
+    if (persen > 0) yearGroups[yr].push(persen);
+  });
+
+  const years = Object.keys(yearGroups).sort();
+  const yearAverages = [];
+  const yearColors = [];
+  const yearBorders = [];
+  const yearDescriptions = [];
+
+  years.forEach((yr) => {
+    const arr = yearGroups[yr];
+    const avg = arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0;
+    yearAverages.push(avg);
+    if (avg >= 90) {
+      yearColors.push('rgba(16, 185, 129, 0.85)');
+      yearBorders.push('#10b981');
+      yearDescriptions.push('Target Tercapai Sangat Baik');
+    } else if (avg >= 80) {
+      yearColors.push('rgba(59, 130, 246, 0.85)');
+      yearBorders.push('#3b82f6');
+      yearDescriptions.push('Target Tercapai Baik');
+    } else if (avg >= 70) {
+      yearColors.push('rgba(245, 158, 11, 0.85)');
+      yearBorders.push('#f59e0b');
+      yearDescriptions.push('Cukup Baik (Sedang)');
+    } else {
+      yearColors.push('rgba(239, 68, 68, 0.85)');
+      yearBorders.push('#ef4444');
+      yearDescriptions.push('Perlu Peningkatan Kinerja');
+    }
+  });
+
+  innerContainer.style.width = '100%';
+  innerContainer.style.minWidth = '100%';
+  innerContainer.innerHTML = '<canvas id="chartHopeActivity"></canvas>';
+  const canvas = document.getElementById('chartHopeActivity');
+
+  chartHopeActivityInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: years.map(y => `Tahun ${y}`),
+      datasets: [{
+        label: 'Rata-rata Capaian Kinerja',
+        data: yearAverages,
+        backgroundColor: yearColors,
+        borderColor: yearBorders,
+        borderWidth: 1.5,
+        borderRadius: { topLeft: 8, topRight: 8 },
+        barPercentage: years.length === 1 ? 0.35 : 0.48,
+        categoryPercentage: 0.65,
+        maxBarThickness: 75
+      }]
+    },
+    plugins: [chartTopPercentPlugin, chartTarget100LinePlugin],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 28, bottom: 8, left: 14, right: 18 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 13, weight: '700' },
+          bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+          padding: 12,
+          cornerRadius: 10,
+          callbacks: {
+            label: function(context) {
+              const idx = context.dataIndex;
+              const val = context.parsed.y;
+              return `Rata-rata Capaian: ${val}% (${yearDescriptions[idx]})`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            color: '#1e293b',
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 13, weight: '700' },
+            padding: 8
+          }
+        },
+        y: {
+          grid: { color: 'rgba(226, 232, 240, 0.8)', borderDash: [4, 4] },
+          ticks: {
+            color: '#64748b',
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11.5, weight: '600' },
+            callback: function(v) { return v + '%'; },
+            stepSize: 20
+          },
+          beginAtZero: true,
+          suggestedMax: 118
+        }
+      }
+    }
+  });
+}
+
+// ==========================================================================
+// RENDER GRAFIK ANALISIS INDIKATOR SASARAN (100% DATA ASLI, ZERO DUMMY)
 // ==========================================================================
 function initHopeActivityChart() {
-  const canvas = document.getElementById('chartHopeActivity');
-  if (!canvas || typeof Chart === 'undefined') return;
+  const scrollWrap = document.getElementById('capaianChartScrollWrap');
+  const innerContainer = document.getElementById('capaianChartInner');
+  const scrollHint = document.getElementById('capaianChartScrollHint');
+  const scrollHintText = document.getElementById('capaianChartScrollHintText');
+  const navButtons = document.getElementById('capaianNavButtons');
 
+  if (!innerContainer) return;
+
+  // Jika mode yang dipilih adalah 'kuartal' (Perbandingan 4 Triwulan):
+  if (dashboardChartCapaianMode === 'kuartal') {
+    let canvas = document.getElementById('chartHopeActivity');
+    if (!canvas) {
+      innerContainer.innerHTML = '<canvas id="chartHopeActivity"></canvas>';
+      canvas = document.getElementById('chartHopeActivity');
+    }
+    renderQuarterlyChart(canvas, innerContainer, scrollWrap, scrollHint, navButtons);
+    return;
+  }
+
+  // Jika mode yang dipilih adalah 'tren-tahunan':
+  if (dashboardChartCapaianMode === 'tren-tahunan') {
+    renderTrenTahunanChart(innerContainer, scrollWrap, scrollHint, navButtons);
+    return;
+  }
+
+  // Bersihkan chart lama jika ada
   if (chartHopeActivityInstance) {
     chartHopeActivityInstance.destroy();
     chartHopeActivityInstance = null;
   }
 
-  const ctx = canvas.getContext('2d');
+  // Ambil data murni dari database (capaianDb)
+  let list = (typeof capaianDb !== 'undefined' && Array.isArray(capaianDb)) ? [...capaianDb] : [];
 
-  // Gradient untuk Dokumen Masuk (Royal Blue)
-  const gradBlue = ctx.createLinearGradient(0, 0, 0, 280);
-  gradBlue.addColorStop(0, 'rgba(58, 87, 232, 0.35)');
-  gradBlue.addColorStop(1, 'rgba(58, 87, 232, 0.00)');
-
-  // Gradient untuk Dokumen Terverifikasi (Teal / Emerald)
-  const gradTeal = ctx.createLinearGradient(0, 0, 0, 280);
-  gradTeal.addColorStop(0, 'rgba(0, 208, 132, 0.28)');
-  gradTeal.addColorStop(1, 'rgba(0, 208, 132, 0.00)');
-
-  const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-  // Agregasi jumlah riil dokumen per bulan dari adminDb
-  const dataMasuk = new Array(12).fill(0);
-  const dataVerif = new Array(12).fill(0);
-
-  for (const key in adminDb) {
-    if (Array.isArray(adminDb[key])) {
-      adminDb[key].forEach(item => {
-        const dateStr = item.tanggal || item.created_at || item.date;
-        let monthIdx = -1;
-        if (dateStr) {
-          const d = new Date(dateStr);
-          if (!isNaN(d.getTime())) {
-            monthIdx = d.getMonth();
-          }
-        }
-        if (monthIdx >= 0 && monthIdx < 12) {
-          dataMasuk[monthIdx]++;
-          const st = (item.status || '').toLowerCase();
-          if (st === 'lengkap' || st === 'selesai' || st === 'terverifikasi') {
-            dataVerif[monthIdx]++;
-          }
-        }
-      });
-    }
+  // Filter tahun jika dipilih
+  if (dashboardChartCapaianYear && dashboardChartCapaianYear !== 'Semua') {
+    list = list.filter(item => String(item.tahun || '').trim() === String(dashboardChartCapaianYear).trim());
   }
 
-  const maxVal = Math.max(...dataMasuk, ...dataVerif, 5);
+  // Filter triwulan jika dipilih
+  if (dashboardChartCapaianTw && dashboardChartCapaianTw !== 'Semua') {
+    list = list.filter(item => (item.triwulan || '').trim() === dashboardChartCapaianTw);
+  }
+
+  // ========================================================================
+  // EMPTY STATE ELEGAN & RAMAH PENGGUNA (ZERO DATA DUMMY!)
+  // Jika pengguna belum mengisi data triwulan tertentu (misal TW II),
+  // tampilkan pesan informatif yang jelas tanpa menampilkan grafik palsu.
+  // ========================================================================
+  if (list.length === 0) {
+    if (scrollHint) scrollHint.style.display = 'none';
+    if (navButtons) navButtons.style.display = 'none';
+
+    innerContainer.style.width = '100%';
+    innerContainer.style.minWidth = '100%';
+
+    let twFriendly = 'periode ini';
+    if (dashboardChartCapaianTw === 'TW I') twFriendly = 'Triwulan 1 (Jan - Mar)';
+    else if (dashboardChartCapaianTw === 'TW II') twFriendly = 'Triwulan 2 (Apr - Jun)';
+    else if (dashboardChartCapaianTw === 'TW III') twFriendly = 'Triwulan 3 (Jul - Sep)';
+    else if (dashboardChartCapaianTw === 'TW IV') twFriendly = 'Triwulan 4 (Okt - Des)';
+
+    innerContainer.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:340px;text-align:center;padding:24px;background:#f8fafc;border-radius:12px;border:1.5px dashed #cbd5e1;box-sizing:border-box;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#e0f2fe;display:flex;align-items:center;justify-content:center;color:#0284c7;margin-bottom:12px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <h4 style="font-size:15px;font-weight:700;color:#0f172a;margin:0 0 6px;">Data ${twFriendly} Belum Ada / Belum Diisi</h4>
+        <p style="font-size:13px;color:#64748b;max-width:440px;margin:0 0 16px;line-height:1.5;">
+          Anda belum menginput data capaian kinerja untuk ${twFriendly}. Sistem sengaja tidak menampilkan data tiruan agar analisis Anda tetap akurat dan sesuai fakta data asli.
+        </p>
+        <button type="button" onclick="navigateAdmin('capaian-kinerja')" class="btn btn-primary btn-sm" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12.5px;border-radius:8px;padding:8px 18px;cursor:pointer;background:#2563eb;color:#ffffff;border:none;box-shadow:0 2px 4px rgba(37,99,235,0.2);">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Buka Modul &amp; Input Data Capaian</span>
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // Jika ada data riil, pastikan canvas siap digunakan
+  let canvas = document.getElementById('chartHopeActivity');
+  if (!canvas) {
+    innerContainer.innerHTML = '<canvas id="chartHopeActivity"></canvas>';
+    canvas = document.getElementById('chartHopeActivity');
+  }
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  // ========================================================================
+  // KALKULASI LEBAR DINAMIS (DYNAMIC WIDTH & RESPONSIVE SCROLL SIZING)
+  // Alokasi lebar 150px per kolom agar font 12px tetap horizontal & rapi
+  // ========================================================================
+  const minColWidth = 150;
+  const numItems = list.length;
+  const calculatedWidth = (numItems * minColWidth) + 90;
+  const containerWidth = scrollWrap ? (scrollWrap.clientWidth || scrollWrap.getBoundingClientRect().width) : 750;
+
+  if (calculatedWidth > containerWidth) {
+    innerContainer.style.width = calculatedWidth + 'px';
+    innerContainer.style.minWidth = calculatedWidth + 'px';
+    if (scrollHint) scrollHint.style.display = 'flex';
+    if (scrollHintText) scrollHintText.textContent = `Geser ke kanan untuk melihat seluruh ${numItems} indikator`;
+    if (navButtons) navButtons.style.display = 'inline-flex';
+  } else {
+    innerContainer.style.width = '100%';
+    innerContainer.style.minWidth = '100%';
+    if (scrollHint) scrollHint.style.display = 'none';
+    if (navButtons) navButtons.style.display = 'none';
+  }
+
+  canvas.removeAttribute('width');
+  canvas.removeAttribute('height');
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+
+  const labels = [];
+  const fullLabels = [];
+  const percentages = [];
+  const bgColors = [];
+  const borderColors = [];
+  const itemMetas = [];
+
+  let totalValidPersen = 0;
+  let countValid = 0;
+
+  list.forEach((item, idx) => {
+    let rawP = parseFloat(item.capaian_kinerja_persen) || 0;
+    if (rawP <= 0) {
+      const target = parseFloat(item.target_tahunan) || 0;
+      const real = parseFloat(item.realisasi_kinerja) || 0;
+      if (target > 0) rawP = (real / target) * 100;
+    }
+    const persen = Math.min(100, Math.max(0, rawP));
+
+    if (persen > 0) {
+      totalValidPersen += persen;
+      countValid++;
+    }
+
+    const rawTitle = item.indikator && item.indikator.trim() !== '' && item.indikator.trim() !== '-'
+      ? item.indikator.trim()
+      : `Indikator ${idx + 1}`;
+
+    labels.push(wrapChartLabel(rawTitle, 15, 3));
+    fullLabels.push(rawTitle);
+    percentages.push(Math.round(persen * 10) / 10);
+
+    let pred = (item.predikat_kinerja || '').toLowerCase();
+    let ramahText = 'Cukup Baik';
+    if (pred.includes('sangat') || persen >= 90) {
+      bgColors.push('rgba(16, 185, 129, 0.85)');
+      borderColors.push('#10b981');
+      ramahText = 'Target Tercapai Sangat Baik';
+    } else if (pred.includes('tinggi') || (persen >= 80 && persen < 90)) {
+      bgColors.push('rgba(59, 130, 246, 0.85)');
+      borderColors.push('#3b82f6');
+      ramahText = 'Target Tercapai Baik';
+    } else if (pred.includes('sedang') || (persen >= 70 && persen < 80)) {
+      bgColors.push('rgba(245, 158, 11, 0.85)');
+      borderColors.push('#f59e0b');
+      ramahText = 'Cukup Baik (Sedang)';
+    } else {
+      bgColors.push('rgba(239, 68, 68, 0.85)');
+      borderColors.push('#ef4444');
+      ramahText = 'Perlu Ditingkatkan';
+    }
+
+    itemMetas.push({
+      sasaran: item.sasaran || '-',
+      target: item.target_tahunan !== null && item.target_tahunan !== undefined ? item.target_tahunan : '-',
+      realisasi: item.realisasi_kinerja !== null && item.realisasi_kinerja !== undefined ? item.realisasi_kinerja : '-',
+      satuan: item.satuan || '',
+      ramahPredikat: ramahText,
+      triwulan: item.triwulan || '-'
+    });
+  });
+
+  const avgVal = countValid > 0 ? Math.round((totalValidPersen / countValid) * 10) / 10 : 0;
+  const statAvgEl = document.getElementById('hopeStatCapaianAvg');
+  if (statAvgEl) statAvgEl.textContent = avgVal > 0 ? avgVal + '%' : '0%';
+
+  const mCardCapaian = document.getElementById('metricCapaianAvg');
+  if (mCardCapaian) mCardCapaian.textContent = avgVal > 0 ? avgVal + '%' : '-';
 
   chartHopeActivityInstance = new Chart(canvas, {
-    type: 'line',
+    type: 'bar',
     data: {
       labels: labels,
       datasets: [
         {
-          label: 'Dokumen Masuk',
-          data: dataMasuk,
-          borderColor: '#3a57e8',
-          backgroundColor: gradBlue,
-          fill: true,
-          tension: 0.42,
-          borderWidth: 3,
-          pointRadius: 3,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#3a57e8',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2
-        },
-        {
-          label: 'Terverifikasi',
-          data: dataVerif,
-          borderColor: '#00d084',
-          backgroundColor: gradTeal,
-          fill: true,
-          tension: 0.42,
-          borderWidth: 2.5,
-          pointRadius: 3,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#00d084',
-          pointBorderColor: '#ffffff',
-          pointBorderWidth: 2
+          label: '% Capaian Kinerja',
+          data: percentages,
+          backgroundColor: bgColors,
+          borderColor: borderColors,
+          borderWidth: 1.5,
+          borderRadius: { topLeft: 8, topRight: 8 },
+          barPercentage: 0.52,
+          categoryPercentage: 0.84,
+          maxBarThickness: 56
         }
       ]
     },
+    plugins: [chartTopPercentPlugin, chartTarget100LinePlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false
+      layout: {
+        padding: {
+          top: 28,
+          bottom: 6,
+          left: 10,
+          right: 18
+        }
       },
       plugins: {
         legend: {
           display: false
         },
         tooltip: {
-          backgroundColor: '#1e293b',
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
           titleColor: '#ffffff',
-          bodyColor: '#e2e8f0',
-          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '700' },
-          bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '500' },
-          padding: 12,
+          bodyColor: '#cbd5e1',
+          borderColor: 'rgba(255, 255, 255, 0.12)',
+          borderWidth: 1,
+          titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12.5, weight: '700' },
+          bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 11.5, weight: '500' },
+          padding: 13,
           boxPadding: 6,
           cornerRadius: 10,
-          usePointStyle: true,
           callbacks: {
+            title: function(items) {
+              const idx = items[0].dataIndex;
+              const raw = fullLabels[idx] || items[0].label;
+              return raw.length > 55 ? raw.substring(0, 52) + '…' : raw;
+            },
+            beforeBody: function(items) {
+              const idx = items[0].dataIndex;
+              const m = itemMetas[idx];
+              const tVal = formatChartValue(m.target);
+              const rVal = formatChartValue(m.realisasi);
+              return `Sasaran: ${m.sasaran}\nTarget: ${tVal} ${m.satuan} | Hasil Nyata: ${rVal} ${m.satuan} (${m.triwulan})`;
+            },
             label: function(context) {
-              return ` ${context.dataset.label}: ${context.parsed.y} Berkas`;
+              const idx = context.dataIndex;
+              const m = itemMetas[idx];
+              return `Capaian: ${context.parsed.y}% (${m.ramahPredikat})`;
             }
           }
         }
@@ -1954,8 +2664,16 @@ function initHopeActivityChart() {
             drawBorder: false
           },
           ticks: {
-            color: '#8a92a6',
-            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }
+            color: '#334155',
+            font: {
+              family: "'Plus Jakarta Sans', sans-serif",
+              size: 12,
+              weight: '600'
+            },
+            autoSkip: false,
+            maxRotation: 0,
+            minRotation: 0,
+            padding: 10
           }
         },
         y: {
@@ -1968,17 +2686,31 @@ function initHopeActivityChart() {
             borderDash: [4, 4]
           },
           ticks: {
-            color: '#8a92a6',
-            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' },
-            precision: 0
+            color: '#64748b',
+            font: { family: "'Plus Jakarta Sans', sans-serif", size: 11.5, weight: '600' },
+            callback: function(v) { return v + '%'; },
+            stepSize: 20
           },
           beginAtZero: true,
-          suggestedMax: maxVal
+          suggestedMax: 118
         }
       }
     }
   });
 }
+
+// Re-evaluasi ukuran dinamis saat resize window
+let capaianResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(capaianResizeTimer);
+  capaianResizeTimer = setTimeout(() => {
+    if (document.getElementById('chartHopeActivity')) {
+      initHopeActivityChart();
+    }
+  }, 180);
+});
+
+
 
 let chartModuleDistributionInstance = null;
 

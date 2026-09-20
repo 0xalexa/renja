@@ -95,13 +95,241 @@ class AdminController extends Controller
             'surat-keluar' => $allSuratKeluar->map($mapSurat)->values()->toArray(),
         ];
 
-        // Capaian Kinerja Data
+        // Capaian Kinerja Data (Analisis Komprehensif Antar-Tahun & Kelengkapan Triwulan)
         $capaianKinerjaList = \App\Models\CapaianKinerja::orderBy('id', 'asc')->get();
         $countCapaian = $capaianKinerjaList->count();
-        $capaianYears = \App\Models\CapaianKinerja::select('tahun')->distinct()->pluck('tahun')->toArray();
+        $capaianYears = \App\Models\CapaianKinerja::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun')->toArray();
         if (empty($capaianYears)) {
             $capaianYears = [2026];
         }
+
+        // Kalkulasi Statistik Rata-rata Tahunan Murni (e-SAKIP Standard)
+        $normalizedPercentages = $capaianKinerjaList->map(function ($item) {
+            $rawP = (float)($item->capaian_kinerja_persen ?? 0);
+            if ($rawP <= 0 && ($item->realisasi_kinerja ?? 0) > 0 && ($item->target_tahunan ?? 0) > 0) {
+                $rawP = ($item->realisasi_kinerja / $item->target_tahunan) * 100;
+            }
+            return min(100, max(0, $rawP));
+        })->filter(function ($p) {
+            return $p > 0;
+        });
+
+        $capaianAvgKinerja = $normalizedPercentages->count() > 0 
+            ? round($normalizedPercentages->avg(), 1) 
+            : 0;
+
+        $capaianTotalPagu = (float) $capaianKinerjaList->sum('pagu_anggaran');
+        $capaianTotalRealisasi = (float) $capaianKinerjaList->sum('realisasi_keuangan');
+        $capaianAvgKeuangan = $capaianTotalPagu > 0 
+            ? round(($capaianTotalRealisasi / $capaianTotalPagu) * 100, 1) 
+            : round(($capaianKinerjaList->avg('capaian_keuangan_persen') ?: 0), 1);
+
+        $predikatCounts = [
+            'sangat_tinggi' => 0,
+            'tinggi' => 0,
+            'sedang' => 0,
+            'rendah' => 0,
+        ];
+
+        foreach ($capaianKinerjaList as $item) {
+            $rawP = (float)($item->capaian_kinerja_persen ?? 0);
+            if ($rawP <= 0 && ($item->realisasi_kinerja ?? 0) > 0 && ($item->target_tahunan ?? 0) > 0) {
+                $rawP = ($item->realisasi_kinerja / $item->target_tahunan) * 100;
+            }
+            $persen = min(100, max(0, $rawP));
+            $predikat = strtolower($item->predikat_kinerja ?? '');
+
+            if (str_contains($predikat, 'sangat') || $persen >= 90) {
+                $predikatCounts['sangat_tinggi']++;
+            } elseif (str_contains($predikat, 'tinggi') || ($persen >= 80 && $persen < 90)) {
+                $predikatCounts['tinggi']++;
+            } elseif (str_contains($predikat, 'sedang') || ($persen >= 70 && $persen < 80)) {
+                $predikatCounts['sedang']++;
+            } else {
+                $predikatCounts['rendah']++;
+            }
+        }
+
+        // Bahasa awam deskripsi capaian
+        if ($capaianAvgKinerja >= 90) {
+            $overallPredikat = 'Sangat Baik (Tercapai Penuh)';
+            $overallBadgeClass = 'badge-green';
+            $overallColor = '#10b981';
+        } elseif ($capaianAvgKinerja >= 80) {
+            $overallPredikat = 'Baik (Tercapai)';
+            $overallBadgeClass = 'badge-blue';
+            $overallColor = '#3b82f6';
+        } elseif ($capaianAvgKinerja >= 70) {
+            $overallPredikat = 'Cukup Baik (Sedang)';
+            $overallBadgeClass = 'badge-yellow';
+            $overallColor = '#f59e0b';
+        } elseif ($capaianAvgKinerja > 0) {
+            $overallPredikat = 'Perlu Ditingkatkan';
+            $overallBadgeClass = 'badge-red';
+            $overallColor = '#ef4444';
+        } else {
+            $overallPredikat = 'Belum Ada Isian';
+            $overallBadgeClass = 'badge-gray';
+            $overallColor = '#64748b';
+        }
+
+        // Analisis Perkembangan Antar-Tahun (Year-over-Year Trend)
+        $capaianPerTahun = [];
+        $groupedByYear = $capaianKinerjaList->groupBy('tahun');
+        foreach ($groupedByYear as $yr => $items) {
+            $norm = $items->map(function ($it) {
+                $rawP = (float)($it->capaian_kinerja_persen ?? 0);
+                if ($rawP <= 0 && ($it->realisasi_kinerja ?? 0) > 0 && ($it->target_tahunan ?? 0) > 0) {
+                    $rawP = ($it->realisasi_kinerja / $it->target_tahunan) * 100;
+                }
+                return min(100, max(0, $rawP));
+            })->filter(function ($p) { return $p > 0; });
+
+            $capaianPerTahun[$yr] = [
+                'tahun' => (int) $yr,
+                'avg' => $norm->count() > 0 ? round($norm->avg(), 1) : 0,
+                'count' => $items->count(),
+                'triwulans' => $items->pluck('triwulan')->unique()->filter()->values()->toArray()
+            ];
+        }
+        ksort($capaianPerTahun);
+
+        $latestYear = !empty($capaianYears) ? (int) $capaianYears[0] : 2026;
+        $prevYear = $latestYear - 1;
+        $peningkatanTahun = null;
+        if (isset($capaianPerTahun[$prevYear]) && isset($capaianPerTahun[$latestYear])) {
+            $delta = round($capaianPerTahun[$latestYear]['avg'] - $capaianPerTahun[$prevYear]['avg'], 1);
+            $peningkatanTahun = [
+                'delta' => $delta,
+                'status' => $delta > 0 ? 'Meningkat' : ($delta < 0 ? 'Menurun' : 'Stabil'),
+                'prevTahun' => $prevYear,
+                'prevAvg' => $capaianPerTahun[$prevYear]['avg'],
+                'currTahun' => $latestYear,
+                'currAvg' => $capaianPerTahun[$latestYear]['avg']
+            ];
+        }
+
+        // Analisis Komprehensif per Triwulan (4 Kuartal SIM-PEP / e-SAKIP)
+        $twSummary = [
+            'TW I' => [
+                'key' => 'TW I',
+                'title' => 'Triwulan I',
+                'shortTitle' => 'TW 1',
+                'months' => 'Jan – Mar ' . $latestYear,
+                'fullPeriod' => 'Januari – Maret ' . $latestYear,
+                'filled' => false,
+                'count' => 0,
+                'avgCapaian' => 0,
+                'avgKeuangan' => 0,
+                'totalPagu' => 0,
+                'totalRealisasi' => 0,
+                'predikat' => 'Belum Diisi',
+                'badgeClass' => 'badge-gray',
+                'color' => '#64748b',
+                'items' => []
+            ],
+            'TW II' => [
+                'key' => 'TW II',
+                'title' => 'Triwulan II',
+                'shortTitle' => 'TW 2',
+                'months' => 'Apr – Jun ' . $latestYear,
+                'fullPeriod' => 'April – Juni ' . $latestYear,
+                'filled' => false,
+                'count' => 0,
+                'avgCapaian' => 0,
+                'avgKeuangan' => 0,
+                'totalPagu' => 0,
+                'totalRealisasi' => 0,
+                'predikat' => 'Belum Diisi',
+                'badgeClass' => 'badge-gray',
+                'color' => '#64748b',
+                'items' => []
+            ],
+            'TW III' => [
+                'key' => 'TW III',
+                'title' => 'Triwulan III',
+                'shortTitle' => 'TW 3',
+                'months' => 'Jul – Sep ' . $latestYear,
+                'fullPeriod' => 'Juli – September ' . $latestYear,
+                'filled' => false,
+                'count' => 0,
+                'avgCapaian' => 0,
+                'avgKeuangan' => 0,
+                'totalPagu' => 0,
+                'totalRealisasi' => 0,
+                'predikat' => 'Belum Diisi',
+                'badgeClass' => 'badge-gray',
+                'color' => '#64748b',
+                'items' => []
+            ],
+            'TW IV' => [
+                'key' => 'TW IV',
+                'title' => 'Triwulan IV',
+                'shortTitle' => 'TW 4',
+                'months' => 'Okt – Des ' . $latestYear,
+                'fullPeriod' => 'Oktober – Desember ' . $latestYear,
+                'filled' => false,
+                'count' => 0,
+                'avgCapaian' => 0,
+                'avgKeuangan' => 0,
+                'totalPagu' => 0,
+                'totalRealisasi' => 0,
+                'predikat' => 'Belum Diisi',
+                'badgeClass' => 'badge-gray',
+                'color' => '#64748b',
+                'items' => []
+            ],
+        ];
+
+        foreach ($capaianKinerjaList as $item) {
+            $twKey = trim($item->triwulan ?? '');
+            if ((int)($item->tahun ?? $latestYear) === (int)$latestYear && isset($twSummary[$twKey])) {
+                $twSummary[$twKey]['filled'] = true;
+                $twSummary[$twKey]['count']++;
+                $twSummary[$twKey]['items'][] = $item;
+                $twSummary[$twKey]['totalPagu'] += (float)($item->pagu_anggaran ?? 0);
+                $twSummary[$twKey]['totalRealisasi'] += (float)($item->realisasi_keuangan ?? 0);
+            }
+        }
+
+        foreach ($twSummary as $k => &$tw) {
+            if ($tw['filled'] && count($tw['items']) > 0) {
+                $scores = collect($tw['items'])->map(function($it) {
+                    $p = (float)($it->capaian_kinerja_persen ?? 0);
+                    if ($p <= 0 && ($it->realisasi_kinerja ?? 0) > 0 && ($it->target_tahunan ?? 0) > 0) {
+                        $p = ($it->realisasi_kinerja / $it->target_tahunan) * 100;
+                    }
+                    return min(100, max(0, $p));
+                })->filter(function($val) { return $val > 0; });
+
+                $avg = $scores->count() > 0 ? round($scores->avg(), 1) : 0;
+                $tw['avgCapaian'] = $avg;
+                if ($tw['totalPagu'] > 0) {
+                    $tw['avgKeuangan'] = round(($tw['totalRealisasi'] / $tw['totalPagu']) * 100, 1);
+                }
+
+                if ($avg >= 90) {
+                    $tw['predikat'] = 'Sangat Baik';
+                    $tw['badgeClass'] = 'badge-green';
+                    $tw['color'] = '#10b981';
+                } elseif ($avg >= 80) {
+                    $tw['predikat'] = 'Baik';
+                    $tw['badgeClass'] = 'badge-blue';
+                    $tw['color'] = '#3b82f6';
+                } elseif ($avg >= 70) {
+                    $tw['predikat'] = 'Cukup Baik';
+                    $tw['badgeClass'] = 'badge-yellow';
+                    $tw['color'] = '#f59e0b';
+                } else {
+                    $tw['predikat'] = 'Perlu Ditingkatkan';
+                    $tw['badgeClass'] = 'badge-red';
+                    $tw['color'] = '#ef4444';
+                }
+            }
+        }
+        unset($tw);
+
+        $filledTwCount = count(array_filter($twSummary, function($v) { return $v['filled']; }));
 
         return view('admin.dashboard', compact(
             'recentDocs',
@@ -130,7 +358,20 @@ class AdminController extends Controller
             'allDocsGrouped',
             'capaianKinerjaList',
             'countCapaian',
-            'capaianYears'
+            'capaianYears',
+            'capaianAvgKinerja',
+            'capaianAvgKeuangan',
+            'capaianTotalPagu',
+            'capaianTotalRealisasi',
+            'predikatCounts',
+            'overallPredikat',
+            'overallBadgeClass',
+            'overallColor',
+            'capaianPerTahun',
+            'peningkatanTahun',
+            'twSummary',
+            'filledTwCount',
+            'latestYear'
         ));
     }
 
