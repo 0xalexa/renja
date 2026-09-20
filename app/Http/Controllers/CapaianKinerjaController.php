@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CapaianKinerja;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -446,12 +447,13 @@ class CapaianKinerjaController extends Controller
     }
 
     /**
-     * Cetak / Tampilan Siap Cetak PDF Resmi (Landscape Kop Dinas)
+     * Cetak / Ekspor PDF Resmi Laporan Capaian Kinerja (Format Landscape Kertas Panjang / F4)
      */
     public function cetak(Request $request)
     {
         $tahun = $request->query('tahun', 2026);
         $triwulan = $request->query('triwulan', 'TW I');
+        $paper = strtolower($request->query('paper', 'f4'));
 
         $query = CapaianKinerja::where('tahun', $tahun);
         if ($triwulan !== 'Semua' && !empty($triwulan)) {
@@ -459,11 +461,32 @@ class CapaianKinerjaController extends Controller
         }
         $data = $query->orderBy('id', 'asc')->get();
 
-        return view('admin.capaian.cetak', [
+        $filename = 'Laporan_Capaian_Kinerja_' . str_replace(' ', '_', $triwulan) . '_' . $tahun . '.pdf';
+
+        $pdf = Pdf::loadView('admin.capaian.cetak', [
             'data' => $data,
             'tahun' => $tahun,
             'triwulan' => $triwulan,
         ]);
+
+        // Kertas Panjang F4 / Folio (330mm x 215mm) atau Legal / A4
+        if ($paper === 'a4') {
+            $pdf->setPaper('a4', 'landscape');
+        } elseif ($paper === 'legal') {
+            $pdf->setPaper('legal', 'landscape');
+        } else {
+            // Default F4 Folio Landscape (kertas panjang resmi kedinasan)
+            $f4Paper = [0, 0, 609.45, 935.43];
+            $pdf->setPaper($f4Paper, 'landscape');
+        }
+
+        // Jika user menginginkan langsung unduh berkas file
+        if ($request->query('download') == '1') {
+            return $pdf->download($filename);
+        }
+
+        // Tampilkan langsung di browser (PDF viewer bawaan browser dengan tombol Print & Download)
+        return $pdf->stream($filename);
     }
 
     /**

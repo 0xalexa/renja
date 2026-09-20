@@ -65,14 +65,14 @@
     <!-- BARIS 2: Rincian Sub-Grup -->
     <tr>
       <!-- Di bawah Data <?= $tahun ?> -->
-      <th style="width: 90px;">Target</th>
-      <th style="width: 130px;">Rp</th>
-      <th style="width: 80px;">Satuan</th>
+      <th rowspan="2" style="width: 90px;">Target</th>
+      <th rowspan="2" style="width: 130px;">Rp</th>
+      <th rowspan="2" style="width: 80px;">Satuan</th>
       <!-- Di bawah Target Kinerja -->
-      <th style="width: 75px;">TW I</th>
-      <th style="width: 75px;">TW II</th>
-      <th style="width: 75px;">TW III</th>
-      <th style="width: 75px;">TW IV</th>
+      <th rowspan="2" style="width: 75px;">TW I</th>
+      <th rowspan="2" style="width: 75px;">TW II</th>
+      <th rowspan="2" style="width: 75px;">TW III</th>
+      <th rowspan="2" style="width: 75px;">TW IV</th>
       <!-- Di bawah Capaian Kinerja -->
       <th colspan="3" style="width: 260px;"><?= $triwulan !== 'Semua' ? $triwulan : 'TW I' ?></th>
       <!-- Di bawah Capaian Keuangan -->

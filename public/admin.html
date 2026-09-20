@@ -865,53 +865,22 @@
                 </div>
               </div>
 
-              <!-- 4. Kalender Kegiatan September 2026 -->
+              <!-- 4. Kalender Kegiatan -->
               <div class="hope-card hope-calendar-card" id="hopeCalendarCard">
                 <div class="cal-header">
-                  <button class="cal-nav-btn" onclick="showAdminToast('Bulan sebelumnya', 'info')">&lsaquo;</button>
-                  <span>September 2026</span>
-                  <button class="cal-nav-btn" onclick="showAdminToast('Bulan berikutnya', 'info')">&rsaquo;</button>
+                  <button type="button" class="cal-nav-btn" onclick="navigateCalendarMonth(-1)" title="Bulan Sebelumnya">&lsaquo;</button>
+                  <span id="calMonthYearTitle">September 2026</span>
+                  <button type="button" class="cal-nav-btn" onclick="navigateCalendarMonth(1)" title="Bulan Berikutnya">&rsaquo;</button>
                 </div>
                 <div class="cal-weekdays">
-                  <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                  <span class="weekday-sun">S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                 </div>
                 <div class="cal-days-grid" id="calDaysGrid">
-                  <span class="cal-day empty"></span>
-                  <span class="cal-day empty"></span>
-                  <span class="cal-day" onclick="selectCalDay(this, 1)">1</span>
-                  <span class="cal-day has-event" onclick="selectCalDay(this, 2)">2</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 3)">3</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 4)">4</span>
-                  <span class="cal-day has-event" onclick="selectCalDay(this, 5)">5</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 6)">6</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 7)">7</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 8)">8</span>
-                  <span class="cal-day active-today has-event" onclick="selectCalDay(this, 9)">9</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 10)">10</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 11)">11</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 12)">12</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 13)">13</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 14)">14</span>
-                  <span class="cal-day has-event" onclick="selectCalDay(this, 15)">15</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 16)">16</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 17)">17</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 18)">18</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 19)">19</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 20)">20</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 21)">21</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 22)">22</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 23)">23</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 24)">24</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 25)">25</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 26)">26</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 27)">27</span>
-                  <span class="cal-day has-event" onclick="selectCalDay(this, 28)">28</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 29)">29</span>
-                  <span class="cal-day" onclick="selectCalDay(this, 30)">30</span>
+                  <!-- Rendered dynamically by renderAdminCalendar() -->
                 </div>
                 <div style="margin-top:10px;font-size:11px;color:var(--text-muted);display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border-subtle);">
-                  <span>Hari ini: <strong>9 Sep 2026</strong></span>
-                  <span class="badge badge-blue">Aktif</span>
+                  <span>Hari ini: <strong>20 Sep 2026</strong></span>
+                  <button type="button" class="badge badge-blue" style="cursor:pointer;border:none;outline:none;" onclick="resetCalendarToToday()" title="Kembali ke Hari Ini">Hari Ini</button>
                 </div>
               </div>
 
