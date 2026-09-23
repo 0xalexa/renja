@@ -5607,6 +5607,66 @@ body.sidebar-collapsed .hope-chart-canvas-wrap {
     font-weight: 800;
   }
 
+  /* TABLE CAPAIAN KINERJA DENGAN GARIS BORDER LENGKAP & RAPI */
+  .table-capaian-grid {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    font-size: 12.5px !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid th,
+  .table-capaian-grid td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 10px !important;
+    vertical-align: middle !important;
+  }
+  .table-capaian-grid td.col-text,
+  .table-capaian-grid th.col-text {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  .table-capaian-grid td.col-nowrap,
+  .table-capaian-grid th.col-nowrap {
+    white-space: nowrap !important;
+  }
+  .table-capaian-grid thead tr.head-top th {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+    font-size: 12px !important;
+  }
+  .table-capaian-grid thead tr.head-sub th {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid thead tr.head-detail th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid tbody tr:hover {
+    background-color: #f8fafc !important;
+  }
+  .table-capaian-grid td.cell-input {
+    color: #c2410c !important;
+    font-weight: 700 !important;
+  }
+  .table-capaian-grid td.cell-rumus {
+    color: #b91c1c !important;
+    font-weight: 800 !important;
+  }
+
   .predikat-chip {
     display: inline-block;
     padding: 3px 9px;
@@ -5768,4 +5828,117 @@ body.sidebar-collapsed .hope-chart-canvas-wrap {
     color: #ffffff !important;
     border-color: #2563eb !important;
     box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25) !important;
+  }
+
+  /* ==========================================================================
+     TABEL CAPAIAN KINERJA (e-SAKIP) - STANDAR LAPORAN KANTOR PEMERINTAHAN
+     Karakteristik: Font Sangat Jelas (13.5px), Kontras Tinggi, Angka Tabular Rapi
+     ========================================================================== */
+  .table-capaian-grid,
+  #tableCapaianKinerja,
+  #tableIndikatorTriwulan {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 13.5px !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #94a3b8 !important;
+    color: #0f172a !important;
+    font-variant-numeric: tabular-nums !important;
+    -webkit-font-smoothing: antialiased !important;
+  }
+
+  .table-capaian-grid th,
+  .table-capaian-grid td,
+  #tableCapaianKinerja th,
+  #tableCapaianKinerja td,
+  #tableIndikatorTriwulan th,
+  #tableIndikatorTriwulan td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 10px 12px !important;
+    vertical-align: middle !important;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+  }
+
+  .table-capaian-grid td.col-text,
+  .table-capaian-grid th.col-text,
+  #tableCapaianKinerja td.col-text,
+  #tableCapaianKinerja th.col-text {
+    white-space: normal !important;
+    word-break: break-word !important;
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+  }
+
+  .table-capaian-grid td.col-text strong,
+  #tableCapaianKinerja td.col-text strong {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+
+  .table-capaian-grid td,
+  #tableCapaianKinerja td,
+  #tableIndikatorTriwulan td {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+  }
+
+  .table-capaian-grid tbody tr:nth-child(even),
+  #tableCapaianKinerja tbody tr:nth-child(even),
+  #tableIndikatorTriwulan tbody tr:nth-child(even) {
+    background-color: #f8fafc !important;
+  }
+
+  .table-capaian-grid tbody tr:hover,
+  #tableCapaianKinerja tbody tr:hover,
+  #tableIndikatorTriwulan tbody tr:hover {
+    background-color: #eff6ff !important;
+  }
+
+  .table-capaian-grid thead th,
+  #tableCapaianKinerja thead th,
+  #tableIndikatorTriwulan thead th {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    letter-spacing: 0.2px !important;
+    border-color: #94a3b8 !important;
+  }
+
+  .table-capaian-grid thead tr.head-top th,
+  #tableCapaianKinerja thead tr.head-top th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    border-bottom: 2px solid #64748b !important;
+    font-size: 13px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    padding: 12px 10px !important;
+  }
+
+  .table-capaian-grid thead tr.head-sub th,
+  #tableCapaianKinerja thead tr.head-sub th {
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 12.5px !important;
+    border-bottom: 1.5px solid #94a3b8 !important;
+    padding: 9px 10px !important;
+  }
+
+  .table-capaian-grid thead tr.head-detail th,
+  #tableCapaianKinerja thead tr.head-detail th {
+    background-color: #ffffff !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    border-bottom: 1.5px solid #94a3b8 !important;
+    padding: 8px 8px !important;
   }

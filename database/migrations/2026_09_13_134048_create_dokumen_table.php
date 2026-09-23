@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('dokumen', function (Blueprint $table) {
             $table->id();
-            $table->string('modul'); // renja, pk, dpa
-            $table->string('kategori'); // murni, perubahan
+            $table->string('modul', 50); // renja, pk, dpa
+            $table->string('kategori', 50); // murni, perubahan
             $table->integer('tahun_anggaran')->default(2026);
             $table->string('judul');
             $table->text('keterangan')->nullable();

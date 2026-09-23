@@ -18,6 +18,10 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Redirect legacy static HTML files to Laravel
+    RewriteRule ^admin\.html$ admin/dashboard [R=302,L]
+    RewriteRule ^index\.html$ ./ [R=302,L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f

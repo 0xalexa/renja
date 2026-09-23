@@ -5607,6 +5607,66 @@ body.sidebar-collapsed .hope-chart-canvas-wrap {
     font-weight: 800;
   }
 
+  /* TABLE CAPAIAN KINERJA DENGAN GARIS BORDER LENGKAP & RAPI */
+  .table-capaian-grid {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+    font-size: 12.5px !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid th,
+  .table-capaian-grid td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 10px !important;
+    vertical-align: middle !important;
+  }
+  .table-capaian-grid td.col-text,
+  .table-capaian-grid th.col-text {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+  .table-capaian-grid td.col-nowrap,
+  .table-capaian-grid th.col-nowrap {
+    white-space: nowrap !important;
+  }
+  .table-capaian-grid thead tr.head-top th {
+    background-color: #f8fafc !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+    font-size: 12px !important;
+  }
+  .table-capaian-grid thead tr.head-sub th {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid thead tr.head-detail th {
+    background-color: #f8fafc !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+  }
+  .table-capaian-grid tbody tr:hover {
+    background-color: #f8fafc !important;
+  }
+  .table-capaian-grid td.cell-input {
+    color: #c2410c !important;
+    font-weight: 700 !important;
+  }
+  .table-capaian-grid td.cell-rumus {
+    color: #b91c1c !important;
+    font-weight: 800 !important;
+  }
+
   .predikat-chip {
     display: inline-block;
     padding: 3px 9px;

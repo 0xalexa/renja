@@ -1847,32 +1847,304 @@ window.syncTableHeightWithCalendar = syncTableHeightWithCalendar;
 // Pusat Monitoring 4 Triwulan, Dynamic Width, Zero Dummy Data & Filter Cepat
 // ==========================================================================
 let dashboardChartCapaianTw = 'Semua';
-let dashboardChartCapaianYear = 'Semua';
-let dashboardChartCapaianMode = 'kuartal'; // 'kuartal' (default), 'indikator', atau 'tren-tahunan'
+let dashboardChartCapaianYear = (typeof window !== 'undefined' && window.serverCapaianYears && window.serverCapaianYears.length > 0) ? String(window.serverCapaianYears[0]) : '2026';
+let dashboardChartCapaianMode = 'kuartal'; // 'kuartal' (default) atau 'tren-tahunan'
+
+// ==========================================================================
+// KALKULATOR STATUS 4 TRIWULAN DINAMIS PER TAHUN
+// ==========================================================================
+function calculateQuarterlySummary(targetYear) {
+  const yr = parseInt(targetYear) || 2026;
+  const twKeys = ['TW I', 'TW II', 'TW III', 'TW IV'];
+  const twMonths = {
+    'TW I': `Jan – Mar ${yr}`,
+    'TW II': `Apr – Jun ${yr}`,
+    'TW III': `Jul – Sep ${yr}`,
+    'TW IV': `Okt – Des ${yr}`
+  };
+  const twFullTitles = {
+    'TW I': 'Triwulan I',
+    'TW II': 'Triwulan II',
+    'TW III': 'Triwulan III',
+    'TW IV': 'Triwulan IV'
+  };
+
+  const summary = {};
+  twKeys.forEach(k => {
+    summary[k] = {
+      key: k,
+      title: twFullTitles[k],
+      months: twMonths[k],
+      filled: false,
+      count: 0,
+      avgCapaian: 0,
+      avgKeuangan: 0,
+      totalPagu: 0,
+      totalRealisasi: 0,
+      predikat: 'Belum Diisi',
+      badgeClass: 'badge-gray',
+      color: '#64748b'
+    };
+  });
+
+  const list = (typeof capaianDb !== 'undefined' && Array.isArray(capaianDb)) ? capaianDb : ((typeof window !== 'undefined' && window.serverCapaianDb) ? window.serverCapaianDb : []);
+  const twPercents = { 'TW I': [], 'TW II': [], 'TW III': [], 'TW IV': [] };
+
+  list.forEach(item => {
+    const itemYr = parseInt(item.tahun || 2026);
+    const k = (item.triwulan || '').trim();
+    if (itemYr === yr && summary[k]) {
+      summary[k].filled = true;
+      summary[k].count++;
+      summary[k].totalPagu += parseFloat(item.pagu_anggaran || 0);
+      summary[k].totalRealisasi += parseFloat(item.realisasi_keuangan || 0);
+
+      let p = parseFloat(item.capaian_kinerja_persen) || 0;
+      if (p <= 0) {
+        const target = parseFloat(item.target_tahunan || 0);
+        const real = parseFloat(item.realisasi_kinerja || 0);
+        if (target > 0) p = (real / target) * 100;
+      }
+      p = Math.min(100, Math.max(0, p));
+      if (p > 0) twPercents[k].push(p);
+    }
+  });
+
+  let filledTwCount = 0;
+  twKeys.forEach(k => {
+    const tw = summary[k];
+    if (tw.filled) {
+      filledTwCount++;
+      if (twPercents[k].length > 0) {
+        tw.avgCapaian = Math.round((twPercents[k].reduce((a, b) => a + b, 0) / twPercents[k].length) * 10) / 10;
+      }
+      if (tw.totalPagu > 0) {
+        tw.avgKeuangan = Math.round((tw.totalRealisasi / tw.totalPagu) * 1000) / 10;
+      }
+
+      if (tw.avgCapaian >= 90) {
+        tw.predikat = 'Sangat Baik';
+        tw.badgeClass = 'badge-green';
+        tw.color = '#10b981';
+      } else if (tw.avgCapaian >= 80) {
+        tw.predikat = 'Baik';
+        tw.badgeClass = 'badge-blue';
+        tw.color = '#3b82f6';
+      } else if (tw.avgCapaian >= 70) {
+        tw.predikat = 'Cukup Baik';
+        tw.badgeClass = 'badge-yellow';
+        tw.color = '#f59e0b';
+      } else {
+        tw.predikat = 'Perlu Ditingkatkan';
+        tw.badgeClass = 'badge-red';
+        tw.color = '#ef4444';
+      }
+    }
+  });
+
+  return { summary, filledTwCount, year: yr };
+}
+window.calculateQuarterlySummary = calculateQuarterlySummary;
+
+// Perbarui visual 4 kartu monitoring triwulan di atas grafik sesuai tahun yang dipilih
+function updateDashboardTwCards(targetYear) {
+  const { summary, filledTwCount, year } = calculateQuarterlySummary(targetYear);
+
+  const headerKelengkapan = document.getElementById('twHeaderKelengkapanText');
+  if (headerKelengkapan) {
+    headerKelengkapan.textContent = `${filledTwCount} dari 4 Triwulan Terisi`;
+  }
+
+  ['TW I', 'TW II', 'TW III', 'TW IV'].forEach(k => {
+    const tw = summary[k];
+    const badge = document.getElementById(`twBadge_${k}`);
+    const months = document.getElementById(`twMonths_${k}`);
+    const percent = document.getElementById(`twPercent_${k}`);
+    const percentLabel = document.getElementById(`twPercentLabel_${k}`);
+    const stats = document.getElementById(`twStats_${k}`);
+    const actionWrap = document.getElementById(`twActionWrap_${k}`);
+
+    if (badge) {
+      badge.className = `badge ${tw.filled ? tw.badgeClass : 'badge-gray'}`;
+      badge.textContent = tw.filled ? tw.predikat : 'Belum Diisi';
+    }
+    if (months) {
+      months.textContent = tw.months;
+    }
+    if (percent) {
+      percent.style.color = tw.filled ? tw.color : '#94a3b8';
+      percent.textContent = tw.filled ? `${tw.avgCapaian}%` : '0%';
+    }
+    if (percentLabel) {
+      percentLabel.style.color = tw.filled ? '#059669' : '#94a3b8';
+      percentLabel.textContent = tw.filled ? 'Fisik' : 'Kosong';
+    }
+    if (stats) {
+      if (tw.filled) {
+        stats.innerHTML = `
+          <div><strong id="twCountVal_${k}">${tw.count}</strong> Indikator terdata</div>
+          <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_${k}">Rp ${tw.totalRealisasi.toLocaleString('id-ID')}</strong></div>
+          <div id="twKeuanganVal_${k}" style="margin-top:1px;font-size:10.5px;color:#2563eb;font-weight:600;">Serapan Keuangan: ${tw.avgKeuangan}%</div>
+        `;
+      } else {
+        stats.innerHTML = `
+          <div><strong id="twCountVal_${k}">0</strong> Indikator terdata</div>
+          <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_${k}">Rp 0</strong></div>
+          <div id="twKeuanganVal_${k}" style="margin-top:1px;font-size:10.5px;color:#94a3b8;">Belum ada input laporan</div>
+        `;
+      }
+    }
+    if (actionWrap) {
+      if (tw.filled) {
+        actionWrap.innerHTML = `
+          <button type="button" class="btn btn-outline btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianRincian('${k}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;border-color:#cbd5e1;color:#334155;cursor:pointer;">
+            <span>Lihat Rincian</span>
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        `;
+      } else {
+        actionWrap.innerHTML = `
+          <button type="button" class="btn btn-primary btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianInput('${k}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;background:#2563eb;color:#ffffff;border:none;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 1px 3px rgba(37,99,235,0.2);cursor:pointer;">
+            <span>+ Input ${k}</span>
+          </button>
+        `;
+      }
+    }
+  });
+}
+window.updateDashboardTwCards = updateDashboardTwCards;
+
+function openCapaianRincian(twKey, year) {
+  const targetYear = parseInt(year || (typeof dashboardChartCapaianYear !== 'undefined' ? dashboardChartCapaianYear : 2026)) || activeCapaianTahun;
+  activeCapaianTahun = targetYear;
+
+  if (twKey) {
+    activeCapaianTriwulan = twKey;
+  }
+
+  navigateAdmin('capaian-kinerja');
+
+  const selectTahun = document.getElementById('capaianFilterTahun');
+  if (selectTahun) {
+    let exists = false;
+    for (let i = 0; i < selectTahun.options.length; i++) {
+      if (parseInt(selectTahun.options[i].value) === activeCapaianTahun) {
+        selectTahun.selectedIndex = i;
+        exists = true;
+        break;
+      }
+    }
+    if (!exists) {
+      const opt = document.createElement('option');
+      opt.value = activeCapaianTahun;
+      opt.textContent = activeCapaianTahun;
+      opt.selected = true;
+      selectTahun.appendChild(opt);
+    }
+  }
+
+  const selectTW = document.getElementById('capaianFilterTriwulan');
+  if (selectTW && twKey) {
+    selectTW.value = twKey;
+  }
+
+  if (typeof renderCapaianTable === 'function') {
+    renderCapaianTable();
+  }
+
+  setTimeout(() => {
+    const tableEl = document.getElementById('tableCapaianKinerja') || document.querySelector('.table-responsive');
+    if (tableEl) {
+      tableEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, 100);
+}
+window.openCapaianRincian = openCapaianRincian;
+
+function openCapaianInput(twKey, year) {
+  openCapaianRincian(twKey, year);
+  setTimeout(() => {
+    if (typeof openModalCapaian === 'function') {
+      openModalCapaian('add', null, twKey || 'TW I');
+    }
+  }, 150);
+}
+window.openCapaianInput = openCapaianInput;
 
 function setCapaianChartMode(mode) {
-  dashboardChartCapaianMode = mode || 'kuartal';
+  dashboardChartCapaianMode = (mode === 'tren-tahunan') ? 'tren-tahunan' : 'kuartal';
   const btnKuartal = document.getElementById('btnModeKuartal');
-  const btnIndikator = document.getElementById('btnModeIndikator');
   const btnTren = document.getElementById('btnModeTren');
-  const filterWrap = document.getElementById('capaianFilterWrap');
 
-  [btnKuartal, btnIndikator, btnTren].forEach(b => b?.classList.remove('active'));
+  btnKuartal?.classList.remove('active');
+  btnTren?.classList.remove('active');
 
-  if (mode === 'kuartal') {
+  if (dashboardChartCapaianMode === 'kuartal') {
     btnKuartal?.classList.add('active');
-    if (filterWrap) filterWrap.style.display = 'none';
-  } else if (mode === 'indikator') {
-    btnIndikator?.classList.add('active');
-    if (filterWrap) filterWrap.style.display = 'flex';
   } else {
     btnTren?.classList.add('active');
-    if (filterWrap) filterWrap.style.display = 'none';
   }
 
   initHopeActivityChart();
 }
 window.setCapaianChartMode = setCapaianChartMode;
+
+function filterIndikatorTable() {
+  const twKey = dashboardChartCapaianTw || 'Semua';
+  const yr = parseInt(dashboardChartCapaianYear) || 2026;
+  const rows = document.querySelectorAll('#tableIndikatorTriwulan tbody tr.row-indikator');
+  const emptyRow = document.getElementById('rowIndikatorEmpty');
+  const emptyTitle = document.getElementById('emptyIndikatorTitle');
+  const emptySub = document.getElementById('emptyIndikatorSub');
+  const btnInputTw = document.getElementById('btnInputSpecificTw');
+  let visibleCount = 0;
+
+  rows.forEach(r => {
+    const rowTw = r.getAttribute('data-triwulan');
+    const rowYr = parseInt(r.getAttribute('data-tahun') || 2026);
+    const matchTw = (!twKey || twKey === 'Semua' || rowTw === twKey);
+    const matchYr = (!yr || rowYr === yr);
+
+    if (matchTw && matchYr) {
+      r.style.display = '';
+      visibleCount++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+
+  if (emptyRow) {
+    if (visibleCount === 0) {
+      emptyRow.style.display = '';
+      let friendlyName = 'periode ini';
+      if (twKey === 'TW I') friendlyName = `Triwulan I Tahun ${yr}`;
+      else if (twKey === 'TW II') friendlyName = `Triwulan II Tahun ${yr}`;
+      else if (twKey === 'TW III') friendlyName = `Triwulan III Tahun ${yr}`;
+      else if (twKey === 'TW IV') friendlyName = `Triwulan IV Tahun ${yr}`;
+      else friendlyName = `Tahun ${yr}`;
+
+      if (emptyTitle) emptyTitle.textContent = `Belum Ada Data Indikator untuk ${friendlyName}`;
+      if (emptySub) emptySub.textContent = `Laporan capaian kinerja belum diinput untuk ${friendlyName}. Anda dapat menambahkannya sekarang.`;
+      if (btnInputTw) {
+        btnInputTw.style.display = 'inline-flex';
+        btnInputTw.innerHTML = `<span>+ Input Data Capaian ${twKey !== 'Semua' ? twKey : ''}</span>`;
+      }
+    } else {
+      emptyRow.style.display = 'none';
+    }
+  }
+
+  const currentTwTitle = document.getElementById('currentTwTitle');
+  if (currentTwTitle) {
+    let tTitle = `Semua Triwulan (Tahun ${yr})`;
+    if (twKey === 'TW I') tTitle = `Triwulan I (Januari – Maret ${yr})`;
+    else if (twKey === 'TW II') tTitle = `Triwulan II (April – Juni ${yr})`;
+    else if (twKey === 'TW III') tTitle = `Triwulan III (Juli – September ${yr})`;
+    else if (twKey === 'TW IV') tTitle = `Triwulan IV (Oktober – Desember ${yr})`;
+    currentTwTitle.textContent = tTitle;
+  }
+}
+window.filterIndikatorTable = filterIndikatorTable;
 
 function selectDashboardTriwulan(twKey) {
   dashboardChartCapaianTw = twKey || 'Semua';
@@ -1898,58 +2170,7 @@ function selectDashboardTriwulan(twKey) {
   });
 
   // 3. Filter baris tabel indikator
-  const rows = document.querySelectorAll('#tableIndikatorTriwulan tbody tr.row-indikator');
-  const emptyRow = document.getElementById('rowIndikatorEmpty');
-  const emptyTitle = document.getElementById('emptyIndikatorTitle');
-  const emptySub = document.getElementById('emptyIndikatorSub');
-  const btnInputTw = document.getElementById('btnInputSpecificTw');
-  let visibleCount = 0;
-
-  rows.forEach(r => {
-    const rowTw = r.getAttribute('data-triwulan');
-    if (!twKey || twKey === 'Semua' || rowTw === twKey) {
-      r.style.display = '';
-      visibleCount++;
-    } else {
-      r.style.display = 'none';
-    }
-  });
-
-  if (emptyRow) {
-    if (visibleCount === 0) {
-      emptyRow.style.display = '';
-      let friendlyName = 'periode ini';
-      if (twKey === 'TW I') friendlyName = 'Triwulan I (Januari – Maret)';
-      else if (twKey === 'TW II') friendlyName = 'Triwulan II (April – Juni)';
-      else if (twKey === 'TW III') friendlyName = 'Triwulan III (Juli – September)';
-      else if (twKey === 'TW IV') friendlyName = 'Triwulan IV (Oktober – Desember)';
-
-      if (emptyTitle) emptyTitle.textContent = `Belum Ada Data Indikator untuk ${friendlyName}`;
-      if (emptySub) emptySub.textContent = `Laporan capaian kinerja belum diinput untuk ${friendlyName}. Anda dapat menambahkannya sekarang.`;
-      if (btnInputTw) {
-        btnInputTw.style.display = 'inline-flex';
-        btnInputTw.innerHTML = `<span>+ Input Data Capaian ${twKey}</span>`;
-      }
-    } else {
-      emptyRow.style.display = 'none';
-    }
-  }
-
-  // 4. Update judul rincian indikator
-  const currentTwTitle = document.getElementById('currentTwTitle');
-  if (currentTwTitle) {
-    let tTitle = 'Semua Triwulan (Gabungan Data)';
-    if (twKey === 'TW I') tTitle = 'Triwulan I (Januari – Maret)';
-    else if (twKey === 'TW II') tTitle = 'Triwulan II (April – Juni)';
-    else if (twKey === 'TW III') tTitle = 'Triwulan III (Juli – September)';
-    else if (twKey === 'TW IV') tTitle = 'Triwulan IV (Oktober – Desember)';
-    currentTwTitle.textContent = tTitle;
-  }
-
-  // Jika sedang di mode 'indikator', re-render chart sesuai filter
-  if (dashboardChartCapaianMode === 'indikator') {
-    initHopeActivityChart();
-  }
+  filterIndikatorTable();
 }
 window.selectDashboardTriwulan = selectDashboardTriwulan;
 
@@ -1959,7 +2180,13 @@ function filterCapaianDashboardChart(tw) {
 window.filterCapaianDashboardChart = filterCapaianDashboardChart;
 
 function filterCapaianDashboardYear(yr) {
-  dashboardChartCapaianYear = yr || 'Semua';
+  dashboardChartCapaianYear = String(yr || '2026');
+  const sel = document.getElementById('filterChartCapaianYear');
+  if (sel && sel.value !== dashboardChartCapaianYear) {
+    sel.value = dashboardChartCapaianYear;
+  }
+  updateDashboardTwCards(dashboardChartCapaianYear);
+  filterIndikatorTable();
   initHopeActivityChart();
 }
 window.filterCapaianDashboardYear = filterCapaianDashboardYear;
@@ -2107,28 +2334,15 @@ function renderQuarterlyChart(canvas, innerContainer, scrollWrap, scrollHint, na
   innerContainer.style.width = '100%';
   innerContainer.style.minWidth = '100%';
 
-  const twLabels = ['Triwulan I (Jan - Mar)', 'Triwulan II (Apr - Jun)', 'Triwulan III (Jul - Sep)', 'Triwulan IV (Okt - Des)'];
+  const targetYear = parseInt(dashboardChartCapaianYear) || 2026;
+  const { summary: twDataMap } = calculateQuarterlySummary(targetYear);
+  const twLabels = [
+    ['Triwulan I', `Jan – Mar ${targetYear}`],
+    ['Triwulan II', `Apr – Jun ${targetYear}`],
+    ['Triwulan III', `Jul – Sep ${targetYear}`],
+    ['Triwulan IV', `Okt – Des ${targetYear}`]
+  ];
   const twKeys = ['TW I', 'TW II', 'TW III', 'TW IV'];
-
-  let twDataMap = window.serverTwSummary || null;
-  if (!twDataMap && typeof capaianDb !== 'undefined') {
-    twDataMap = {
-      'TW I': { avgCapaian: 0, filled: false, count: 0 },
-      'TW II': { avgCapaian: 0, filled: false, count: 0 },
-      'TW III': { avgCapaian: 0, filled: false, count: 0 },
-      'TW IV': { avgCapaian: 0, filled: false, count: 0 }
-    };
-    capaianDb.forEach(item => {
-      const k = (item.triwulan || '').trim();
-      if (twDataMap[k]) {
-        twDataMap[k].filled = true;
-        twDataMap[k].count++;
-        let p = parseFloat(item.capaian_kinerja_persen) || 0;
-        if (p <= 0 && item.target_tahunan > 0) p = (item.realisasi_kinerja / item.target_tahunan) * 100;
-        twDataMap[k].avgCapaian = Math.min(100, Math.max(0, p));
-      }
-    });
-  }
 
   const values = [];
   const bgColors = [];
@@ -2214,7 +2428,7 @@ function renderQuarterlyChart(canvas, innerContainer, scrollWrap, scrollHint, na
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      layout: { padding: { top: 28, bottom: 8, left: 14, right: 18 } },
+      layout: { padding: { top: 28, bottom: 18, left: 14, right: 18 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -2242,7 +2456,10 @@ function renderQuarterlyChart(canvas, innerContainer, scrollWrap, scrollHint, na
           ticks: {
             color: '#1e293b',
             font: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: '700' },
-            padding: 8
+            padding: 10,
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: false
           }
         },
         y: {
@@ -3792,13 +4009,6 @@ function formatDesimalCapaian(val) {
 }
 window.formatDesimalCapaian = formatDesimalCapaian;
 
-function getPredikatBadgeHtml(predikat) {
-  let cls = 'kurang';
-  if (predikat === 'Sangat Berhasil') cls = 'sangat-berhasil';
-  else if (predikat === 'Berhasil') cls = 'berhasil';
-  else if (predikat === 'Cukup') cls = 'cukup';
-  return `<span class="predikat-chip ${cls}">${predikat || 'Belum Ada'}</span>`;
-}
 
 // Inisialisasi & Populasi Dropdown Tahun Dinamis (Tidak Terbatas)
 function populateCapaianYearFilter(selectedYear) {
@@ -3917,36 +4127,242 @@ function renderBuktiCell(row) {
 }
 window.renderBuktiCell = renderBuktiCell;
 
-// Render Tabel Capaian Kinerja (e-SAKIP Format Sesuai Foto)
+// Helper Predikat Badge
+function getPredikatBadgeHtml(predikat) {
+  if (!predikat || predikat === '-' || predikat === 'Belum Ada') {
+    return '<span style="color:#94a3b8;font-size:11px;font-weight:600;">-</span>';
+  }
+  let cls = 'kurang';
+  const p = String(predikat).toLowerCase();
+  if (p.includes('sangat tinggi') || p.includes('sangat berhasil')) cls = 'sangat-berhasil';
+  else if (p.includes('tinggi') || p.includes('berhasil')) cls = 'berhasil';
+  else if (p.includes('sedang') || p.includes('cukup')) cls = 'cukup';
+  else if (p.includes('kurang') || p.includes('rendah')) cls = 'kurang';
+  return `<span class="predikat-chip ${cls}" style="white-space:nowrap;font-size:10.5px;padding:2px 8px;">${predikat}</span>`;
+}
+window.getPredikatBadgeHtml = getPredikatBadgeHtml;
+
+function getPredikatFromPercent(pct) {
+  if (pct >= 90) return 'Sangat Berhasil';
+  if (pct >= 75) return 'Berhasil';
+  if (pct >= 60) return 'Cukup';
+  if (pct >= 50) return 'Sedang';
+  return 'Kurang';
+}
+window.getPredikatFromPercent = getPredikatFromPercent;
+
+// Render Tabel Capaian Kinerja (Mendukung Tampilan TW I-IV Tunggal & Matriks 42 Kolom saat Filter Semua Triwulan)
 function renderCapaianTable() {
   const tbody = document.getElementById('tbodyCapaianKinerja');
   if (!tbody) return;
 
+  const thead = document.getElementById('theadCapaianKinerja') || document.querySelector('#tableCapaianKinerja thead');
+  const isSemua = (activeCapaianTriwulan === 'Semua');
+
   populateCapaianYearFilter(activeCapaianTahun);
 
-  // Update header text dinamis sesuai Tahun & Triwulan aktif
-  const thTahun = document.getElementById('thDataTahun');
-  const thSubKinerja = document.getElementById('thSubKinerjaTW');
-  const thSubKeuangan = document.getElementById('thSubKeuanganTW');
-  const currentTW = activeCapaianTriwulan !== 'Semua' ? activeCapaianTriwulan : 'TW I';
+  // Update header thead secara dinamis sesuai pilihan filter Triwulan
+  if (thead) {
+    if (isSemua) {
+      // JIKA MEMILIH "SEMUA TRIWULAN" / TAHUNAN: TAMPILKAN MATRIKS LENGKAP 42 KOLOM RESMI PERSIS FOTO
+      thead.innerHTML = `
+        <!-- Baris 1: Header Grup Utama -->
+        <tr class="head-top">
+          <th rowspan="3" style="text-align:center;white-space:nowrap;width:1%;">No</th>
+          <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:220px;white-space:normal;word-break:break-word;">Tujuan / Sasaran / Program / Kegiatan / Sub Kegiatan</th>
+          <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:200px;white-space:normal;word-break:break-word;">Indikator Kinerja</th>
+          <th colspan="6" id="thDataTahun" style="white-space:nowrap;">Data ${activeCapaianTahun}</th>
+          <th colspan="4" style="white-space:nowrap;">Target Kinerja</th>
+          <th colspan="15" style="white-space:nowrap;">Capaian Kinerja</th>
+          <th colspan="10" style="white-space:nowrap;">Capaian Keuangan</th>
+          <th colspan="2" style="white-space:nowrap;">Target Akhir RPJMD ${activeCapaianTahun}</th>
+          <th colspan="2" style="white-space:nowrap;">Capaian Terhadap Target Akhir Renstra ${activeCapaianTahun}</th>
+          <th rowspan="3" style="text-align:center;white-space:nowrap;min-width:140px;">Bukti Pendukung</th>
+          <th rowspan="3" style="text-align:center;white-space:nowrap;width:1%;">Aksi</th>
+        </tr>
 
-  if (thTahun) thTahun.textContent = `Data ${activeCapaianTahun}`;
-  if (thSubKinerja) thSubKinerja.textContent = currentTW;
-  if (thSubKeuangan) thSubKeuangan.textContent = currentTW;
+        <!-- Baris 2: Kolom Rincian & Sub Header Triwulan -->
+        <tr class="head-sub">
+          <!-- Data Tahun -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:75px;">Target</th>
+          <th colspan="4" style="text-align:center;white-space:nowrap;">Rp</th>
+          <th rowspan="2" style="text-align:center;white-space:nowrap;min-width:70px;">Satuan</th>
+          <!-- Target Kinerja -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:70px;">TW I</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:70px;">TW II</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:70px;">TW III</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:70px;">TW IV</th>
+          <!-- Capaian Kinerja -->
+          <th colspan="3" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">TW I</th>
+          <th colspan="3" style="text-align:center;background:#f0fdf4;color:#166534;font-weight:800;white-space:nowrap;">TW II</th>
+          <th colspan="3" style="text-align:center;background:#f0f9ff;color:#0369a1;font-weight:800;white-space:nowrap;">TW III</th>
+          <th colspan="3" style="text-align:center;background:#faf5ff;color:#6b21a8;font-weight:800;white-space:nowrap;">TW IV</th>
+          <th colspan="3" style="text-align:center;background:#fef2f2;color:#991b1b;font-weight:800;white-space:nowrap;">Total ${activeCapaianTahun}</th>
+          <!-- Capaian Keuangan -->
+          <th colspan="2" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">TW I</th>
+          <th colspan="2" style="text-align:center;background:#f0fdf4;color:#166534;font-weight:800;white-space:nowrap;">TW II</th>
+          <th colspan="2" style="text-align:center;background:#f0f9ff;color:#0369a1;font-weight:800;white-space:nowrap;">TW III</th>
+          <th colspan="2" style="text-align:center;background:#faf5ff;color:#6b21a8;font-weight:800;white-space:nowrap;">TW IV</th>
+          <th colspan="2" style="text-align:center;background:#fef2f2;color:#991b1b;font-weight:800;white-space:nowrap;">Total ${activeCapaianTahun}</th>
+          <!-- Target Akhir RPJMD -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:80px;">Kinerja</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:110px;">Rp</th>
+          <!-- Capaian Terhadap Target Akhir Renstra -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:80px;">Kinerja (%)</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:80px;">Rp (%)</th>
+        </tr>
 
-  // Filter Data berdasarkan Tahun & Triwulan aktif
+        <!-- Baris 3: Rincian Realisasi, Persentase, dan Predikat -->
+        <tr class="head-detail">
+          <!-- Pagu Rp per TW -->
+          <th style="text-align:right;white-space:nowrap;min-width:90px;">TW I</th>
+          <th style="text-align:right;white-space:nowrap;min-width:90px;">TW II</th>
+          <th style="text-align:right;white-space:nowrap;min-width:90px;">TW III</th>
+          <th style="text-align:right;white-space:nowrap;min-width:90px;">TW IV</th>
+
+          <!-- Capaian Kinerja TW I -->
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:105px;">Predikat</th>
+          <!-- Capaian Kinerja TW II -->
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:105px;">Predikat</th>
+          <!-- Capaian Kinerja TW III -->
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:105px;">Predikat</th>
+          <!-- Capaian Kinerja TW IV -->
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:105px;">Predikat</th>
+          <!-- Capaian Kinerja Total -->
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:105px;">Predikat</th>
+
+          <!-- Capaian Keuangan TW I -->
+          <th style="text-align:right;white-space:nowrap;min-width:105px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <!-- Capaian Keuangan TW II -->
+          <th style="text-align:right;white-space:nowrap;min-width:105px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <!-- Capaian Keuangan TW III -->
+          <th style="text-align:right;white-space:nowrap;min-width:105px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <!-- Capaian Keuangan TW IV -->
+          <th style="text-align:right;white-space:nowrap;min-width:105px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <!-- Capaian Keuangan Total -->
+          <th style="text-align:right;white-space:nowrap;min-width:105px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+        </tr>
+
+        <!-- Baris 4: Baris Penomoran Rumus Resmi (1) s/d (42) Sesuai Foto -->
+        <tr class="head-numbering" style="background:#f1f5f9;font-size:10px;font-weight:700;color:#475569;text-align:center;">
+          <th style="text-align:center;padding:4px 2px;">(1)</th>
+          <th style="text-align:center;padding:4px 2px;">(2)</th>
+          <th style="text-align:center;padding:4px 2px;">(3)</th>
+          <th style="text-align:center;padding:4px 2px;">(4)</th>
+          <th style="text-align:center;padding:4px 2px;">(5)</th>
+          <th style="text-align:center;padding:4px 2px;">(6)</th>
+          <th style="text-align:center;padding:4px 2px;">(7)</th>
+          <th style="text-align:center;padding:4px 2px;">(8)</th>
+          <th style="text-align:center;padding:4px 2px;">(9)</th>
+          <th style="text-align:center;padding:4px 2px;">(10)</th>
+          <th style="text-align:center;padding:4px 2px;">(11)</th>
+          <th style="text-align:center;padding:4px 2px;">(12)</th>
+          <th style="text-align:center;padding:4px 2px;">(13)</th>
+          <th style="text-align:center;padding:4px 2px;">(14)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(15=14/10*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(16)</th>
+          <th style="text-align:center;padding:4px 2px;">(17)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(18=17/11*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(19)</th>
+          <th style="text-align:center;padding:4px 2px;">(20)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(21=20/12*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(22)</th>
+          <th style="text-align:center;padding:4px 2px;">(23)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(24=23/13*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(25)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:8.5px;">(26=14..17..20..23)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(27=26/4*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(28)</th>
+          <th style="text-align:center;padding:4px 2px;">(29)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(30=29/5*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(31)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(32=31/6*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(33)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(34=33/7*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(35)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(36=35/8*100)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:8.5px;">(37=29+31+33+35)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:8.5px;">(38=37/(5+6+7+8)*100)</th>
+          <th style="text-align:center;padding:4px 2px;">(39)</th>
+          <th style="text-align:center;padding:4px 2px;">(40)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(41=26/39*100)</th>
+          <th style="text-align:center;padding:4px 2px;font-size:9px;">(42=37/40*100)</th>
+          <th style="text-align:center;padding:4px 2px;">Bukti</th>
+          <th style="text-align:center;padding:4px 2px;">Aksi</th>
+        </tr>
+      `;
+    } else {
+      // JIKA MEMILIH SALAH SATU TRIWULAN (TW I, TW II, TW III, ATAU TW IV): TAMPILKAN FORMAT AWAL
+      const twLabel = activeCapaianTriwulan || 'TW I';
+      thead.innerHTML = `
+        <!-- Baris 1: Header Grup Utama -->
+        <tr class="head-top">
+          <th rowspan="3" style="width:38px;text-align:center;">No</th>
+          <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:220px;white-space:normal;word-break:break-word;">Tujuan / Sasaran / Program / Kegiatan / Sub Kegiatan</th>
+          <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:200px;white-space:normal;word-break:break-word;">Indikator Kinerja</th>
+          <th colspan="3" id="thDataTahun">Data ${activeCapaianTahun}</th>
+          <th colspan="4">Target Kinerja</th>
+          <th colspan="3" id="thGroupCapaianKinerja">Capaian Kinerja</th>
+          <th colspan="2" id="thGroupCapaianKeuangan">Capaian Keuangan</th>
+          <th rowspan="3" style="text-align:center;white-space:nowrap;min-width:130px;">Bukti Pendukung</th>
+          <th rowspan="3" style="text-align:center;white-space:nowrap;width:1%;">Aksi</th>
+        </tr>
+
+        <!-- Baris 2: Kolom Rincian & Sub Header Triwulan -->
+        <tr class="head-sub">
+          <!-- Data Tahun (Rowspan 2) -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:85px;">Target</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:125px;">Rp</th>
+          <th rowspan="2" style="text-align:center;white-space:nowrap;min-width:80px;">Satuan</th>
+          <!-- Target Kinerja (Rowspan 2) -->
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW I</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW II</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW III</th>
+          <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW IV</th>
+          <!-- Capaian Kinerja (Sub TW Dinamis) -->
+          <th colspan="3" id="thSubKinerjaTW" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">${twLabel}</th>
+          <!-- Capaian Keuangan (Sub TW Dinamis) -->
+          <th colspan="2" id="thSubKeuanganTW" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">${twLabel}</th>
+        </tr>
+
+        <!-- Baris 3: Rincian Realisasi, Persentase, dan Predikat -->
+        <tr class="head-detail">
+          <!-- Capaian Kinerja -->
+          <th style="text-align:right;white-space:nowrap;min-width:85px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+          <th style="text-align:center;white-space:nowrap;min-width:115px;">Predikat</th>
+          <!-- Capaian Keuangan -->
+          <th style="text-align:right;white-space:nowrap;min-width:125px;">Realisasi</th>
+          <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+        </tr>
+      `;
+    }
+  }
+
+  // Filter Data berdasarkan Tahun aktif & kata kunci pencarian
   const filtered = capaianDb.filter(item => {
     const matchTahun = parseInt(item.tahun) === parseInt(activeCapaianTahun);
-    let matchTW = true;
-    if (activeCapaianTriwulan !== 'Semua') {
-      matchTW = (item.triwulan === activeCapaianTriwulan);
-    }
     let matchQuery = true;
     if (capaianSearchQuery) {
       const combined = `${item.sasaran || ''} ${item.indikator || ''} ${item.satuan || ''} ${item.bukti_keterangan || ''}`.toLowerCase();
       matchQuery = combined.includes(capaianSearchQuery);
     }
-    return matchTahun && matchTW && matchQuery;
+    return matchTahun && matchQuery;
   });
 
   // Update badge count
@@ -3954,13 +4370,14 @@ function renderCapaianTable() {
   if (badgeCount) badgeCount.textContent = capaianDb.length;
 
   if (filtered.length === 0) {
+    const emptyColspan = isSemua ? 44 : 17;
     tbody.innerHTML = `
       <tr>
-        <td colspan="17" style="text-align:center;padding:48px 24px;background:#ffffff;">
+        <td colspan="${emptyColspan}" style="text-align:center;padding:48px 24px;background:#ffffff;">
           <div style="font-size:36px;margin-bottom:12px;">📊</div>
-          <div style="font-weight:700;font-size:15px;color:#1e293b;">Belum Ada Data Capaian Kinerja (${activeCapaianTriwulan} Tahun ${activeCapaianTahun})</div>
+          <div style="font-weight:700;font-size:15px;color:#1e293b;">Belum Ada Data Capaian Kinerja (Tahun ${activeCapaianTahun})</div>
           <div style="font-size:13px;color:#64748b;margin-top:6px;max-width:560px;margin-left:auto;margin-right:auto;line-height:1.5;">
-            Tabel ini sengaja dikosongkan agar Anda dapat menginputkan data capaian secara mandiri. Silakan klik tombol di bawah untuk mulai menambahkan target, realisasi indikator kinerja, dan serapan keuangan.
+            Tabel evaluasi triwulanan ini belum memiliki data. Silakan klik tombol di bawah untuk mulai menambahkan target, realisasi indikator kinerja TW I s/d TW IV, dan serapan anggaran keuangan.
           </div>
           <button type="button" class="btn btn-primary" onclick="openModalCapaian('create')" style="margin-top:16px;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 18px;font-weight:700;border-radius:8px;background:#00875a;border-color:#00875a;color:#ffffff;cursor:pointer;">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -3974,65 +4391,228 @@ function renderCapaianTable() {
 
   let html = '';
   filtered.forEach((row, index) => {
-    html += `
-      <tr data-capaian-id="${row.id}" onclick="onCapaianRowClick(event, ${row.id})" style="cursor:pointer;" title="Klik baris ini untuk mengedit atau mengisi isian capaian kinerja">
-        <!-- 1. NO -->
-        <td style="text-align:center;font-weight:700;color:#64748b;white-space:nowrap;">${index + 1}</td>
-        
-        <!-- 2. SASARAN / PROGRAM / KEGIATAN (Melebar Dinamis Sesuai Kalimat) -->
-        <td class="col-text" style="font-weight:700;color:#1e293b;line-height:1.45;min-width:220px;">${row.sasaran || '-'}</td>
-        
-        <!-- 3. INDIKATOR KINERJA (Melebar Dinamis Sesuai Kalimat) -->
-        <td class="col-text" style="color:#334155;line-height:1.45;min-width:200px;">${row.indikator || '-'}</td>
-        
-        <!-- 4, 5, 6. DATA TAHUN (TARGET, RP, SATUAN - Data Asli Lengkap) -->
-        <td style="text-align:right;font-weight:600;white-space:nowrap;">${formatDesimalCapaian(row.target_tahunan)}</td>
-        <td style="text-align:right;font-weight:700;color:#1e3a8a;white-space:nowrap;">${formatRupiahCapaian(row.pagu_anggaran)}</td>
-        <td style="text-align:center;font-weight:600;white-space:nowrap;">${row.satuan || '-'}</td>
+    // Pagu TW 1..4 (fallback jika belum diisi: bagi 4 dari pagu tahunan)
+    const p1 = parseFloat(row.pagu_tw1) > 0 ? parseFloat(row.pagu_tw1) : (parseFloat(row.pagu_anggaran) > 0 ? parseFloat(row.pagu_anggaran) / 4 : 0);
+    const p2 = parseFloat(row.pagu_tw2) > 0 ? parseFloat(row.pagu_tw2) : (parseFloat(row.pagu_anggaran) > 0 ? parseFloat(row.pagu_anggaran) / 4 : 0);
+    const p3 = parseFloat(row.pagu_tw3) > 0 ? parseFloat(row.pagu_tw3) : (parseFloat(row.pagu_anggaran) > 0 ? parseFloat(row.pagu_anggaran) / 4 : 0);
+    const p4 = parseFloat(row.pagu_tw4) > 0 ? parseFloat(row.pagu_tw4) : (parseFloat(row.pagu_anggaran) > 0 ? parseFloat(row.pagu_anggaran) / 4 : 0);
 
-        <!-- 7, 8, 9, 10. TARGET KINERJA (TW I - IV) -->
-        <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw1)}</td>
-        <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw2)}</td>
-        <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw3)}</td>
-        <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw4)}</td>
+    // Target Fisik TW 1..4
+    const t1 = parseFloat(row.target_tw1) || 0;
+    const t2 = parseFloat(row.target_tw2) || 0;
+    const t3 = parseFloat(row.target_tw3) || 0;
+    const t4 = parseFloat(row.target_tw4) || 0;
 
-        <!-- 11, 12, 13. CAPAIAN KINERJA (REALISASI, %, PREDIKAT) -->
-        <td style="text-align:right;font-weight:700;color:#c2410c;white-space:nowrap;" class="cell-input">
-          ${formatDesimalCapaian(row.realisasi_kinerja)}
-        </td>
-        <td style="text-align:right;font-weight:800;color:#b91c1c;white-space:nowrap;" class="cell-rumus">
-          ${formatDesimalCapaian(row.capaian_kinerja_persen)}%
-        </td>
-        <td style="text-align:center;white-space:nowrap;">
-          ${getPredikatBadgeHtml(row.predikat_kinerja)}
-        </td>
+    // Realisasi Fisik TW 1..4
+    const rk1 = parseFloat(row.realisasi_kinerja_tw1 !== undefined ? row.realisasi_kinerja_tw1 : row.realisasi_kinerja) || 0;
+    const ck1 = parseFloat(row.capaian_kinerja_tw1 !== undefined && row.capaian_kinerja_tw1 > 0 ? row.capaian_kinerja_tw1 : (t1 > 0 ? (rk1 / t1) * 100 : row.capaian_kinerja_persen)) || 0;
+    const pk1 = row.predikat_kinerja_tw1 || (rk1 > 0 ? row.predikat_kinerja : '-');
 
-        <!-- 14, 15. CAPAIAN KEUANGAN (REALISASI, %) -->
-        <td style="text-align:right;font-weight:700;white-space:nowrap;" class="cell-input">
-          ${parseFloat(row.realisasi_keuangan) > 0 ? formatRupiahCapaian(row.realisasi_keuangan) : '-'}
-        </td>
-        <td style="text-align:right;font-weight:800;color:#b91c1c;white-space:nowrap;" class="cell-rumus">
-          ${(parseFloat(row.pagu_anggaran) > 0 && parseFloat(row.realisasi_keuangan) > 0) ? formatDesimalCapaian(row.capaian_keuangan_persen) + '%' : '-'}
-        </td>
+    const rk2 = parseFloat(row.realisasi_kinerja_tw2) || 0;
+    const ck2 = parseFloat(row.capaian_kinerja_tw2 !== undefined && row.capaian_kinerja_tw2 > 0 ? row.capaian_kinerja_tw2 : (t2 > 0 ? (rk2 / t2) * 100 : 0)) || 0;
+    const pk2 = row.predikat_kinerja_tw2 || (rk2 > 0 ? getPredikatFromPercent(ck2) : '-');
 
-        <!-- 16. BUKTI PENDUKUNG (DI SEBELAH KIRI AKSI) -->
-        <td style="text-align:center;white-space:nowrap;padding:6px 8px;" onclick="event.stopPropagation()">
-          ${renderBuktiCell(row)}
-        </td>
+    const rk3 = parseFloat(row.realisasi_kinerja_tw3) || 0;
+    const ck3 = parseFloat(row.capaian_kinerja_tw3 !== undefined && row.capaian_kinerja_tw3 > 0 ? row.capaian_kinerja_tw3 : (t3 > 0 ? (rk3 / t3) * 100 : 0)) || 0;
+    const pk3 = row.predikat_kinerja_tw3 || (rk3 > 0 ? getPredikatFromPercent(ck3) : '-');
 
-        <!-- 17. AKSI CRUD -->
-        <td style="text-align:center;white-space:nowrap;" onclick="event.stopPropagation()">
-          <div style="display:inline-flex;gap:4px;align-items:center;">
-            <button type="button" class="agenda-btn edit" onclick="openModalCapaian('edit', ${row.id})" title="Sunting / Isi Isian Capaian Kinerja">
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-            </button>
-            <button type="button" class="agenda-btn del" onclick="deleteCapaianData(${row.id})" title="Hapus Data Capaian">
-              <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
+    const rk4 = parseFloat(row.realisasi_kinerja_tw4) || 0;
+    const ck4 = parseFloat(row.capaian_kinerja_tw4 !== undefined && row.capaian_kinerja_tw4 > 0 ? row.capaian_kinerja_tw4 : (t4 > 0 ? (rk4 / t4) * 100 : 0)) || 0;
+    const pk4 = row.predikat_kinerja_tw4 || (rk4 > 0 ? getPredikatFromPercent(ck4) : '-');
+
+    const rkTot = parseFloat(row.realisasi_kinerja_total !== undefined && row.realisasi_kinerja_total > 0 ? row.realisasi_kinerja_total : (rk1 + rk2 + rk3 + rk4)) || 0;
+    const ckTot = parseFloat(row.capaian_kinerja_total !== undefined && row.capaian_kinerja_total > 0 ? row.capaian_kinerja_total : (parseFloat(row.target_tahunan) > 0 ? (rkTot / parseFloat(row.target_tahunan)) * 100 : row.capaian_kinerja_persen)) || 0;
+    const pkTot = row.predikat_kinerja_total || (rkTot > 0 ? row.predikat_kinerja : '-');
+
+    // Realisasi Keuangan TW 1..4 (Dihitung dari Pagu Anggaran Total: Realisasi / Pagu * 100%)
+    const totalPaguHitung = parseFloat(row.pagu_anggaran) > 0 ? parseFloat(row.pagu_anggaran) : (p1 + p2 + p3 + p4);
+    const rq1 = parseFloat(row.realisasi_keuangan_tw1 !== undefined && row.realisasi_keuangan_tw1 > 0 ? row.realisasi_keuangan_tw1 : row.realisasi_keuangan) || 0;
+    const cq1 = totalPaguHitung > 0 ? (rq1 / totalPaguHitung) * 100 : (parseFloat(row.capaian_keuangan_tw1) || 0);
+
+    const rq2 = parseFloat(row.realisasi_keuangan_tw2) || 0;
+    const cq2 = totalPaguHitung > 0 ? (rq2 / totalPaguHitung) * 100 : (parseFloat(row.capaian_keuangan_tw2) || 0);
+
+    const rq3 = parseFloat(row.realisasi_keuangan_tw3) || 0;
+    const cq3 = totalPaguHitung > 0 ? (rq3 / totalPaguHitung) * 100 : (parseFloat(row.capaian_keuangan_tw3) || 0);
+
+    const rq4 = parseFloat(row.realisasi_keuangan_tw4) || 0;
+    const cq4 = totalPaguHitung > 0 ? (rq4 / totalPaguHitung) * 100 : (parseFloat(row.capaian_keuangan_tw4) || 0);
+
+    const rqTot = parseFloat(row.realisasi_keuangan_total !== undefined && row.realisasi_keuangan_total > 0 ? row.realisasi_keuangan_total : (rq1 + rq2 + rq3 + rq4)) || 0;
+    const cqTot = totalPaguHitung > 0 ? (rqTot / totalPaguHitung) * 100 : (parseFloat(row.capaian_keuangan_total) || 0);
+
+    if (!isSemua) {
+      // JIKA MEMILIH SALAH SATU TRIWULAN (TW I, TW II, TW III, ATAU TW IV): TAMPILKAN FORMAT AWAL
+      let rkCur = 0, ckCur = 0, pkCur = '-';
+      let rqCur = 0, cqCur = 0;
+
+      if (activeCapaianTriwulan === 'TW I') {
+        rkCur = rk1; ckCur = ck1; pkCur = pk1;
+        rqCur = rq1; cqCur = cq1;
+      } else if (activeCapaianTriwulan === 'TW II') {
+        rkCur = rk2; ckCur = ck2; pkCur = pk2;
+        rqCur = rq2; cqCur = cq2;
+      } else if (activeCapaianTriwulan === 'TW III') {
+        rkCur = rk3; ckCur = ck3; pkCur = pk3;
+        rqCur = rq3; cqCur = cq3;
+      } else if (activeCapaianTriwulan === 'TW IV') {
+        rkCur = rk4; ckCur = ck4; pkCur = pk4;
+        rqCur = rq4; cqCur = cq4;
+      }
+
+      html += `
+        <tr data-capaian-id="${row.id}" onclick="onCapaianRowClick(event, ${row.id})" style="cursor:pointer;" title="Klik baris ini untuk mengedit data capaian kinerja lengkap">
+          <!-- (1) NO -->
+          <td style="text-align:center;font-weight:700;color:#64748b;white-space:nowrap;">${index + 1}</td>
+          
+          <!-- (2) TUJUAN / SASARAN / PROGRAM / KEGIATAN -->
+          <td class="col-text" style="font-weight:700;color:#1e293b;line-height:1.45;min-width:220px;">${row.sasaran || '-'}</td>
+          
+          <!-- (3) INDIKATOR KINERJA -->
+          <td class="col-text" style="color:#334155;line-height:1.45;min-width:200px;">${row.indikator || '-'}</td>
+          
+          <!-- DATA TAHUN: (4) TARGET, (5) RP, (6) SATUAN -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${formatDesimalCapaian(row.target_tahunan)}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${formatRupiahCapaian(row.pagu_anggaran)}</td>
+          <td style="text-align:center;font-weight:600;white-space:nowrap;">${row.satuan || '-'}</td>
+
+          <!-- TARGET KINERJA: (7) TW I, (8) TW II, (9) TW III, (10) TW IV -->
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw1)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw2)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw3)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw4)}</td>
+
+          <!-- CAPAIAN KINERJA (TRIWULAN TERPILIH): REALISASI, %, PREDIKAT -->
+          <td style="text-align:right;font-weight:700;color:#c2410c;white-space:nowrap;">${rkCur > 0 ? formatDesimalCapaian(rkCur) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#b91c1c;white-space:nowrap;">${(rkCur > 0 || ckCur > 0) ? formatDesimalCapaian(ckCur) + '%' : '-'}</td>
+          <td style="text-align:center;white-space:nowrap;">${getPredikatBadgeHtml(pkCur)}</td>
+
+          <!-- CAPAIAN KEUANGAN (TRIWULAN TERPILIH): REALISASI, % -->
+          <td style="text-align:right;font-weight:700;color:#1e40af;white-space:nowrap;">${rqCur > 0 ? formatRupiahCapaian(rqCur) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#1d4ed8;white-space:nowrap;">${(rqCur > 0 || cqCur > 0) ? formatDesimalCapaian(cqCur) + '%' : '-'}</td>
+
+          <!-- BUKTI PENDUKUNG -->
+          <td style="text-align:center;white-space:nowrap;padding:6px 8px;" onclick="event.stopPropagation()">
+            ${renderBuktiCell(row)}
+          </td>
+
+          <!-- AKSI CRUD -->
+          <td style="text-align:center;white-space:nowrap;" onclick="event.stopPropagation()">
+            <div style="display:inline-flex;gap:4px;align-items:center;">
+              <button type="button" class="agenda-btn edit" onclick="openModalCapaian('edit', ${row.id}, '${activeCapaianTriwulan}')" title="Sunting / Isi Rincian Capaian Kinerja">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button type="button" class="agenda-btn del" onclick="deleteCapaianData(${row.id})" title="Hapus Data Capaian">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    } else {
+      // JIKA MEMILIH "SEMUA TRIWULAN" / TAHUNAN: TAMPILKAN MATRIKS LENGKAP 42 KOLOM + BUKTI + AKSI
+      const rpjmdKin = parseFloat(row.target_rpjmd_kinerja) || 0;
+      const rpjmdKeu = parseFloat(row.target_rpjmd_keuangan) || 0;
+      const cRenKin = parseFloat(row.capaian_renstra_kinerja !== undefined && row.capaian_renstra_kinerja > 0 ? row.capaian_renstra_kinerja : (rpjmdKin > 0 ? (rkTot / rpjmdKin) * 100 : 0)) || 0;
+      const cRenKeu = parseFloat(row.capaian_renstra_keuangan !== undefined && row.capaian_renstra_keuangan > 0 ? row.capaian_renstra_keuangan : (rpjmdKeu > 0 ? (rqTot / rpjmdKeu) * 100 : 0)) || 0;
+
+      html += `
+        <tr data-capaian-id="${row.id}" onclick="onCapaianRowClick(event, ${row.id})" style="cursor:pointer;" title="Klik baris ini untuk mengedit data capaian kinerja lengkap">
+          <!-- (1) NO -->
+          <td style="text-align:center;font-weight:700;color:#64748b;white-space:nowrap;">${index + 1}</td>
+          
+          <!-- (2) TUJUAN / SASARAN / PROGRAM / KEGIATAN -->
+          <td class="col-text" style="font-weight:700;color:#1e293b;line-height:1.45;min-width:220px;">${row.sasaran || '-'}</td>
+          
+          <!-- (3) INDIKATOR KINERJA -->
+          <td class="col-text" style="color:#334155;line-height:1.45;min-width:200px;">${row.indikator || '-'}</td>
+          
+          <!-- DATA 2026: (4) TARGET, (5-8) RP PER TW, (9) SATUAN -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${formatDesimalCapaian(row.target_tahunan)}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${p1 > 0 ? formatRupiahCapaian(p1) : '-'}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${p2 > 0 ? formatRupiahCapaian(p2) : '-'}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${p3 > 0 ? formatRupiahCapaian(p3) : '-'}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${p4 > 0 ? formatRupiahCapaian(p4) : '-'}</td>
+          <td style="text-align:center;font-weight:600;white-space:nowrap;">${row.satuan || '-'}</td>
+
+          <!-- TARGET KINERJA: (10) TW I, (11) TW II, (12) TW III, (13) TW IV -->
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw1)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw2)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw3)}</td>
+          <td style="text-align:right;white-space:nowrap;">${formatDesimalCapaian(row.target_tw4)}</td>
+
+          <!-- CAPAIAN KINERJA TW I: (14, 15, 16) -->
+          <td style="text-align:right;font-weight:600;color:#c2410c;white-space:nowrap;">${rk1 > 0 ? formatDesimalCapaian(rk1) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#b91c1c;white-space:nowrap;">${(rk1 > 0 || ck1 > 0) ? formatDesimalCapaian(ck1) + '%' : '-'}</td>
+          <td style="text-align:center;white-space:nowrap;">${getPredikatBadgeHtml(pk1)}</td>
+
+          <!-- CAPAIAN KINERJA TW II: (17, 18, 19) -->
+          <td style="text-align:right;font-weight:600;color:#166534;white-space:nowrap;">${rk2 > 0 ? formatDesimalCapaian(rk2) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#15803d;white-space:nowrap;">${(rk2 > 0 || ck2 > 0) ? formatDesimalCapaian(ck2) + '%' : '-'}</td>
+          <td style="text-align:center;white-space:nowrap;">${getPredikatBadgeHtml(pk2)}</td>
+
+          <!-- CAPAIAN KINERJA TW III: (20, 21, 22) -->
+          <td style="text-align:right;font-weight:600;color:#0369a1;white-space:nowrap;">${rk3 > 0 ? formatDesimalCapaian(rk3) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#0284c7;white-space:nowrap;">${(rk3 > 0 || ck3 > 0) ? formatDesimalCapaian(ck3) + '%' : '-'}</td>
+          <td style="text-align:center;white-space:nowrap;">${getPredikatBadgeHtml(pk3)}</td>
+
+          <!-- CAPAIAN KINERJA TW IV: (23, 24, 25) -->
+          <td style="text-align:right;font-weight:600;color:#6b21a8;white-space:nowrap;">${rk4 > 0 ? formatDesimalCapaian(rk4) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#7e22ce;white-space:nowrap;">${(rk4 > 0 || ck4 > 0) ? formatDesimalCapaian(ck4) + '%' : '-'}</td>
+          <td style="text-align:center;white-space:nowrap;">${getPredikatBadgeHtml(pk4)}</td>
+
+          <!-- CAPAIAN KINERJA TOTAL 2026: (26, 27, 28) -->
+          <td style="text-align:right;font-weight:800;color:#991b1b;background:#fff1f2;white-space:nowrap;">${rkTot > 0 ? formatDesimalCapaian(rkTot) : '-'}</td>
+          <td style="text-align:right;font-weight:800;color:#b91c1c;background:#fff1f2;white-space:nowrap;">${(rkTot > 0 || ckTot > 0) ? formatDesimalCapaian(ckTot) + '%' : '-'}</td>
+          <td style="text-align:center;background:#fff1f2;white-space:nowrap;">${getPredikatBadgeHtml(pkTot)}</td>
+
+          <!-- CAPAIAN KEUANGAN TW I: (29, 30) -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${rq1 > 0 ? formatRupiahCapaian(rq1) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#c2410c;white-space:nowrap;">${(rq1 > 0 || cq1 > 0) ? formatDesimalCapaian(cq1) + '%' : '-'}</td>
+
+          <!-- CAPAIAN KEUANGAN TW II: (31, 32) -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${rq2 > 0 ? formatRupiahCapaian(rq2) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#166534;white-space:nowrap;">${(rq2 > 0 || cq2 > 0) ? formatDesimalCapaian(cq2) + '%' : '-'}</td>
+
+          <!-- CAPAIAN KEUANGAN TW III: (33, 34) -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${rq3 > 0 ? formatRupiahCapaian(rq3) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#0369a1;white-space:nowrap;">${(rq3 > 0 || cq3 > 0) ? formatDesimalCapaian(cq3) + '%' : '-'}</td>
+
+          <!-- CAPAIAN KEUANGAN TW IV: (35, 36) -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${rq4 > 0 ? formatRupiahCapaian(rq4) : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#6b21a8;white-space:nowrap;">${(rq4 > 0 || cq4 > 0) ? formatDesimalCapaian(cq4) + '%' : '-'}</td>
+
+          <!-- CAPAIAN KEUANGAN TOTAL 2026: (37, 38) -->
+          <td style="text-align:right;font-weight:800;color:#1e3a8a;background:#eff6ff;white-space:nowrap;">${rqTot > 0 ? formatRupiahCapaian(rqTot) : '-'}</td>
+          <td style="text-align:right;font-weight:800;color:#1d4ed8;background:#eff6ff;white-space:nowrap;">${(rqTot > 0 || cqTot > 0) ? formatDesimalCapaian(cqTot) + '%' : '-'}</td>
+
+          <!-- TARGET AKHIR RPJMD: (39, 40) -->
+          <td style="text-align:right;font-weight:600;white-space:nowrap;">${rpjmdKin > 0 ? formatDesimalCapaian(rpjmdKin) : '-'}</td>
+          <td style="text-align:right;font-weight:600;color:#1e3a8a;white-space:nowrap;">${rpjmdKeu > 0 ? formatRupiahCapaian(rpjmdKeu) : '-'}</td>
+
+          <!-- CAPAIAN AKHIR RENSTRA: (41, 42) -->
+          <td style="text-align:right;font-weight:700;color:#0f766e;white-space:nowrap;">${cRenKin > 0 ? formatDesimalCapaian(cRenKin) + '%' : '-'}</td>
+          <td style="text-align:right;font-weight:700;color:#0f766e;white-space:nowrap;">${cRenKeu > 0 ? formatDesimalCapaian(cRenKeu) + '%' : '-'}</td>
+
+          <!-- BUKTI PENDUKUNG -->
+          <td style="text-align:center;white-space:nowrap;padding:6px 8px;" onclick="event.stopPropagation()">
+            ${renderBuktiCell(row)}
+          </td>
+
+          <!-- AKSI CRUD -->
+          <td style="text-align:center;white-space:nowrap;" onclick="event.stopPropagation()">
+            <div style="display:inline-flex;gap:4px;align-items:center;">
+              <button type="button" class="agenda-btn edit" onclick="openModalCapaian('edit', ${row.id}, '${activeCapaianTriwulan}')" title="Sunting / Isi Rincian Capaian Kinerja">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </button>
+              <button type="button" class="agenda-btn del" onclick="deleteCapaianData(${row.id})" title="Hapus Data Capaian">
+                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
   });
 
   tbody.innerHTML = html;
@@ -4041,7 +4621,7 @@ window.renderCapaianTable = renderCapaianTable;
 
 function onCapaianRowClick(event, id) {
   if (event.target.closest('button') || event.target.closest('a')) return;
-  openModalCapaian('edit', id);
+  openModalCapaian('edit', id, activeCapaianTriwulan);
 }
 window.onCapaianRowClick = onCapaianRowClick;
 
@@ -4056,64 +4636,142 @@ function exportExcelCapaian() {
 }
 window.exportExcelCapaian = exportExcelCapaian;
 
-// Live Formula Calculation di Form Modal
+// Bagi Rata Pagu Tahunan ke 4 Triwulan Otomatis
+function autoDistributePagu() {
+  const paguTotal = parseRupiahInput(document.getElementById('crudCapaianPaguAnggaran')?.value);
+  if (paguTotal > 0) {
+    const perTw = Math.round(paguTotal / 4);
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val.toLocaleString('id-ID');
+    };
+    setVal('crudCapaianPaguTw1', perTw);
+    setVal('crudCapaianPaguTw2', perTw);
+    setVal('crudCapaianPaguTw3', perTw);
+    setVal('crudCapaianPaguTw4', (paguTotal - (perTw * 3)));
+    recalculateCapaianForm();
+  }
+}
+window.autoDistributePagu = autoDistributePagu;
+
+// Live Formula Calculation di Form Modal (Dihitung Real-time tanpa mengunci input manual)
 function recalculateCapaianForm() {
-  const tw = document.getElementById('crudCapaianTriwulan')?.value || 'TW I';
+  const triwulan = document.getElementById('crudCapaianTriwulan')?.value || 'TW I';
+  const targetTahunan = parseFlexibleNumber(document.getElementById('crudCapaianTargetTahunan')?.value);
+  const paguTotal = parseRupiahInput(document.getElementById('crudCapaianPaguAnggaran')?.value);
+
+  // Target per Triwulan (Target TW I s/d TW IV)
   const tw1 = parseFlexibleNumber(document.getElementById('crudCapaianTw1')?.value);
   const tw2 = parseFlexibleNumber(document.getElementById('crudCapaianTw2')?.value);
   const tw3 = parseFlexibleNumber(document.getElementById('crudCapaianTw3')?.value);
   const tw4 = parseFlexibleNumber(document.getElementById('crudCapaianTw4')?.value);
-  
-  const realisasiKinerja = parseFlexibleNumber(document.getElementById('crudCapaianRealisasiKinerja')?.value);
-  const pagu = parseRupiahInput(document.getElementById('crudCapaianPaguAnggaran')?.value);
-  const realisasiKeuangan = parseRupiahInput(document.getElementById('crudCapaianRealisasiKeuangan')?.value);
 
-  let targetAktif = tw1;
-  if (tw === 'TW II') targetAktif = tw2;
-  else if (tw === 'TW III') targetAktif = tw3;
-  else if (tw === 'TW IV') targetAktif = tw4;
+  // Tentukan target untuk triwulan yang aktif
+  let targetAktif = 0;
+  if (triwulan === 'TW I') targetAktif = tw1 > 0 ? tw1 : (targetTahunan > 0 ? targetTahunan : 0);
+  else if (triwulan === 'TW II') targetAktif = tw2 > 0 ? tw2 : (targetTahunan > 0 ? targetTahunan : 0);
+  else if (triwulan === 'TW III') targetAktif = tw3 > 0 ? tw3 : (targetTahunan > 0 ? targetTahunan : 0);
+  else if (triwulan === 'TW IV') targetAktif = tw4 > 0 ? tw4 : (targetTahunan > 0 ? targetTahunan : 0);
 
-  // Hitung Capaian Kinerja (%)
-  let persenKinerja = 0;
-  if (targetAktif > 0) {
-    persenKinerja = (realisasiKinerja / targetAktif) * 100;
-  } else if (realisasiKinerja === 0 && targetAktif === 0) {
-    persenKinerja = 100.0;
+  // Input Realisasi Fisik & Keuangan Triwulan Ini
+  const elRealKin = document.getElementById('crudCapaianRealisasiKinerja');
+  const elRealKeu = document.getElementById('crudCapaianRealisasiKeuangan');
+  const rKin = parseFlexibleNumber(elRealKin?.value);
+  const rKeu = parseRupiahInput(elRealKeu?.value);
+
+  const elPersenKin = document.getElementById('crudCapaianPersenKinerja');
+  const elPredikat = document.getElementById('crudCapaianPredikat');
+  const elPersenKeu = document.getElementById('crudCapaianPersenKeuangan');
+
+  // Hitung % Capaian Fisik
+  const cKin = targetAktif > 0 ? (rKin / targetAktif) * 100 : 0;
+  if (elPersenKin && document.activeElement !== elPersenKin) {
+    elPersenKin.value = (rKin > 0 || targetAktif > 0) ? cKin.toFixed(2) : '';
   }
 
-  // Tentukan Predikat
-  let predikat = 'Sangat Berhasil';
-  if (persenKinerja >= 100) predikat = 'Sangat Berhasil';
-  else if (persenKinerja >= 85) predikat = 'Berhasil';
-  else if (persenKinerja >= 70) predikat = 'Cukup';
-  else if (persenKinerja >= 55) predikat = 'Sedang';
-  else predikat = 'Kurang';
-
-  // Hitung Capaian Keuangan (%)
-  let persenKeuangan = 0;
-  if (pagu > 0) {
-    persenKeuangan = (realisasiKeuangan / pagu) * 100;
+  // Hitung Predikat
+  if (elPredikat && document.activeElement !== elPredikat) {
+    if (rKin > 0 || targetAktif > 0) {
+      elPredikat.value = getPredikatFromPercent(cKin);
+    }
   }
 
-  // Tampilkan di Input / Preview
-  const inputPersenKinerja = document.getElementById('crudCapaianPersenKinerja');
-  const inputPredikat = document.getElementById('crudCapaianPredikat');
-  const inputPersenKeuangan = document.getElementById('crudCapaianPersenKeuangan');
-
-  if (inputPersenKinerja && document.activeElement !== inputPersenKinerja) {
-    inputPersenKinerja.value = persenKinerja.toFixed(2);
-  }
-  if (inputPredikat && document.activeElement !== inputPredikat) {
-    inputPredikat.value = predikat;
-  }
-  if (inputPersenKeuangan && document.activeElement !== inputPersenKeuangan) {
-    inputPersenKeuangan.value = persenKeuangan.toFixed(2);
+  // Hitung % Capaian Keuangan: (Realisasi Keuangan / Pagu Anggaran) * 100%
+  const cKeu = paguTotal > 0 ? (rKeu / paguTotal) * 100 : 0;
+  if (elPersenKeu && document.activeElement !== elPersenKeu) {
+    elPersenKeu.value = (rKeu > 0 || paguTotal > 0) ? cKeu.toFixed(2) : '';
   }
 }
 window.recalculateCapaianForm = recalculateCapaianForm;
 
-// Buka Modal Tambah/Edit Capaian Kinerja
-function openModalCapaian(mode, id) {
+// Helper: Muat Realisasi dan Capaian Triwulan Tertentu ke Form Modal
+function loadTriwulanRealisasiIntoForm(item, tw) {
+  const setSafe = (elemId, val) => {
+    const el = document.getElementById(elemId);
+    if (el) el.value = (val !== null && val !== undefined) ? val : '';
+  };
+  const fmtRupiah = (val) => {
+    if (!val || parseFloat(val) <= 0) return '';
+    return parseFloat(val).toLocaleString('id-ID');
+  };
+
+  if (tw === 'TW I') {
+    const rk = item.realisasi_kinerja_tw1 !== undefined ? item.realisasi_kinerja_tw1 : (item.realisasi_kinerja || '');
+    const ck = item.capaian_kinerja_tw1 !== undefined ? item.capaian_kinerja_tw1 : (item.capaian_kinerja_persen || '');
+    const pk = item.predikat_kinerja_tw1 || item.predikat_kinerja || '';
+    const rq = item.realisasi_keuangan_tw1 !== undefined ? item.realisasi_keuangan_tw1 : (item.realisasi_keuangan || '');
+    const cq = item.capaian_keuangan_tw1 !== undefined ? item.capaian_keuangan_tw1 : (item.capaian_keuangan_persen || '');
+    setSafe('crudCapaianRealisasiKinerja', rk);
+    setSafe('crudCapaianPersenKinerja', ck ? parseFloat(ck).toFixed(2) : '');
+    setSafe('crudCapaianPredikat', pk || 'Sangat Berhasil');
+    setSafe('crudCapaianRealisasiKeuangan', fmtRupiah(rq));
+    setSafe('crudCapaianPersenKeuangan', cq ? parseFloat(cq).toFixed(2) : '');
+  } else if (tw === 'TW II') {
+    setSafe('crudCapaianRealisasiKinerja', item.realisasi_kinerja_tw2 || '');
+    setSafe('crudCapaianPersenKinerja', item.capaian_kinerja_tw2 ? parseFloat(item.capaian_kinerja_tw2).toFixed(2) : '');
+    setSafe('crudCapaianPredikat', item.predikat_kinerja_tw2 || 'Sangat Berhasil');
+    setSafe('crudCapaianRealisasiKeuangan', fmtRupiah(item.realisasi_keuangan_tw2));
+    setSafe('crudCapaianPersenKeuangan', item.capaian_keuangan_tw2 ? parseFloat(item.capaian_keuangan_tw2).toFixed(2) : '');
+  } else if (tw === 'TW III') {
+    setSafe('crudCapaianRealisasiKinerja', item.realisasi_kinerja_tw3 || '');
+    setSafe('crudCapaianPersenKinerja', item.capaian_kinerja_tw3 ? parseFloat(item.capaian_kinerja_tw3).toFixed(2) : '');
+    setSafe('crudCapaianPredikat', item.predikat_kinerja_tw3 || 'Sangat Berhasil');
+    setSafe('crudCapaianRealisasiKeuangan', fmtRupiah(item.realisasi_keuangan_tw3));
+    setSafe('crudCapaianPersenKeuangan', item.capaian_keuangan_tw3 ? parseFloat(item.capaian_keuangan_tw3).toFixed(2) : '');
+  } else if (tw === 'TW IV') {
+    setSafe('crudCapaianRealisasiKinerja', item.realisasi_kinerja_tw4 || '');
+    setSafe('crudCapaianPersenKinerja', item.capaian_kinerja_tw4 ? parseFloat(item.capaian_kinerja_tw4).toFixed(2) : '');
+    setSafe('crudCapaianPredikat', item.predikat_kinerja_tw4 || 'Sangat Berhasil');
+    setSafe('crudCapaianRealisasiKeuangan', fmtRupiah(item.realisasi_keuangan_tw4));
+    setSafe('crudCapaianPersenKeuangan', item.capaian_keuangan_tw4 ? parseFloat(item.capaian_keuangan_tw4).toFixed(2) : '');
+  }
+}
+window.loadTriwulanRealisasiIntoForm = loadTriwulanRealisasiIntoForm;
+
+// Dipanggil saat dropdown Periode Triwulan di modal berubah
+function onModalTriwulanChange() {
+  const tw = document.getElementById('crudCapaianTriwulan')?.value || 'TW I';
+  const labelTriwulan = document.getElementById('labelRealisasiTriwulan');
+  const labelFisik = document.getElementById('labelRealFisikTW');
+  const labelKeu = document.getElementById('labelRealKeuTW');
+  
+  if (labelTriwulan) labelTriwulan.textContent = `Input Realisasi & Perhitungan Otomatis (${tw})`;
+  if (labelFisik) labelFisik.innerHTML = `Realisasi Kinerja Fisik (${tw}) <span style="font-size:11px;color:#9a3412;font-weight:normal;">(Opsional)</span>`;
+  if (labelKeu) labelKeu.textContent = `Realisasi Keuangan Rp (${tw})`;
+
+  const id = document.getElementById('crudCapaianId')?.value;
+  if (id) {
+    const item = capaianDb.find(x => x.id == id);
+    if (item) {
+      loadTriwulanRealisasiIntoForm(item, tw);
+    }
+  }
+  recalculateCapaianForm();
+}
+window.onModalTriwulanChange = onModalTriwulanChange;
+
+// Buka Modal Tambah/Edit Capaian Kinerja (Format Asli Bersih + Bebas Diedit Tanpa Kunci)
+function openModalCapaian(mode, id, selectedTw) {
   const modal = document.getElementById('modalCrudCapaian');
   const title = document.getElementById('modalCrudCapaianTitle');
   const idInput = document.getElementById('crudCapaianId');
@@ -4131,59 +4789,57 @@ function openModalCapaian(mode, id) {
     const el = document.getElementById(elemId);
     if (el) el.value = (val !== null && val !== undefined) ? val : '';
   };
+  const fmtRupiahField = (val) => {
+    if (!val || parseFloat(val) <= 0) return '';
+    return parseFloat(val).toLocaleString('id-ID');
+  };
+
+  // Tentukan Triwulan yang dipilih
+  let currentTw = selectedTw || (activeCapaianTriwulan === 'Semua' ? 'TW I' : activeCapaianTriwulan);
+  setSafe('crudCapaianTahun', activeCapaianTahun);
+  setSafe('crudCapaianTriwulan', currentTw);
 
   if (mode === 'create') {
-    if (title) title.innerHTML = 'TAMBAH DATA CAPAIAN KINERJA (e-SAKIP)';
+    if (title) title.textContent = 'TAMBAH DATA CAPAIAN KINERJA';
     if (form) form.reset();
-    
+
     setSafe('crudCapaianTahun', activeCapaianTahun);
-    setSafe('crudCapaianTriwulan', activeCapaianTriwulan !== 'Semua' ? activeCapaianTriwulan : 'TW I');
+    setSafe('crudCapaianTriwulan', currentTw);
     setSafe('crudCapaianSatuan', 'Persentase');
-    setSafe('crudCapaianSasaran', '');
-    setSafe('crudCapaianIndikator', '');
-    setSafe('crudCapaianTargetTahunan', '');
-    setSafe('crudCapaianPaguAnggaran', '');
-    setSafe('crudCapaianTw1', '');
-    setSafe('crudCapaianTw2', '');
-    setSafe('crudCapaianTw3', '');
-    setSafe('crudCapaianTw4', '');
+
     setSafe('crudCapaianRealisasiKinerja', '');
+    setSafe('crudCapaianPersenKinerja', '');
+    setSafe('crudCapaianPredikat', 'Sangat Berhasil');
     setSafe('crudCapaianRealisasiKeuangan', '');
+    setSafe('crudCapaianPersenKeuangan', '');
     setSafe('crudCapaianBuktiLink', '');
     setSafe('crudCapaianBuktiKeterangan', '');
-    const fileInp = document.getElementById('crudCapaianBuktiFile');
-    if (fileInp) fileInp.value = '';
+
     const existFile = document.getElementById('crudCapaianExistingFile');
     if (existFile) existFile.style.display = 'none';
-    setSafe('crudCapaianPersenKinerja', '0.00');
-    setSafe('crudCapaianPersenKeuangan', '0.00');
 
-    const elPredikat = document.getElementById('crudCapaianPredikat');
-    if (elPredikat) elPredikat.value = 'Sangat Berhasil';
-
-    recalculateCapaianForm();
+    onModalTriwulanChange();
   } else {
-    if (title) title.innerHTML = 'SUNTING / ISI DATA CAPAIAN KINERJA';
+    if (title) title.textContent = 'SUNTING DATA CAPAIAN KINERJA';
+
     const item = capaianDb.find(x => x.id == id);
     if (!item) return;
 
     setSafe('crudCapaianTahun', item.tahun);
-    setSafe('crudCapaianTriwulan', item.triwulan);
-    setSafe('crudCapaianSatuan', item.satuan);
-    setSafe('crudCapaianSasaran', item.sasaran);
-    setSafe('crudCapaianIndikator', item.indikator);
+    setSafe('crudCapaianSatuan', item.satuan || 'Persentase');
+    setSafe('crudCapaianSasaran', item.sasaran || '');
+    setSafe('crudCapaianIndikator', item.indikator || '');
     setSafe('crudCapaianTargetTahunan', item.target_tahunan || '');
-    setSafe('crudCapaianPaguAnggaran', (item.pagu_anggaran && parseFloat(item.pagu_anggaran) > 0) ? (Math.floor(item.pagu_anggaran) === parseFloat(item.pagu_anggaran) ? parseFloat(item.pagu_anggaran).toLocaleString('id-ID') : item.pagu_anggaran) : '');
+    setSafe('crudCapaianPaguAnggaran', fmtRupiahField(item.pagu_anggaran));
+
     setSafe('crudCapaianTw1', item.target_tw1 || '');
     setSafe('crudCapaianTw2', item.target_tw2 || '');
     setSafe('crudCapaianTw3', item.target_tw3 || '');
     setSafe('crudCapaianTw4', item.target_tw4 || '');
-    setSafe('crudCapaianRealisasiKinerja', item.realisasi_kinerja || '');
-    setSafe('crudCapaianRealisasiKeuangan', (item.realisasi_keuangan && parseFloat(item.realisasi_keuangan) > 0) ? (Math.floor(item.realisasi_keuangan) === parseFloat(item.realisasi_keuangan) ? parseFloat(item.realisasi_keuangan).toLocaleString('id-ID') : item.realisasi_keuangan) : '');
-    setSafe('crudCapaianBuktiLink', item.bukti_link);
-    setSafe('crudCapaianBuktiKeterangan', item.bukti_keterangan);
-    const fileInp = document.getElementById('crudCapaianBuktiFile');
-    if (fileInp) fileInp.value = '';
+
+    setSafe('crudCapaianBuktiLink', item.bukti_link || '');
+    setSafe('crudCapaianBuktiKeterangan', item.bukti_keterangan || '');
+
     const existFile = document.getElementById('crudCapaianExistingFile');
     if (existFile) {
       if (item.bukti_file_name) {
@@ -4193,16 +4849,11 @@ function openModalCapaian(mode, id) {
         existFile.style.display = 'none';
       }
     }
-    setSafe('crudCapaianPersenKinerja', item.capaian_kinerja_persen);
-    setSafe('crudCapaianPersenKeuangan', item.capaian_keuangan_persen);
 
-    const elPredikat = document.getElementById('crudCapaianPredikat');
-    if (elPredikat && item.predikat_kinerja) {
-      elPredikat.value = item.predikat_kinerja;
-    }
+    onModalTriwulanChange();
   }
 
-  // Tampilkan popup secara pasti (Class Show + Active + Inline Style)
+  // Tampilkan popup
   modal.classList.add('show');
   modal.classList.add('active');
   modal.style.display = 'flex';
@@ -4212,67 +4863,78 @@ function openModalCapaian(mode, id) {
 }
 window.openModalCapaian = openModalCapaian;
 
-// Submit Handler Form Capaian Kinerja (Backend Laravel & Local Sync)
+// Submit Handler Form Capaian Kinerja (Menyimpan data dan memperbarui capaian triwulan & total)
 async function handleCapaianSubmit(event) {
   event.preventDefault();
   const mode = document.getElementById('crudCapaianMode')?.value || 'create';
   const id = document.getElementById('crudCapaianId')?.value;
 
   const tahun = parseInt(document.getElementById('crudCapaianTahun')?.value) || activeCapaianTahun;
-  const triwulan = document.getElementById('crudCapaianTriwulan')?.value || activeCapaianTriwulan;
+  const triwulan = document.getElementById('crudCapaianTriwulan')?.value || 'TW I';
   const satuan = document.getElementById('crudCapaianSatuan')?.value || 'Persentase';
   const sasaran = document.getElementById('crudCapaianSasaran')?.value || '-';
   const indikator = document.getElementById('crudCapaianIndikator')?.value || '-';
   
   const targetTahunan = parseFlexibleNumber(document.getElementById('crudCapaianTargetTahunan')?.value);
   const pagu = parseRupiahInput(document.getElementById('crudCapaianPaguAnggaran')?.value);
-  
+
   const tw1 = parseFlexibleNumber(document.getElementById('crudCapaianTw1')?.value);
   const tw2 = parseFlexibleNumber(document.getElementById('crudCapaianTw2')?.value);
   const tw3 = parseFlexibleNumber(document.getElementById('crudCapaianTw3')?.value);
   const tw4 = parseFlexibleNumber(document.getElementById('crudCapaianTw4')?.value);
 
-  const realisasiKinerja = parseFlexibleNumber(document.getElementById('crudCapaianRealisasiKinerja')?.value);
-  const realisasiKeuangan = parseRupiahInput(document.getElementById('crudCapaianRealisasiKeuangan')?.value);
+  const paguTw = pagu > 0 ? (pagu / 4) : 0;
+
+  // Ambil input Realisasi & Capaian Triwulan aktif
+  const curRealKin = parseFlexibleNumber(document.getElementById('crudCapaianRealisasiKinerja')?.value);
+  const curCapKin = parseFlexibleNumber(document.getElementById('crudCapaianPersenKinerja')?.value);
+  const curPredKin = document.getElementById('crudCapaianPredikat')?.value || getPredikatFromPercent(curCapKin);
+
+  const curRealKeu = parseRupiahInput(document.getElementById('crudCapaianRealisasiKeuangan')?.value);
+  const curCapKeu = parseFlexibleNumber(document.getElementById('crudCapaianPersenKeuangan')?.value);
 
   const buktiLink = document.getElementById('crudCapaianBuktiLink')?.value || '';
   const buktiKeterangan = document.getElementById('crudCapaianBuktiKeterangan')?.value || '';
-  const buktiFileInput = document.getElementById('crudCapaianBuktiFile');
 
-  // Hitung formula default
-  let targetAktif = tw1;
-  if (triwulan === 'TW II') targetAktif = tw2;
-  else if (triwulan === 'TW III') targetAktif = tw3;
-  else if (triwulan === 'TW IV') targetAktif = tw4;
+  // Cari existing item di database jika ada
+  const existingItem = id ? capaianDb.find(x => x.id == id) : null;
 
-  let persenKinerja = 0;
-  if (targetAktif > 0) persenKinerja = (realisasiKinerja / targetAktif) * 100;
-  else if (realisasiKinerja === 0 && targetAktif === 0) persenKinerja = 100;
+  // Realisasi Kinerja TW 1 - 4
+  const rKin1 = triwulan === 'TW I' ? curRealKin : (existingItem ? (parseFloat(existingItem.realisasi_kinerja_tw1) || 0) : 0);
+  const cKin1 = triwulan === 'TW I' ? curCapKin : (existingItem ? (parseFloat(existingItem.capaian_kinerja_tw1) || 0) : 0);
+  const pKin1 = triwulan === 'TW I' ? curPredKin : (existingItem?.predikat_kinerja_tw1 || '-');
 
-  let predikat = 'Sangat Berhasil';
-  if (persenKinerja >= 100) predikat = 'Sangat Berhasil';
-  else if (persenKinerja >= 85) predikat = 'Berhasil';
-  else if (persenKinerja >= 70) predikat = 'Cukup';
-  else if (persenKinerja >= 55) predikat = 'Sedang';
-  else predikat = 'Kurang';
+  const rKin2 = triwulan === 'TW II' ? curRealKin : (existingItem ? (parseFloat(existingItem.realisasi_kinerja_tw2) || 0) : 0);
+  const cKin2 = triwulan === 'TW II' ? curCapKin : (existingItem ? (parseFloat(existingItem.capaian_kinerja_tw2) || 0) : 0);
+  const pKin2 = triwulan === 'TW II' ? curPredKin : (existingItem?.predikat_kinerja_tw2 || '-');
 
-  let persenKeuangan = (pagu > 0) ? (realisasiKeuangan / pagu) * 100 : 0;
+  const rKin3 = triwulan === 'TW III' ? curRealKin : (existingItem ? (parseFloat(existingItem.realisasi_kinerja_tw3) || 0) : 0);
+  const cKin3 = triwulan === 'TW III' ? curCapKin : (existingItem ? (parseFloat(existingItem.capaian_kinerja_tw3) || 0) : 0);
+  const pKin3 = triwulan === 'TW III' ? curPredKin : (existingItem?.predikat_kinerja_tw3 || '-');
 
-  // Baca input manual jika pengguna mengubah nilai manual
-  const rawPersenKinerja = document.getElementById('crudCapaianPersenKinerja')?.value;
-  if (rawPersenKinerja !== undefined && rawPersenKinerja !== '') {
-    persenKinerja = parseFlexibleNumber(rawPersenKinerja);
-  }
+  const rKin4 = triwulan === 'TW IV' ? curRealKin : (existingItem ? (parseFloat(existingItem.realisasi_kinerja_tw4) || 0) : 0);
+  const cKin4 = triwulan === 'TW IV' ? curCapKin : (existingItem ? (parseFloat(existingItem.capaian_kinerja_tw4) || 0) : 0);
+  const pKin4 = triwulan === 'TW IV' ? curPredKin : (existingItem?.predikat_kinerja_tw4 || '-');
 
-  const rawPredikat = document.getElementById('crudCapaianPredikat')?.value;
-  if (rawPredikat) {
-    predikat = rawPredikat;
-  }
+  const rKinTot = rKin1 + rKin2 + rKin3 + rKin4;
+  const cKinTot = targetTahunan > 0 ? (rKinTot / targetTahunan) * 100 : 0;
+  const pKinTot = rKinTot > 0 ? getPredikatFromPercent(cKinTot) : '-';
 
-  const rawPersenKeuangan = document.getElementById('crudCapaianPersenKeuangan')?.value;
-  if (rawPersenKeuangan !== undefined && rawPersenKeuangan !== '') {
-    persenKeuangan = parseFlexibleNumber(rawPersenKeuangan);
-  }
+  // Realisasi Keuangan TW 1 - 4
+  const rKeu1 = triwulan === 'TW I' ? curRealKeu : (existingItem ? (parseFloat(existingItem.realisasi_keuangan_tw1) || 0) : 0);
+  const cKeu1 = triwulan === 'TW I' ? curCapKeu : (existingItem ? (parseFloat(existingItem.capaian_keuangan_tw1) || 0) : 0);
+
+  const rKeu2 = triwulan === 'TW II' ? curRealKeu : (existingItem ? (parseFloat(existingItem.realisasi_keuangan_tw2) || 0) : 0);
+  const cKeu2 = triwulan === 'TW II' ? curCapKeu : (existingItem ? (parseFloat(existingItem.capaian_keuangan_tw2) || 0) : 0);
+
+  const rKeu3 = triwulan === 'TW III' ? curRealKeu : (existingItem ? (parseFloat(existingItem.realisasi_keuangan_tw3) || 0) : 0);
+  const cKeu3 = triwulan === 'TW III' ? curCapKeu : (existingItem ? (parseFloat(existingItem.capaian_keuangan_tw3) || 0) : 0);
+
+  const rKeu4 = triwulan === 'TW IV' ? curRealKeu : (existingItem ? (parseFloat(existingItem.realisasi_keuangan_tw4) || 0) : 0);
+  const cKeu4 = triwulan === 'TW IV' ? curCapKeu : (existingItem ? (parseFloat(existingItem.capaian_keuangan_tw4) || 0) : 0);
+
+  const rKeuTot = rKeu1 + rKeu2 + rKeu3 + rKeu4;
+  const cKeuTot = pagu > 0 ? (rKeuTot / pagu) * 100 : 0;
 
   // Kirim ke Backend Laravel MySQL
   const csrfMeta = document.querySelector('meta[name="csrf-token"]');
@@ -4287,23 +4949,57 @@ async function handleCapaianSubmit(event) {
     formData.append('indikator', indikator);
     formData.append('target_tahunan', targetTahunan);
     formData.append('pagu_anggaran', pagu);
+
+    formData.append('pagu_tw1', paguTw);
+    formData.append('pagu_tw2', paguTw);
+    formData.append('pagu_tw3', paguTw);
+    formData.append('pagu_tw4', paguTw);
+
     formData.append('target_tw1', tw1);
     formData.append('target_tw2', tw2);
     formData.append('target_tw3', tw3);
     formData.append('target_tw4', tw4);
-    formData.append('realisasi_kinerja', realisasiKinerja);
-    formData.append('realisasi_keuangan', realisasiKeuangan);
-    formData.append('capaian_kinerja_persen', persenKinerja);
-    formData.append('predikat_kinerja', predikat);
-    formData.append('capaian_keuangan_persen', persenKeuangan);
+
+    formData.append('realisasi_kinerja_tw1', rKin1);
+    formData.append('capaian_kinerja_tw1', cKin1);
+    formData.append('predikat_kinerja_tw1', pKin1);
+
+    formData.append('realisasi_kinerja_tw2', rKin2);
+    formData.append('capaian_kinerja_tw2', cKin2);
+    formData.append('predikat_kinerja_tw2', pKin2);
+
+    formData.append('realisasi_kinerja_tw3', rKin3);
+    formData.append('capaian_kinerja_tw3', cKin3);
+    formData.append('predikat_kinerja_tw3', pKin3);
+
+    formData.append('realisasi_kinerja_tw4', rKin4);
+    formData.append('capaian_kinerja_tw4', cKin4);
+    formData.append('predikat_kinerja_tw4', pKin4);
+
+    formData.append('realisasi_kinerja_total', rKinTot);
+    formData.append('capaian_kinerja_total', cKinTot);
+    formData.append('predikat_kinerja_total', pKinTot);
+
+    formData.append('realisasi_keuangan_tw1', rKeu1);
+    formData.append('capaian_keuangan_tw1', cKeu1);
+
+    formData.append('realisasi_keuangan_tw2', rKeu2);
+    formData.append('capaian_keuangan_tw2', cKeu2);
+
+    formData.append('realisasi_keuangan_tw3', rKeu3);
+    formData.append('capaian_keuangan_tw3', cKeu3);
+
+    formData.append('realisasi_keuangan_tw4', rKeu4);
+    formData.append('capaian_keuangan_tw4', cKeu4);
+
+    formData.append('realisasi_keuangan_total', rKeuTot);
+    formData.append('capaian_keuangan_total', cKeuTot);
+
     formData.append('bukti_link', buktiLink);
     formData.append('bukti_keterangan', buktiKeterangan);
-    if (buktiFileInput && buktiFileInput.files && buktiFileInput.files[0]) {
-      formData.append('bukti_file', buktiFileInput.files[0]);
-    }
 
     try {
-      const url = mode === 'create' ? '/admin/capaian-kinerja' : `/admin/capaian-kinerja/${id}/update`;
+      const url = (mode === 'create' && !id) ? '/admin/capaian-kinerja' : `/admin/capaian-kinerja/${id}/update`;
       const res = await fetch(url, {
         method: 'POST',
         headers: {
@@ -4322,69 +5018,70 @@ async function handleCapaianSubmit(event) {
   }
 
   // Update Data di Memori Lokal
-  if (mode === 'create') {
-    const newItem = savedServerData || {
-      id: capaianDb.length > 0 ? Math.max(...capaianDb.map(x => x.id || 0)) + 1 : 1,
-      tahun: tahun,
-      triwulan: triwulan,
-      satuan: satuan,
-      sasaran: sasaran,
-      indikator: indikator,
-      target_tahunan: targetTahunan,
-      pagu_anggaran: pagu,
-      target_tw1: tw1,
-      target_tw2: tw2,
-      target_tw3: tw3,
-      target_tw4: tw4,
-      realisasi_kinerja: realisasiKinerja,
-      capaian_kinerja_persen: persenKinerja,
-      predikat_kinerja: predikat,
-      realisasi_keuangan: realisasiKeuangan,
-      capaian_keuangan_persen: persenKeuangan,
-      bukti_link: buktiLink,
-      bukti_keterangan: buktiKeterangan,
-      bukti_file_name: buktiFileInput?.files?.[0]?.name || null,
-      bukti_file_path: null,
-      bukti_file_size: null,
-      status_bukti: 'Belum Ada'
-    };
+  const itemPayload = {
+    id: savedServerData ? savedServerData.id : (id ? parseInt(id) : (capaianDb.length > 0 ? Math.max(...capaianDb.map(x => x.id || 0)) + 1 : 1)),
+    tahun: tahun,
+    triwulan: triwulan,
+    satuan: satuan,
+    sasaran: sasaran,
+    indikator: indikator,
+    target_tahunan: targetTahunan,
+    pagu_anggaran: pagu,
+    pagu_tw1: paguTw,
+    pagu_tw2: paguTw,
+    pagu_tw3: paguTw,
+    pagu_tw4: paguTw,
+    target_tw1: tw1,
+    target_tw2: tw2,
+    target_tw3: tw3,
+    target_tw4: tw4,
+    realisasi_kinerja_tw1: rKin1,
+    capaian_kinerja_tw1: cKin1,
+    predikat_kinerja_tw1: pKin1,
+    realisasi_kinerja_tw2: rKin2,
+    capaian_kinerja_tw2: cKin2,
+    predikat_kinerja_tw2: pKin2,
+    realisasi_kinerja_tw3: rKin3,
+    capaian_kinerja_tw3: cKin3,
+    predikat_kinerja_tw3: pKin3,
+    realisasi_kinerja_tw4: rKin4,
+    capaian_kinerja_tw4: cKin4,
+    predikat_kinerja_tw4: pKin4,
+    realisasi_kinerja_total: rKinTot,
+    capaian_kinerja_total: cKinTot,
+    predikat_kinerja_total: pKinTot,
+    realisasi_keuangan_tw1: rKeu1,
+    capaian_keuangan_tw1: cKeu1,
+    realisasi_keuangan_tw2: rKeu2,
+    capaian_keuangan_tw2: cKeu2,
+    realisasi_keuangan_tw3: rKeu3,
+    capaian_keuangan_tw3: cKeu3,
+    realisasi_keuangan_tw4: rKeu4,
+    capaian_keuangan_tw4: cKeu4,
+    realisasi_keuangan_total: rKeuTot,
+    capaian_keuangan_total: cKeuTot,
+    bukti_link: buktiLink,
+    bukti_keterangan: buktiKeterangan,
+    status_bukti: buktiLink ? 'Lengkap' : 'Belum Ada'
+  };
 
-    const existingIdx = capaianDb.findIndex(x => x.id == newItem.id);
+  if (mode === 'create' && !id) {
+    const existingIdx = capaianDb.findIndex(x => x.id == itemPayload.id);
     if (existingIdx !== -1) {
-      capaianDb[existingIdx] = newItem;
+      capaianDb[existingIdx] = itemPayload;
     } else {
-      capaianDb.push(newItem);
+      capaianDb.push(itemPayload);
     }
     customCapaianYears.add(tahun);
     activeCapaianTahun = tahun;
   } else {
-    const idx = capaianDb.findIndex(x => x.id == id);
+    const targetId = id || itemPayload.id;
+    const idx = capaianDb.findIndex(x => x.id == targetId);
     if (idx !== -1) {
-      const updatedItem = savedServerData || {
+      capaianDb[idx] = {
         ...capaianDb[idx],
-        tahun: tahun,
-        triwulan: triwulan,
-        satuan: satuan,
-        sasaran: sasaran,
-        indikator: indikator,
-        target_tahunan: targetTahunan,
-        pagu_anggaran: pagu,
-        target_tw1: tw1,
-        target_tw2: tw2,
-        target_tw3: tw3,
-        target_tw4: tw4,
-        realisasi_kinerja: realisasiKinerja,
-        capaian_kinerja_persen: persenKinerja,
-        predikat_kinerja: predikat,
-        realisasi_keuangan: realisasiKeuangan,
-        capaian_keuangan_persen: persenKeuangan,
-        bukti_link: buktiLink,
-        bukti_keterangan: buktiKeterangan,
-        bukti_file_name: buktiFileInput?.files?.[0]?.name || capaianDb[idx]?.bukti_file_name,
-        bukti_file_path: capaianDb[idx]?.bukti_file_path,
-        bukti_file_size: capaianDb[idx]?.bukti_file_size
+        ...itemPayload
       };
-      capaianDb[idx] = updatedItem;
       customCapaianYears.add(tahun);
     }
   }
@@ -4394,7 +5091,7 @@ async function handleCapaianSubmit(event) {
   renderCapaianTable();
 
   if (typeof showAdminToast === 'function') {
-    showAdminToast('Data Capaian Kinerja berhasil disimpan ke database!', 'success');
+    showAdminToast(`Data Capaian Kinerja ${triwulan} berhasil disimpan!`, 'success');
   }
 }
 window.handleCapaianSubmit = handleCapaianSubmit;
@@ -4508,14 +5205,15 @@ async function handleQuickBuktiSubmit(event) {
 }
 window.handleQuickBuktiSubmit = handleQuickBuktiSubmit;
 
-// Cetak & Ekspor PDF Laporan Resmi Capaian Kinerja
+// Cetak & Ekspor PDF Laporan Resmi Capaian Kinerja (Langsung Stream PDF)
 function cetakLaporanCapaian() {
   const selectTahun = document.getElementById('capaianFilterTahun');
   const selectTW = document.getElementById('capaianFilterTriwulan');
-  const tahun = selectTahun ? selectTahun.value : activeCapaianTahun;
-  const tw = selectTW ? selectTW.value : activeCapaianTriwulan;
+  const tahun = selectTahun ? selectTahun.value : (typeof activeCapaianTahun !== 'undefined' ? activeCapaianTahun : '2026');
+  const tw = selectTW ? selectTW.value : (typeof activeCapaianTriwulan !== 'undefined' ? activeCapaianTriwulan : 'Semua');
+  const baseUrl = (typeof window !== 'undefined' && window.appUrl) ? window.appUrl.replace(/\/$/, '') : '';
 
-  const url = `/admin/capaian-kinerja/cetak?tahun=${tahun}&triwulan=${encodeURIComponent(tw)}`;
+  const url = `${baseUrl}/admin/capaian-kinerja/cetak?tahun=${encodeURIComponent(tahun)}&triwulan=${encodeURIComponent(tw)}`;
   window.open(url, '_blank');
 }
 window.cetakLaporanCapaian = cetakLaporanCapaian;

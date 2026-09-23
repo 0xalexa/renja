@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CapaianKinerja;
 use App\Models\Dokumen;
 use App\Models\Surat;
 use Illuminate\Http\Request;
@@ -89,6 +90,14 @@ class PortalController extends Controller
             'surat-keluar' => $suratKeluar->map($mapSurat)->values()->toArray(),
         ];
 
+        // Capaian Kinerja Data
+        $capaianKinerjaList = CapaianKinerja::orderBy('id', 'asc')->get();
+        $countCapaian = $capaianKinerjaList->count();
+        $capaianYears = CapaianKinerja::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun')->toArray();
+        if (empty($capaianYears)) {
+            $capaianYears = [2026];
+        }
+
         return view('portal.index', compact(
             'allDocs',
             'renjaMurni',
@@ -101,6 +110,9 @@ class PortalController extends Controller
             'suratKeluar',
             'totalDoc',
             'allDocsGrouped',
+            'capaianKinerjaList',
+            'countCapaian',
+            'capaianYears',
             'search',
             'tahun'
         ));

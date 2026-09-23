@@ -28,6 +28,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/portal', [PortalController::class, 'index'])->name('portal.index');
     Route::get('/dokumen/download/{id}', [DokumenController::class, 'download'])->name('dokumen.download');
     Route::get('/surat/download/{id}', [SuratController::class, 'download'])->name('surat.download');
+
+    // Capaian Kinerja untuk Pegawai (Hanya input Realisasi Kinerja, Realisasi Keuangan, & Bukti)
+    Route::post('/portal/capaian-kinerja/{id}/update', [CapaianKinerjaController::class, 'updateUserCapaian'])->name('portal.capaian.update');
+    Route::post('/portal/capaian-kinerja/{id}/bukti', [CapaianKinerjaController::class, 'updateBukti'])->name('portal.capaian.bukti');
+    Route::get('/portal/capaian-kinerja/download-bukti/{id}', [CapaianKinerjaController::class, 'downloadBukti'])->name('portal.capaian.download-bukti');
+    Route::get('/portal/capaian-kinerja/export-excel', [CapaianKinerjaController::class, 'exportExcel'])->name('portal.capaian.export');
+    Route::get('/portal/capaian-kinerja/cetak', [CapaianKinerjaController::class, 'cetak'])->name('portal.capaian.cetak');
 });
 
 // 4. Workspace Administrator (Hanya untuk Admin)

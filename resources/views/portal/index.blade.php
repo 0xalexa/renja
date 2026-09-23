@@ -9,13 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}?v={{ time() }}">
-  <script>
-    window.appUrl = "{{ url('/') }}";
-    window.serverDb = @json($allDocsGrouped);
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
-  <script src="{{ asset('assets/js/app.js') }}?v={{ time() }}" defer></script>
 </head>
 
 <body>
@@ -121,6 +116,13 @@
         <li class="nav-item" data-nav="laporan">
           <a href="#" class="nav-link" onclick="navigate('laporan'); return false;">
             Laporan Simdapangda
+          </a>
+        </li>
+
+        <!-- Capaian Kinerja OPD (Triwulan & Evaluasi) -->
+        <li class="nav-item" data-nav="capaian-kinerja">
+          <a href="javascript:void(0)" class="nav-link" onclick="navigate('capaian-kinerja');">
+            Capaian Kinerja
           </a>
         </li>
 
@@ -235,6 +237,11 @@
               <a href="#" class="quick-menu-item" onclick="navigate('laporan'); return false;">
                 <span>Laporan Rekapitulasi Simdapangda</span>
                 <span>&rarr;</span>
+              </a>
+              <a href="javascript:void(0)" class="quick-menu-item" onclick="navigate('capaian-kinerja');" style="background:#f0fdf4;border-color:#bbf7d0;">
+                <span style="font-weight:700;color:#15803d;">Evaluasi & Capaian Kinerja</span>
+                <span class="badge badge-green" id="badgeCountCapaian" style="font-size:11px;margin-left:auto;margin-right:8px;">{{ $countCapaian ?? 0 }} Data</span>
+                <span style="color:#15803d;">&rarr;</span>
               </a>
             </div>
           </div>
@@ -808,6 +815,155 @@
                 <td style="text-align:center;">{{ $suratKeluar->first()?->tanggal_surat ? date('d/m/Y', strtotime($suratKeluar->first()->tanggal_surat)) : '-' }}</td>
                 <td style="text-align:center;"><span class="badge {{ $suratKeluar->count() > 0 ? 'badge-blue' : 'badge-gray' }}">{{ $suratKeluar->count() > 0 ? 'Tercatat' : 'Kosong' }}</span></td>
               </tr>
+              <tr>
+                <td style="text-align:center;">9</td>
+                <td><strong>Evaluasi & Pelaporan</strong></td>
+                <td>Capaian Kinerja Program</td>
+                <td style="text-align:center;">—</td>
+                <td style="text-align:center;">{{ $countCapaian }} Indikator</td>
+                <td style="text-align:center;"><strong>{{ $countCapaian > 0 ? '100%' : '0%' }}</strong></td>
+                <td style="text-align:center;">{{ $capaianKinerjaList->first()?->updated_at?->format('d/m/Y') ?? '-' }}</td>
+                <td style="text-align:center;"><span class="badge {{ $countCapaian > 0 ? 'badge-green' : 'badge-gray' }}">{{ $countCapaian > 0 ? 'Aktif' : 'Kosong' }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== CAPAIAN KINERJA (USER VIEW & INPUT REALISASI) ==================== -->
+    <div class="page" id="page-capaian-kinerja">
+      <div class="page-header">
+        <div class="page-header-title">
+          <h1>Evaluasi & Capaian Kinerja Program / Kegiatan</h1>
+          <p>Pemantauan realisasi kinerja fisik, realisasi keuangan, dan kelengkapan bukti dukung.</p>
+        </div>
+        <div class="page-header-meta">
+          T.A. 2026 &bull; Mode Pengguna (Input Realisasi & Bukti Dukung)
+        </div>
+      </div>
+
+      <!-- Info Alert Box For User -->
+      <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+        <span style="font-size:20px;color:#2563eb;">ℹ️</span>
+        <div style="font-size:12.5px;color:#1e40af;line-height:1.5;">
+          <strong>Hak Akses Pengguna:</strong> Data Sasaran, Indikator, Target Kinerja, dan Pagu Anggaran telah ditetapkan secara resmi oleh Administrator (terkunci). Anda dapat mengisi <strong>Realisasi Kinerja Fisik</strong>, <strong>Realisasi Keuangan (Rp)</strong>, serta mengunggah <strong>Bukti Pendukung</strong> dengan menekan tombol <strong>Edit</strong> (<svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" style="display:inline;vertical-align:middle;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>) atau <strong>+ Isi Bukti</strong>.
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="table-toolbar" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #e2e8f0;">
+        <div class="toolbar-group" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          
+          <!-- Filter Tahun -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;font-weight:700;color:#475569;white-space:nowrap;">Tahun:</span>
+            <select id="capaianFilterTahun" class="form-control" onchange="onCapaianFilterChange()" style="min-width:110px;height:38px;padding:0 10px;font-weight:700;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;color:#1e293b;background:#ffffff;">
+              @foreach($capaianYears ?? [2026] as $yr)
+                <option value="{{ $yr }}" {{ $yr == 2026 ? 'selected' : '' }}>{{ $yr }}</option>
+              @endforeach
+            </select>
+          </div>
+
+          <!-- Filter Triwulan -->
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;font-weight:700;color:#475569;white-space:nowrap;">Triwulan:</span>
+            <select id="capaianFilterTriwulan" class="form-control" onchange="onCapaianFilterChange()" style="min-width:165px;height:38px;padding:0 10px;font-weight:700;border:1.5px solid #cbd5e1;border-radius:8px;font-size:13px;color:#1e293b;background:#ffffff;">
+              <option value="TW I" selected>Triwulan I (TW I)</option>
+              <option value="TW II">Triwulan II (TW II)</option>
+              <option value="TW III">Triwulan III (TW III)</option>
+              <option value="TW IV">Triwulan IV (TW IV)</option>
+              <option value="Semua">Semua / Tahunan</option>
+            </select>
+          </div>
+
+          <!-- Cari Sasaran / Indikator -->
+          <div style="display:flex;align-items:center;">
+            <input 
+              type="text" 
+              id="capaianSearchInput" 
+              class="form-control" 
+              placeholder="Cari Sasaran / Indikator..." 
+              oninput="onCapaianSearch(this.value)"
+              style="min-width:230px;height:38px;padding:0 12px;border:1.5px solid #cbd5e1;border-radius:8px;font-size:12.5px;"
+            >
+          </div>
+
+        </div>
+
+        <!-- Action Buttons: Export Excel & Cetak PDF -->
+        <div class="toolbar-group" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" onclick="exportExcelCapaian()" title="Export Laporan Lengkap ke Berkas Excel (.xls)" style="height:38px;padding:0 14px;border:1.5px solid #16a34a;color:#15803d;background:#f0fdf4;border-radius:8px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;cursor:pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Export Excel</span>
+          </button>
+
+          <button type="button" class="btn btn-outline" onclick="cetakLaporanCapaian()" title="Cetak atau Unduh Laporan Resmi PDF (Landscape)" style="height:38px;padding:0 14px;border:1.5px solid #0284c7;color:#0369a1;background:#f0f9ff;border-radius:8px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;cursor:pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
+            </svg>
+            <span>Cetak / PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabel Capaian Kinerja Multi-Level Header (Dinamis Sesuai Tampilan Screenshot User) -->
+      <div class="table-responsive" style="border:1.5px solid #cbd5e1;border-radius:12px;background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,0.03);overflow-x:auto;width:100%;">
+        <div style="overflow-x:auto;width:100%;">
+          <table class="gov-table table-capaian-grid" id="tableCapaianKinerja" style="width:100%;border-collapse:collapse;table-layout:auto;">
+            <thead id="theadCapaianKinerja">
+              <!-- Baris 1: Header Grup Utama -->
+              <tr class="head-top">
+                <th rowspan="3" style="width:38px;text-align:center;">No</th>
+                <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:220px;white-space:normal;word-break:break-word;">Tujuan / Sasaran / Program / Kegiatan / Sub Kegiatan</th>
+                <th rowspan="3" class="th-left col-text" style="text-align:left;min-width:200px;white-space:normal;word-break:break-word;">Indikator Kinerja</th>
+                <th colspan="3" id="thDataTahun">Data 2026</th>
+                <th colspan="4">Target Kinerja</th>
+                <th colspan="3" id="thGroupCapaianKinerja">Capaian Kinerja</th>
+                <th colspan="2" id="thGroupCapaianKeuangan">Capaian Keuangan</th>
+                <th rowspan="3" style="text-align:center;white-space:nowrap;min-width:130px;">Bukti Pendukung</th>
+                <th rowspan="3" style="text-align:center;white-space:nowrap;width:1%;">Aksi</th>
+              </tr>
+
+              <!-- Baris 2: Kolom Rincian & Sub Header Triwulan -->
+              <tr class="head-sub">
+                <!-- Data Tahun (Rowspan 2) -->
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:85px;">Target</th>
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:125px;">Rp</th>
+                <th rowspan="2" style="text-align:center;white-space:nowrap;min-width:80px;">Satuan</th>
+                <!-- Target Kinerja (Rowspan 2) -->
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW I</th>
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW II</th>
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW III</th>
+                <th rowspan="2" style="text-align:right;white-space:nowrap;min-width:72px;">TW IV</th>
+                <!-- Capaian Kinerja (Sub TW Dinamis) -->
+                <th colspan="3" id="thSubKinerjaTW" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">TW I</th>
+                <!-- Capaian Keuangan (Sub TW Dinamis) -->
+                <th colspan="2" id="thSubKeuanganTW" style="text-align:center;background:#fff7ed;color:#9a3412;font-weight:800;white-space:nowrap;">TW I</th>
+              </tr>
+
+              <!-- Baris 3: Rincian Realisasi, Persentase, dan Predikat -->
+              <tr class="head-detail">
+                <!-- Capaian Kinerja -->
+                <th style="text-align:right;white-space:nowrap;min-width:85px;">Realisasi</th>
+                <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+                <th style="text-align:center;white-space:nowrap;min-width:115px;">Predikat</th>
+                <!-- Capaian Keuangan -->
+                <th style="text-align:right;white-space:nowrap;min-width:125px;">Realisasi</th>
+                <th style="text-align:right;white-space:nowrap;min-width:80px;">Capaian (%)</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCapaianKinerja">
+              <!-- Rendered automatically by renderCapaianTable() -->
             </tbody>
           </table>
         </div>
@@ -834,9 +990,246 @@
     </div>
   </div>
 
+  <!-- ==================== MODAL: INPUT CAPAIAN KINERJA (PENGGUNA) ==================== -->
+  <div class="modal-overlay" id="modalUserCapaian" style="display:none;align-items:center;justify-content:center;z-index:9999;">
+    <div class="modal-dialog" style="max-width:750px;width:95%;max-height:90vh;overflow-y:auto;border-radius:14px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.25);background:#ffffff;">
+      <div class="modal-header" style="background:#f8fafc;padding:16px 20px;border-bottom:1.5px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;border-radius:14px 14px 0 0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:8px;background:#e0f2fe;color:#0369a1;font-weight:800;font-size:15px;">📊</span>
+          <div>
+            <h3 style="margin:0;font-size:16px;font-weight:800;color:#0f172a;">Input Capaian Kinerja & Realisasi Keuangan</h3>
+            <span style="font-size:11.5px;color:#64748b;">Pengisian khusus Realisasi Capaian Kinerja, Keuangan, dan Bukti Pendukung</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeModal('modalUserCapaian')" style="background:none;border:none;font-size:26px;cursor:pointer;color:#64748b;line-height:1;padding:4px 8px;border-radius:6px;transition:all 0.15s;" title="Tutup Modal (Esc)" aria-label="Tutup Modal">&times;</button>
+      </div>
+
+      <form onsubmit="handleUserCapaianSubmit(event)">
+        <input type="hidden" id="userCrudId">
+
+        <div class="modal-body" style="padding:20px;display:flex;flex-direction:column;gap:16px;">
+
+          <!-- Info Read-Only Data Sasaran (Terkunci) -->
+          <div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+              <span style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#64748b;">Informasi Kegiatan (Ditetapkan Admin & Terkunci)</span>
+              <span class="badge badge-gray" style="font-size:10.5px;font-weight:700;">🔒 Read-Only</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr;gap:8px;font-size:12.5px;">
+              <div>
+                <strong style="color:#334155;">Tujuan / Sasaran / Program:</strong>
+                <div id="userViewSasaran" style="color:#0f172a;font-weight:600;margin-top:2px;">-</div>
+              </div>
+              <div>
+                <strong style="color:#334155;">Indikator Kinerja:</strong>
+                <div id="userViewIndikator" style="color:#0f172a;margin-top:2px;">-</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;padding-top:8px;border-top:1px dashed #cbd5e1;">
+                <div>
+                  <span style="color:#64748b;font-size:11.5px;">Target Tahunan:</span>
+                  <div id="userViewTargetTahunan" style="font-weight:700;color:#0f172a;">-</div>
+                </div>
+                <div>
+                  <span style="color:#64748b;font-size:11.5px;">Pagu Anggaran:</span>
+                  <div id="userViewPagu" style="font-weight:700;color:#1e3a8a;">-</div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;background:#ffffff;padding:8px 12px;border-radius:8px;border:1px solid #e2e8f0;margin-top:4px;text-align:center;">
+                <div><span style="font-size:10.5px;color:#64748b;">Target TW I</span><div id="userViewTw1" style="font-weight:700;font-size:12px;color:#334155;">-</div></div>
+                <div><span style="font-size:10.5px;color:#64748b;">Target TW II</span><div id="userViewTw2" style="font-weight:700;font-size:12px;color:#334155;">-</div></div>
+                <div><span style="font-size:10.5px;color:#64748b;">Target TW III</span><div id="userViewTw3" style="font-weight:700;font-size:12px;color:#334155;">-</div></div>
+                <div><span style="font-size:10.5px;color:#64748b;">Target TW IV</span><div id="userViewTw4" style="font-weight:700;font-size:12px;color:#334155;">-</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pilihan Triwulan Pelaporan -->
+          <div>
+            <label style="display:block;font-size:12px;font-weight:700;color:#1e293b;margin-bottom:6px;">
+              Pilih Periode Triwulan yang Diisi / Diedit <span style="color:#e11d48;">*</span>
+            </label>
+            <select id="userCrudTriwulan" class="form-control" onchange="onModalUserTriwulanChange()" style="width:100%;height:40px;font-weight:700;font-size:13px;border:1.5px solid #00875a;border-radius:8px;background:#f0fdf4;color:#166534;">
+              <option value="TW I">Triwulan I (TW I)</option>
+              <option value="TW II">Triwulan II (TW II)</option>
+              <option value="TW III">Triwulan III (TW III)</option>
+              <option value="TW IV">Triwulan IV (TW IV)</option>
+            </select>
+          </div>
+
+          <!-- Section: Capaian Kinerja (Fisik) -->
+          <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+              <span style="color:#c2410c;font-weight:800;font-size:14px;">🎯</span>
+              <strong style="color:#9a3412;font-size:13px;" id="labelUserTriwulanHeader">Input Realisasi & Perhitungan Otomatis (TW I)</strong>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1.2fr 1fr 1.3fr;gap:12px;">
+              <div>
+                <label id="labelUserRealFisik" style="display:block;font-size:12px;font-weight:700;color:#7c2d12;margin-bottom:4px;">
+                  Realisasi Fisik (TW I)
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudRealisasiKinerja" 
+                  class="form-control" 
+                  placeholder="Contoh: 11 (Opsional)" 
+                  oninput="recalculateUserCapaianForm()"
+                  style="font-weight:700;color:#c2410c;font-size:13.5px;height:38px;border:1.5px solid #fb923c;background:#ffffff;"
+                >
+              </div>
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#7c2d12;margin-bottom:4px;">
+                  Capaian (%)
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudPersenKinerja" 
+                  class="form-control" 
+                  placeholder="100%" 
+                  readonly 
+                  style="font-weight:800;color:#b91c1c;background:#ffedd5;border:1.5px solid #fdba74;height:38px;text-align:right;"
+                >
+              </div>
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#7c2d12;margin-bottom:4px;">
+                  Predikat Kinerja
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudPredikat" 
+                  class="form-control" 
+                  placeholder="Sangat Berhasil" 
+                  readonly 
+                  style="font-weight:800;color:#15803d;background:#ffedd5;border:1.5px solid #fdba74;height:38px;text-align:center;"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Capaian Keuangan -->
+          <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+              <span style="color:#1d4ed8;font-weight:800;font-size:14px;">💰</span>
+              <strong style="color:#1e40af;font-size:13px;">Capaian Keuangan</strong>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:12px;">
+              <div>
+                <label id="labelUserRealKeu" style="display:block;font-size:12px;font-weight:700;color:#1e3a8a;margin-bottom:4px;">
+                  Realisasi Keuangan Rp (TW I)
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudRealisasiKeuangan" 
+                  class="form-control" 
+                  placeholder="Contoh: Rp 1.100" 
+                  oninput="formatRupiahInputThis(this); recalculateUserCapaianForm();"
+                  style="font-weight:700;color:#1e40af;font-size:13.5px;height:38px;border:1.5px solid #93c5fd;background:#ffffff;"
+                >
+              </div>
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#1e3a8a;margin-bottom:4px;">
+                  Capaian Keuangan (%)
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudPersenKeuangan" 
+                  class="form-control" 
+                  placeholder="4,40%" 
+                  readonly 
+                  style="font-weight:800;color:#1d4ed8;background:#dbeafe;border:1.5px solid #93c5fd;height:38px;text-align:right;"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Bukti Pendukung -->
+          <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px 16px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;">
+              <span style="color:#15803d;font-weight:800;font-size:14px;">📎</span>
+              <strong style="color:#166534;font-size:13px;">Bukti Pendukung</strong>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#166534;margin-bottom:4px;">
+                  Link Dokumen Bukti (Google Drive / Cloud URL)
+                </label>
+                <input 
+                  type="url" 
+                  id="userCrudBuktiLink" 
+                  class="form-control" 
+                  placeholder="https://drive.google.com/..." 
+                  style="font-size:12.5px;height:38px;border:1.5px solid #86efac;background:#ffffff;"
+                >
+              </div>
+
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#166534;margin-bottom:4px;">
+                  Unggah Berkas Bukti Dukung (PDF, JPG, PNG, DOCX)
+                </label>
+                <input 
+                  type="file" 
+                  id="userCrudBuktiFile" 
+                  class="form-control" 
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip,.rar" 
+                  style="font-size:12px;padding:5px 8px;border:1.5px dashed #86efac;background:#ffffff;"
+                >
+                <div id="userCrudExistingFile" style="display:none;margin-top:6px;font-size:11.5px;color:#15803d;background:#dcfce7;padding:6px 10px;border-radius:6px;"></div>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;color:#166534;margin-bottom:4px;">
+                  Catatan / Keterangan Bukti
+                </label>
+                <input 
+                  type="text" 
+                  id="userCrudBuktiKeterangan" 
+                  class="form-control" 
+                  placeholder="Contoh: Laporan kegiatan dan dokumentasi foto terlampir" 
+                  style="font-size:12.5px;height:38px;border:1.5px solid #86efac;background:#ffffff;"
+                >
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="modal-footer" style="background:#f8fafc;padding:14px 20px;border-top:1.5px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;border-radius:0 0 14px 14px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalUserCapaian')">Batal</button>
+          <button type="submit" class="btn btn-primary" style="background:#00875a;border-color:#00875a;display:inline-flex;align-items:center;gap:6px;font-weight:700;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Simpan Capaian</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- ==================== TOAST NOTIFIKASI ==================== -->
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- Scripts Server Data & Application Logic -->
+  <script>
+    window.appUrl = "{{ url('/') }}";
+    window.serverDb = @json($allDocsGrouped);
+    window.serverCapaianDb = @json($capaianKinerjaList);
+    window.serverCapaianYears = @json($capaianYears);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="{{ asset('assets/js/app.js') }}?v={{ time() }}"></script>
+  <script>
+    // Cegah pemulihan halaman tanpa otentikasi saat tab dipulihkan (Ctrl+Shift+T / Back / Forward)
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
+  </script>
 </body>
 
 </html>

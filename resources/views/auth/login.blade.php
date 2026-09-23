@@ -94,7 +94,7 @@
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-muted);">
-          <input type="checkbox" name="remember" value="1" checked>
+          <input type="checkbox" name="remember" value="1">
           <span>Ingat Sesi Ini</span>
         </label>
         <span style="font-size:11px;color:#94a3b8;">T.A. 2026 Aktif</span>

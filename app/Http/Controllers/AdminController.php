@@ -98,10 +98,9 @@ class AdminController extends Controller
         // Capaian Kinerja Data (Analisis Komprehensif Antar-Tahun & Kelengkapan Triwulan)
         $capaianKinerjaList = \App\Models\CapaianKinerja::orderBy('id', 'asc')->get();
         $countCapaian = $capaianKinerjaList->count();
-        $capaianYears = \App\Models\CapaianKinerja::select('tahun')->distinct()->orderBy('tahun', 'desc')->pluck('tahun')->toArray();
-        if (empty($capaianYears)) {
-            $capaianYears = [2026];
-        }
+        $dbYears = \App\Models\CapaianKinerja::select('tahun')->distinct()->pluck('tahun')->filter()->map(fn($y) => (int)$y)->toArray();
+        $capaianYears = array_values(array_unique(array_merge($dbYears, [2026, 2025, 2024])));
+        rsort($capaianYears);
 
         // Kalkulasi Statistik Rata-rata Tahunan Murni (e-SAKIP Standard)
         $normalizedPercentages = $capaianKinerjaList->map(function ($item) {

@@ -294,6 +294,51 @@ class CapaianKinerjaSeeder extends Seeder
         ];
 
         foreach ($samples as $sample) {
+            $quarterPagu = (float)($sample['pagu_anggaran'] ?? 0) / 4;
+            $sample['pagu_tw1'] = $sample['pagu_tw1'] ?? $quarterPagu;
+            $sample['pagu_tw2'] = $sample['pagu_tw2'] ?? $quarterPagu;
+            $sample['pagu_tw3'] = $sample['pagu_tw3'] ?? $quarterPagu;
+            $sample['pagu_tw4'] = $sample['pagu_tw4'] ?? $quarterPagu;
+
+            $sample['realisasi_kinerja_tw1'] = $sample['realisasi_kinerja_tw1'] ?? (float)$sample['target_tw1'];
+            $sample['capaian_kinerja_tw1'] = 100.0;
+            $sample['predikat_kinerja_tw1'] = 'Sangat Berhasil';
+
+            $sample['realisasi_kinerja_tw2'] = $sample['realisasi_kinerja_tw2'] ?? round((float)$sample['target_tw2'] * 0.96, 2);
+            $sample['capaian_kinerja_tw2'] = 96.0;
+            $sample['predikat_kinerja_tw2'] = 'Sangat Berhasil';
+
+            $sample['realisasi_kinerja_tw3'] = $sample['realisasi_kinerja_tw3'] ?? round((float)$sample['target_tw3'] * 0.92, 2);
+            $sample['capaian_kinerja_tw3'] = 92.0;
+            $sample['predikat_kinerja_tw3'] = 'Sangat Berhasil';
+
+            $sample['realisasi_kinerja_tw4'] = $sample['realisasi_kinerja_tw4'] ?? round((float)$sample['target_tw4'] * 0.88, 2);
+            $sample['capaian_kinerja_tw4'] = 88.0;
+            $sample['predikat_kinerja_tw4'] = 'Berhasil';
+
+            $totKin = $sample['realisasi_kinerja_tw1'] + $sample['realisasi_kinerja_tw2'] + $sample['realisasi_kinerja_tw3'] + $sample['realisasi_kinerja_tw4'];
+            $sample['realisasi_kinerja_total'] = round($totKin, 2);
+            $sample['capaian_kinerja_total'] = $sample['target_tahunan'] > 0 ? round(($totKin / $sample['target_tahunan']) * 100, 2) : 0;
+            $sample['predikat_kinerja_total'] = 'Sangat Berhasil';
+
+            $sample['realisasi_keuangan_tw1'] = $sample['realisasi_keuangan_tw1'] ?? round($quarterPagu * 0.90);
+            $sample['capaian_keuangan_tw1'] = 90.0;
+            $sample['realisasi_keuangan_tw2'] = $sample['realisasi_keuangan_tw2'] ?? round($quarterPagu * 0.88);
+            $sample['capaian_keuangan_tw2'] = 88.0;
+            $sample['realisasi_keuangan_tw3'] = $sample['realisasi_keuangan_tw3'] ?? round($quarterPagu * 0.85);
+            $sample['capaian_keuangan_tw3'] = 85.0;
+            $sample['realisasi_keuangan_tw4'] = $sample['realisasi_keuangan_tw4'] ?? round($quarterPagu * 0.92);
+            $sample['capaian_keuangan_tw4'] = 92.0;
+
+            $totKeu = $sample['realisasi_keuangan_tw1'] + $sample['realisasi_keuangan_tw2'] + $sample['realisasi_keuangan_tw3'] + $sample['realisasi_keuangan_tw4'];
+            $sample['realisasi_keuangan_total'] = round($totKeu);
+            $sample['capaian_keuangan_total'] = $sample['pagu_anggaran'] > 0 ? round(($totKeu / $sample['pagu_anggaran']) * 100, 2) : 0;
+
+            $sample['target_rpjmd_kinerja'] = $sample['target_tahunan'];
+            $sample['target_rpjmd_keuangan'] = $sample['pagu_anggaran'];
+            $sample['capaian_renstra_kinerja'] = 98.2;
+            $sample['capaian_renstra_keuangan'] = 88.75;
+
             CapaianKinerja::create($sample);
         }
     }
