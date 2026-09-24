@@ -1982,31 +1982,30 @@ function updateDashboardTwCards(targetYear) {
     if (stats) {
       if (tw.filled) {
         stats.innerHTML = `
-          <div><strong id="twCountVal_${k}">${tw.count}</strong> Indikator terdata</div>
-          <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_${k}">Rp ${tw.totalRealisasi.toLocaleString('id-ID')}</strong></div>
-          <div id="twKeuanganVal_${k}" style="margin-top:1px;font-size:10.5px;color:#2563eb;font-weight:600;">Serapan Keuangan: ${tw.avgKeuangan}%</div>
+          <span style="color:#334155;font-weight:600;"><strong id="twCountVal_${k}">${tw.count}</strong> Indikator</span>
+          <span style="color:#cbd5e1;margin:0 4px;">•</span>
+          <span id="twKeuanganVal_${k}" style="color:#2563eb;font-weight:600;">Keuangan: ${tw.avgKeuangan}%</span>
         `;
       } else {
         stats.innerHTML = `
-          <div><strong id="twCountVal_${k}">0</strong> Indikator terdata</div>
-          <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_${k}">Rp 0</strong></div>
-          <div id="twKeuanganVal_${k}" style="margin-top:1px;font-size:10.5px;color:#94a3b8;">Belum ada input laporan</div>
+          <span id="twKeuanganVal_${k}" style="color:#94a3b8;">Belum ada laporan</span>
         `;
       }
     }
     if (actionWrap) {
       if (tw.filled) {
         actionWrap.innerHTML = `
-          <button type="button" class="btn btn-outline btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianRincian('${k}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;border-color:#cbd5e1;color:#334155;cursor:pointer;">
+          <span style="font-size:11px;font-weight:700;color:#4f46e5;display:inline-flex;align-items:center;gap:4px;">
             <span>Lihat Rincian</span>
             <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
+          </span>
         `;
       } else {
         actionWrap.innerHTML = `
-          <button type="button" class="btn btn-primary btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianInput('${k}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;background:#2563eb;color:#ffffff;border:none;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 1px 3px rgba(37,99,235,0.2);cursor:pointer;">
-            <span>+ Input ${k}</span>
-          </button>
+          <span style="font-size:11px;font-weight:700;color:#2563eb;display:inline-flex;align-items:center;gap:4px;">
+            <span>+ Input Data</span>
+            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </span>
         `;
       }
     }

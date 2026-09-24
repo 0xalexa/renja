@@ -1065,11 +1065,11 @@
                   </div>
                 </div>
 
-                <!-- 2. KARTU MONITORING 4 TRIWULAN (Sangat Informatif, Jelas, & Bisa Diklik Langsung) -->
+                <!-- 2. KARTU MONITORING 4 TRIWULAN (Sederhana, Bersih & Esensial) -->
                 <div style="padding:16px 20px;background:#f8fafc;border-bottom:1px solid #edf2f7;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                    <span style="font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.4px;">
-                      Status &amp; Realisasi Setiap Triwulan (Klik kartu untuk memfilter rincian):
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                    <span style="font-size:12px;font-weight:700;color:#475569;letter-spacing:0.3px;">
+                      Ringkasan Capaian Triwulan
                     </span>
                     <span style="font-size:11.5px;color:#64748b;font-weight:600;">
                       Kelengkapan: <strong style="color:#0f172a;" id="twHeaderKelengkapanText">{{ $filledTwCount }} dari 4 Triwulan Terisi</strong>
@@ -1078,49 +1078,48 @@
 
                   <div class="tw-cards-grid">
                     @foreach($twSummary as $k => $tw)
-                      <div class="tw-card" data-tw="{{ $k }}" id="twCard_{{ $k }}" onclick="selectDashboardTriwulan('{{ $k }}')" style="padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;">
+                      <div class="tw-card" data-tw="{{ $k }}" id="twCard_{{ $k }}" onclick="selectDashboardTriwulan('{{ $k }}')" style="padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between;border-radius:10px;">
                         <div>
                           <!-- Baris Status & Triwulan -->
-                          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px;">
-                            <span style="font-size:13px;font-weight:800;color:#0f172a;">{{ $tw['title'] }}</span>
-                            <span class="badge {{ $tw['filled'] ? $tw['badgeClass'] : 'badge-gray' }}" id="twBadge_{{ $k }}" style="font-size:10px;padding:2px 7px;">{{ $tw['filled'] ? $tw['predikat'] : 'Belum Diisi' }}</span>
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:3px;">
+                            <span style="font-size:13.5px;font-weight:800;color:#0f172a;">{{ $tw['title'] }}</span>
+                            <span class="badge {{ $tw['filled'] ? $tw['badgeClass'] : 'badge-gray' }}" id="twBadge_{{ $k }}" style="font-size:9.5px;padding:1.5px 6.5px;font-weight:700;">{{ $tw['filled'] ? $tw['predikat'] : 'Belum Diisi' }}</span>
                           </div>
 
-                          <div id="twMonths_{{ $k }}" style="font-size:11px;color:#64748b;margin-bottom:10px;">
+                          <div id="twMonths_{{ $k }}" style="font-size:11px;color:#64748b;margin-bottom:8px;">
                             {{ $tw['months'] }}
                           </div>
 
                           <!-- Angka Capaian Persentase -->
-                          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:4px;">
+                          <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px;">
                             <span id="twPercent_{{ $k }}" style="font-size:24px;font-weight:800;color:{{ $tw['filled'] ? $tw['color'] : '#94a3b8' }};letter-spacing:-0.5px;">{{ $tw['filled'] ? $tw['avgCapaian'] . '%' : '0%' }}</span>
                             <span id="twPercentLabel_{{ $k }}" style="font-size:11px;font-weight:600;color:{{ $tw['filled'] ? '#059669' : '#94a3b8' }};">{{ $tw['filled'] ? 'Fisik' : 'Kosong' }}</span>
                           </div>
 
-                          <!-- Ringkasan Anggaran & Indikator -->
-                          <div id="twStats_{{ $k }}" style="font-size:11px;color:#64748b;line-height:1.4;">
+                          <!-- 1 Baris Ringkasan Esensial -->
+                          <div id="twStats_{{ $k }}" style="font-size:11px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                             @if($tw['filled'])
-                              <div><strong id="twCountVal_{{ $k }}">{{ $tw['count'] }}</strong> Indikator terdata</div>
-                              <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_{{ $k }}">Rp {{ number_format($tw['totalRealisasi'], 0, ',', '.') }}</strong></div>
-                              <div id="twKeuanganVal_{{ $k }}" style="margin-top:1px;font-size:10.5px;color:#2563eb;font-weight:600;">Serapan Keuangan: {{ $tw['avgKeuangan'] }}%</div>
+                              <span style="color:#334155;font-weight:600;"><strong id="twCountVal_{{ $k }}">{{ $tw['count'] }}</strong> Indikator</span>
+                              <span style="color:#cbd5e1;margin:0 4px;">•</span>
+                              <span id="twKeuanganVal_{{ $k }}" style="color:#2563eb;font-weight:600;">Keuangan: {{ $tw['avgKeuangan'] }}%</span>
                             @else
-                              <div><strong id="twCountVal_{{ $k }}">0</strong> Indikator terdata</div>
-                              <div style="margin-top:2px;">Realisasi: <strong id="twRealisasiVal_{{ $k }}">Rp 0</strong></div>
-                              <div id="twKeuanganVal_{{ $k }}" style="margin-top:1px;font-size:10.5px;color:#94a3b8;">Belum ada input laporan</div>
+                              <span id="twKeuanganVal_{{ $k }}" style="color:#94a3b8;">Belum ada laporan</span>
                             @endif
                           </div>
                         </div>
 
-                        <!-- Action Button di Bawah Kartu -->
-                        <div id="twActionWrap_{{ $k }}" style="margin-top:12px;">
+                        <!-- Action Link Minimalis di Bawah Kartu -->
+                        <div id="twActionWrap_{{ $k }}" style="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
                           @if($tw['filled'])
-                            <button type="button" class="btn btn-outline btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianRincian('{{ $k }}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;border-color:#cbd5e1;color:#334155;cursor:pointer;">
+                            <span style="font-size:11px;font-weight:700;color:#4f46e5;display:inline-flex;align-items:center;gap:4px;">
                               <span>Lihat Rincian</span>
                               <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </button>
+                            </span>
                           @else
-                            <button type="button" class="btn btn-primary btn-sm btn-tw-action" onclick="event.stopPropagation(); openCapaianInput('{{ $k }}');" style="width:100%;font-size:11px;padding:5px 8px;border-radius:7px;background:#2563eb;color:#ffffff;border:none;display:flex;align-items:center;justify-content:center;gap:4px;box-shadow:0 1px 3px rgba(37,99,235,0.2);cursor:pointer;">
-                              <span>+ Input {{ $k }}</span>
-                            </button>
+                            <span style="font-size:11px;font-weight:700;color:#2563eb;display:inline-flex;align-items:center;gap:4px;">
+                              <span>+ Input Data</span>
+                              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </span>
                           @endif
                         </div>
                       </div>
