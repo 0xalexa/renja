@@ -5,6 +5,74 @@
   @php
     $isSemua = ($triwulan === 'Semua');
     $twLabel = $isSemua ? 'SEMUA TRIWULAN' : $triwulan;
+
+    if (!function_exists('fitVal')) {
+        function fitVal($val, $decimals = 0, $suffix = '', $isBold = false, $isSemua = true) {
+            if ($val === null || $val === '' || $val === '-') {
+                return '-';
+            }
+            if (is_numeric($val)) {
+                $formatted = number_format((float)$val, $decimals, ',', '.') . $suffix;
+            } else {
+                $formatted = (string)$val . $suffix;
+            }
+
+            $len = mb_strlen($formatted);
+
+            // Skala dinamis auto-sizing menyesuaikan banyaknya karakter angka/teks
+            if ($isSemua) {
+                $fontSize = '5.0px';
+                $letterSpacing = 'normal';
+
+                if ($len >= 18) {
+                    $fontSize = '2.7px';
+                    $letterSpacing = '-0.3px';
+                } elseif ($len >= 15) {
+                    $fontSize = '3.1px';
+                    $letterSpacing = '-0.25px';
+                } elseif ($len >= 13) {
+                    $fontSize = '3.6px';
+                    $letterSpacing = '-0.15px';
+                } elseif ($len >= 11) {
+                    $fontSize = '4.1px';
+                    $letterSpacing = '-0.1px';
+                } elseif ($len >= 9) {
+                    $fontSize = '4.6px';
+                }
+            } else {
+                // Untuk triwulan tunggal (A4 landscape)
+                $fontSize = '6.8px';
+                $letterSpacing = 'normal';
+
+                if ($len >= 18) {
+                    $fontSize = '4.2px';
+                    $letterSpacing = '-0.25px';
+                } elseif ($len >= 15) {
+                    $fontSize = '4.8px';
+                    $letterSpacing = '-0.2px';
+                } elseif ($len >= 13) {
+                    $fontSize = '5.4px';
+                    $letterSpacing = '-0.1px';
+                } elseif ($len >= 10) {
+                    $fontSize = '6.0px';
+                }
+            }
+
+            $weight = $isBold ? 'font-weight:bold;' : '';
+            return '<span class="cell-num" style="display:inline-block;white-space:nowrap;font-size:' . $fontSize . ';letter-spacing:' . $letterSpacing . ';' . $weight . '">' . $formatted . '</span>';
+        }
+    }
+
+    if (!function_exists('fitText')) {
+        function fitText($val, $maxLen = 12) {
+            if ($val === null || $val === '' || $val === '-') {
+                return '-';
+            }
+            $len = mb_strlen($val);
+            $fontSize = ($len > $maxLen) ? '4.5px' : '5.2px';
+            return '<span style="font-size:' . $fontSize . ';line-height:1.1;display:inline-block;">' . e($val) . '</span>';
+        }
+    }
   @endphp
   <title>Laporan Evaluasi Capaian Kinerja {{ $twLabel }} Tahun {{ $tahun }} — SIM-PEP DISDIK</title>
   <style>
@@ -21,7 +89,7 @@
       padding: 0;
       color: #0f172a;
       background: #ffffff;
-      font-size: {{ $isSemua ? '5.5px' : '7px' }};
+      font-size: {{ $isSemua ? '5.2px' : '7px' }};
       width: 100%;
     }
     .kop-surat {
@@ -71,17 +139,32 @@
       width: 100%;
       border-collapse: collapse;
       table-layout: fixed;
-      font-size: {{ $isSemua ? '5.5px' : '7px' }};
-      word-wrap: break-word;
+      font-size: {{ $isSemua ? '5.2px' : '7px' }};
     }
     table.table-laporan th,
     table.table-laporan td {
       border: 0.5px solid #475569;
-      padding: {{ $isSemua ? '1.5px 1px' : '2.5px 1.5px' }};
+      padding: {{ $isSemua ? '1.5px 0.5px' : '2.5px 1.5px' }};
       vertical-align: middle;
-      word-wrap: break-word;
-      word-break: break-word;
       overflow: hidden;
+    }
+    table.table-laporan td.text-right {
+      text-align: right;
+      white-space: nowrap;
+      word-break: normal;
+      word-wrap: normal;
+      padding-left: 0.5px;
+      padding-right: 0.5px;
+    }
+    table.table-laporan td.text-center {
+      text-align: center;
+    }
+    table.table-laporan td.text-left {
+      text-align: left;
+      word-break: break-word;
+      word-wrap: break-word;
+      padding-left: 2px;
+      padding-right: 2px;
     }
     table.table-laporan td a {
       word-break: break-all;
@@ -91,6 +174,7 @@
       color: #0f172a;
       font-weight: bold;
       text-align: center;
+      line-height: 1.15;
     }
     .head-numbering th {
       background-color: #e2e8f0;
@@ -99,9 +183,10 @@
       color: #334155;
       padding: 1px 0.5px;
     }
-    .text-center { text-align: center; }
-    .text-right { text-align: right; }
-    .text-left { text-align: left; }
+    .cell-num {
+      display: inline-block;
+      white-space: nowrap;
+    }
 
     .chip-predikat {
       font-size: {{ $isSemua ? '5.5px' : '7px' }};
@@ -160,19 +245,64 @@
 @if ($isSemua)
   <!-- ================= TABEL MATRIKS 42 KOLOM RESMI (SEMUA TRIWULAN) ================= -->
   <table class="table-laporan">
+    <colgroup>
+      <col style="width: 1.2%;"> <!-- 1: No -->
+      <col style="width: 8.5%;"> <!-- 2: Sasaran -->
+      <col style="width: 7.5%;"> <!-- 3: Indikator -->
+      <col style="width: 1.6%;"> <!-- 4: Target Tahunan -->
+      <col style="width: 2.6%;"> <!-- 5: Pagu TW 1 -->
+      <col style="width: 2.6%;"> <!-- 6: Pagu TW 2 -->
+      <col style="width: 2.6%;"> <!-- 7: Pagu TW 3 -->
+      <col style="width: 2.6%;"> <!-- 8: Pagu TW 4 -->
+      <col style="width: 1.8%;"> <!-- 9: Satuan -->
+      <col style="width: 1.5%;"> <!-- 10: Target TW 1 -->
+      <col style="width: 1.5%;"> <!-- 11: Target TW 2 -->
+      <col style="width: 1.5%;"> <!-- 12: Target TW 3 -->
+      <col style="width: 1.5%;"> <!-- 13: Target TW 4 -->
+      <col style="width: 1.5%;"> <!-- 14: Realisasi Kinerja TW 1 -->
+      <col style="width: 1.4%;"> <!-- 15: Capaian Kinerja % TW 1 -->
+      <col style="width: 1.9%;"> <!-- 16: Predikat TW 1 -->
+      <col style="width: 1.5%;"> <!-- 17: Realisasi Kinerja TW 2 -->
+      <col style="width: 1.4%;"> <!-- 18: Capaian Kinerja % TW 2 -->
+      <col style="width: 1.9%;"> <!-- 19: Predikat TW 2 -->
+      <col style="width: 1.5%;"> <!-- 20: Realisasi Kinerja TW 3 -->
+      <col style="width: 1.4%;"> <!-- 21: Capaian Kinerja % TW 3 -->
+      <col style="width: 1.9%;"> <!-- 22: Predikat TW 3 -->
+      <col style="width: 1.5%;"> <!-- 23: Realisasi Kinerja TW 4 -->
+      <col style="width: 1.4%;"> <!-- 24: Capaian Kinerja % TW 4 -->
+      <col style="width: 1.9%;"> <!-- 25: Predikat TW 4 -->
+      <col style="width: 1.5%;"> <!-- 26: Realisasi Total Kinerja -->
+      <col style="width: 1.4%;"> <!-- 27: Capaian Total Kinerja % -->
+      <col style="width: 1.9%;"> <!-- 28: Predikat Total -->
+      <col style="width: 2.6%;"> <!-- 29: Realisasi Keuangan TW 1 -->
+      <col style="width: 1.4%;"> <!-- 30: Capaian Keuangan % TW 1 -->
+      <col style="width: 2.6%;"> <!-- 31: Realisasi Keuangan TW 2 -->
+      <col style="width: 1.4%;"> <!-- 32: Capaian Keuangan % TW 2 -->
+      <col style="width: 2.6%;"> <!-- 33: Realisasi Keuangan TW 3 -->
+      <col style="width: 1.4%;"> <!-- 34: Capaian Keuangan % TW 3 -->
+      <col style="width: 2.6%;"> <!-- 35: Realisasi Keuangan TW 4 -->
+      <col style="width: 1.4%;"> <!-- 36: Capaian Keuangan % TW 4 -->
+      <col style="width: 2.6%;"> <!-- 37: Realisasi Keuangan Total -->
+      <col style="width: 1.4%;"> <!-- 38: Capaian Keuangan Total % -->
+      <col style="width: 1.5%;"> <!-- 39: Target RPJMD Kinerja -->
+      <col style="width: 2.6%;"> <!-- 40: Target RPJMD Rp -->
+      <col style="width: 1.4%;"> <!-- 41: Capaian Renstra Kinerja % -->
+      <col style="width: 1.5%;"> <!-- 42: Capaian Renstra Keuangan % -->
+      <col style="width: 2.0%;"> <!-- 43: Bukti -->
+    </colgroup>
     <thead>
       <!-- Baris 1: Header Grup Utama -->
       <tr>
-        <th rowspan="3" style="width: 1.5%;">No</th>
-        <th rowspan="3" style="width: 8.5%;" class="text-left">Tujuan / Sasaran / Program / Kegiatan</th>
-        <th rowspan="3" style="width: 7.5%;" class="text-left">Indikator Kinerja</th>
+        <th rowspan="3">No</th>
+        <th rowspan="3" class="text-left">Tujuan / Sasaran / Program / Kegiatan</th>
+        <th rowspan="3" class="text-left">Indikator Kinerja</th>
         <th colspan="6">Data {{ $tahun }}</th>
         <th colspan="4">Target Kinerja</th>
         <th colspan="15">Capaian Kinerja</th>
         <th colspan="10">Capaian Keuangan</th>
         <th colspan="2">Target Akhir RPJMD {{ $tahun }}</th>
         <th colspan="2">Capaian Terhadap Target Akhir Renstra {{ $tahun }}</th>
-        <th rowspan="3" style="width: 3.5%;">Bukti</th>
+        <th rowspan="3">Bukti</th>
       </tr>
 
       <!-- Baris 2: Sub-Grup -->
@@ -319,45 +449,45 @@
           <td class="text-center">{{ $index + 1 }}</td>
           <td class="text-left">{{ $row->sasaran }}</td>
           <td class="text-left">{{ $row->indikator }}</td>
-          <td class="text-right">{{ number_format($row->target_tahunan, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($p1, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($p2, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($p3, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($p4, 0, ',', '.') }}</td>
-          <td class="text-center">{{ $row->satuan }}</td>
-          <td class="text-right">{{ number_format($row->target_tw1, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw2, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw3, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw4, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->realisasi_kinerja_tw1 ?? $row->realisasi_kinerja ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_kinerja_tw1 ?? $row->capaian_kinerja_persen ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-center">{{ $row->predikat_kinerja_tw1 ?? $row->predikat_kinerja ?? '-' }}</td>
-          <td class="text-right">{{ number_format($row->realisasi_kinerja_tw2 ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_kinerja_tw2 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-center">{{ $row->predikat_kinerja_tw2 ?? '-' }}</td>
-          <td class="text-right">{{ number_format($row->realisasi_kinerja_tw3 ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_kinerja_tw3 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-center">{{ $row->predikat_kinerja_tw3 ?? '-' }}</td>
-          <td class="text-right">{{ number_format($row->realisasi_kinerja_tw4 ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_kinerja_tw4 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-center">{{ $row->predikat_kinerja_tw4 ?? '-' }}</td>
-          <td class="text-right" style="font-weight: bold;">{{ number_format($row->realisasi_kinerja_total ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right" style="font-weight: bold;">{{ number_format($row->capaian_kinerja_total ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-center">{{ $row->predikat_kinerja_total ?? '-' }}</td>
-          <td class="text-right">{{ number_format($keu1, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_keuangan_tw1 ?? $row->capaian_keuangan_persen ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right">{{ number_format($keu2, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_keuangan_tw2 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right">{{ number_format($keu3, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_keuangan_tw3 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right">{{ number_format($keu4, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_keuangan_tw4 ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right" style="font-weight: bold;">{{ number_format($keuAll, 0, ',', '.') }}</td>
-          <td class="text-right" style="font-weight: bold;">{{ number_format($row->capaian_keuangan_total ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right">{{ number_format($row->target_rpjmd_kinerja ?? 0, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_rpjmd_keuangan ?? 0, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->capaian_renstra_kinerja ?? 0, 2, ',', '.') }}%</td>
-          <td class="text-right">{{ number_format($row->capaian_renstra_keuangan ?? 0, 2, ',', '.') }}%</td>
+          <td class="text-right">{!! fitVal($row->target_tahunan, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($p1, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($p2, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($p3, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($p4, 0, '', false, true) !!}</td>
+          <td class="text-center">{!! fitText($row->satuan, 8) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw1, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw2, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw3, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw4, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->realisasi_kinerja_tw1 ?? $row->realisasi_kinerja ?? 0, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_kinerja_tw1 ?? $row->capaian_kinerja_persen ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-center">{!! fitText($row->predikat_kinerja_tw1 ?? $row->predikat_kinerja ?? '-', 10) !!}</td>
+          <td class="text-right">{!! fitVal($row->realisasi_kinerja_tw2 ?? 0, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_kinerja_tw2 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-center">{!! fitText($row->predikat_kinerja_tw2 ?? '-', 10) !!}</td>
+          <td class="text-right">{!! fitVal($row->realisasi_kinerja_tw3 ?? 0, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_kinerja_tw3 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-center">{!! fitText($row->predikat_kinerja_tw3 ?? '-', 10) !!}</td>
+          <td class="text-right">{!! fitVal($row->realisasi_kinerja_tw4 ?? 0, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_kinerja_tw4 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-center">{!! fitText($row->predikat_kinerja_tw4 ?? '-', 10) !!}</td>
+          <td class="text-right">{!! fitVal($row->realisasi_kinerja_total ?? 0, 2, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_kinerja_total ?? 0, 2, '%', true, true) !!}</td>
+          <td class="text-center">{!! fitText($row->predikat_kinerja_total ?? '-', 10) !!}</td>
+          <td class="text-right">{!! fitVal($keu1, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_keuangan_tw1 ?? $row->capaian_keuangan_persen ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($keu2, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_keuangan_tw2 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($keu3, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_keuangan_tw3 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($keu4, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_keuangan_tw4 ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($keuAll, 0, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_keuangan_total ?? 0, 2, '%', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_rpjmd_kinerja ?? 0, 2, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_rpjmd_keuangan ?? 0, 0, '', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_renstra_kinerja ?? 0, 2, '%', false, true) !!}</td>
+          <td class="text-right">{!! fitVal($row->capaian_renstra_keuangan ?? 0, 2, '%', false, true) !!}</td>
           <td class="text-center" style="font-size: 5.5px;">
             @if($row->bukti_link)
               <a href="{{ $row->bukti_link }}" target="_blank">Link</a>
@@ -385,21 +515,21 @@
         @endphp
         <tr style="font-weight: bold; background-color: #f8fafc;">
           <td colspan="4" class="text-center">TOTAL REKAPITULASI</td>
-          <td class="text-right">{{ number_format($totPagu1, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($totPagu2, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($totPagu3, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($totPagu4, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totPagu1, 0, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($totPagu2, 0, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($totPagu3, 0, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($totPagu4, 0, '', true, true) !!}</td>
           <td colspan="20"></td>
-          <td class="text-right">{{ number_format($totKeu1, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totKeu1, 0, '', true, true) !!}</td>
           <td></td>
-          <td class="text-right">{{ number_format($totKeu2, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totKeu2, 0, '', true, true) !!}</td>
           <td></td>
-          <td class="text-right">{{ number_format($totKeu3, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totKeu3, 0, '', true, true) !!}</td>
           <td></td>
-          <td class="text-right">{{ number_format($totKeu4, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totKeu4, 0, '', true, true) !!}</td>
           <td></td>
-          <td class="text-right">{{ number_format($totKeuAll, 0, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($totGrandPct, 2, ',', '.') }}%</td>
+          <td class="text-right">{!! fitVal($totKeuAll, 0, '', true, true) !!}</td>
+          <td class="text-right">{!! fitVal($totGrandPct, 2, '%', true, true) !!}</td>
           <td colspan="5"></td>
         </tr>
       @endif
@@ -511,18 +641,18 @@
           <td class="text-center">{{ $index + 1 }}</td>
           <td class="text-left">{{ $row->sasaran }}</td>
           <td class="text-left">{{ $row->indikator }}</td>
-          <td class="text-right">{{ number_format($row->target_tahunan, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($paguAnggaran, 0, ',', '.') }}</td>
-          <td class="text-center">{{ $row->satuan }}</td>
-          <td class="text-right">{{ number_format($row->target_tw1, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw2, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw3, 2, ',', '.') }}</td>
-          <td class="text-right">{{ number_format($row->target_tw4, 2, ',', '.') }}</td>
-          <td class="text-right">{{ $rkCur > 0 ? number_format($rkCur, 2, ',', '.') : '-' }}</td>
-          <td class="text-right">{{ ($rkCur > 0 || $ckCur > 0) ? number_format($ckCur, 2, ',', '.') . '%' : '-' }}</td>
-          <td class="text-center">{{ $pkCur }}</td>
-          <td class="text-right">{{ $rqCur > 0 ? number_format($rqCur, 0, ',', '.') : '-' }}</td>
-          <td class="text-right">{{ ($rqCur > 0 || $cqCur > 0) ? number_format($cqCur, 2, ',', '.') . '%' : '-' }}</td>
+          <td class="text-right">{!! fitVal($row->target_tahunan, 2, '', false, false) !!}</td>
+          <td class="text-right">{!! fitVal($paguAnggaran, 0, '', false, false) !!}</td>
+          <td class="text-center">{!! fitText($row->satuan, 10) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw1, 2, '', false, false) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw2, 2, '', false, false) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw3, 2, '', false, false) !!}</td>
+          <td class="text-right">{!! fitVal($row->target_tw4, 2, '', false, false) !!}</td>
+          <td class="text-right">{!! $rkCur > 0 ? fitVal($rkCur, 2, '', false, false) : '-' !!}</td>
+          <td class="text-right">{!! ($rkCur > 0 || $ckCur > 0) ? fitVal($ckCur, 2, '%', false, false) : '-' !!}</td>
+          <td class="text-center">{!! fitText($pkCur, 12) !!}</td>
+          <td class="text-right">{!! $rqCur > 0 ? fitVal($rqCur, 0, '', false, false) : '-' !!}</td>
+          <td class="text-right">{!! ($rqCur > 0 || $cqCur > 0) ? fitVal($cqCur, 2, '%', false, false) : '-' !!}</td>
           <td class="text-center" style="font-size: 7px;">
             @if($row->bukti_link)
               <a href="{{ $row->bukti_link }}" target="_blank">Link</a>
@@ -546,10 +676,10 @@
       @if(count($data) > 0)
         <tr style="font-weight: bold; background-color: #f8fafc;">
           <td colspan="4" class="text-center">TOTAL REKAPITULASI</td>
-          <td class="text-right">{{ number_format($totPaguTahun, 0, ',', '.') }}</td>
+          <td class="text-right">{!! fitVal($totPaguTahun, 0, '', true, false) !!}</td>
           <td colspan="8"></td>
-          <td class="text-right">{{ number_format($totRealKeuCur, 0, ',', '.') }}</td>
-          <td class="text-right">{{ $totPaguTahun > 0 ? number_format(($totRealKeuCur / $totPaguTahun) * 100, 2, ',', '.') . '%' : '-' }}</td>
+          <td class="text-right">{!! fitVal($totRealKeuCur, 0, '', true, false) !!}</td>
+          <td class="text-right">{!! $totPaguTahun > 0 ? fitVal(($totRealKeuCur / $totPaguTahun) * 100, 2, '%', true, false) : '-' !!}</td>
           <td></td>
         </tr>
       @endif
